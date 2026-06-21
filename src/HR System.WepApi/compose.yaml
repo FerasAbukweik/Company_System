@@ -1,0 +1,7 @@
+﻿services:
+  hr systemhrsystem:
+    image: hr systemhrsystem
+    build:
+      context: .
+      dockerfile: Dockerfile
+

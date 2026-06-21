@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HR System", "HR System.csproj", "{0EC014F1-AB8B-4315-BFAE-972398DF766B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6F855E6-1E97-4A7F-84E3-D03CF7A9C8B2}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4241D955-5542-4D7F-AF65-8391DEDBFD57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{FECEC5DD-B89A-4EC0-AD06-39399EB65CD2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0EC014F1-AB8B-4315-BFAE-972398DF766B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EC014F1-AB8B-4315-BFAE-972398DF766B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EC014F1-AB8B-4315-BFAE-972398DF766B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EC014F1-AB8B-4315-BFAE-972398DF766B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0EC014F1-AB8B-4315-BFAE-972398DF766B} = {4241D955-5542-4D7F-AF65-8391DEDBFD57}
+	EndGlobalSection
+EndGlobal

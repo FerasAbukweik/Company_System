@@ -1,0 +1,73 @@
+2026-06-22 03:14:55.754 +03:00 [DBG] Registered model binder providers, in the following order: ["Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BinderTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ServicesModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BodyModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.HeaderModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FloatingPointTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.EnumTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DateTimeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.SimpleTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.TryParseModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CancellationTokenModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ByteArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormFileModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormCollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.KeyValuePairModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DictionaryModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ComplexObjectModelBinderProvider"]
+2026-06-22 03:14:55.878 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2026-06-22 03:14:55.883 +03:00 [DBG] Hosting starting
+2026-06-22 03:14:55.898 +03:00 [INF] User profile is available. Using '/home/firas/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-06-22 03:14:55.917 +03:00 [DBG] Reading data from file '/home/firas/.aspnet/DataProtection-Keys/key-839d4a36-cd7c-4a91-aa0f-9816d10358d4.xml'.
+2026-06-22 03:14:55.937 +03:00 [DBG] Found key {839d4a36-cd7c-4a91-aa0f-9816d10358d4}.
+2026-06-22 03:14:55.967 +03:00 [DBG] Considering key {839d4a36-cd7c-4a91-aa0f-9816d10358d4} with expiration date 2026-09-19 19:30:23Z as default key.
+2026-06-22 03:14:55.973 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2026-06-22 03:14:55.976 +03:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2026-06-22 03:14:55.977 +03:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2026-06-22 03:14:55.994 +03:00 [DBG] Using key {839d4a36-cd7c-4a91-aa0f-9816d10358d4} as the default key.
+2026-06-22 03:14:55.996 +03:00 [DBG] Key ring with default key {839d4a36-cd7c-4a91-aa0f-9816d10358d4} was loaded during application startup.
+2026-06-22 03:14:56.059 +03:00 [WRN] The WebRootPath was not found: /home/firas/RiderProjects/HR_System/src/HR_System.WepApi/wwwroot. Static files may be unavailable.
+2026-06-22 03:14:56.089 +03:00 [DBG] Middleware configuration started with options: {AllowedHosts = *, AllowEmptyHosts = True, IncludeFailureMessage = True}
+2026-06-22 03:14:56.090 +03:00 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2026-06-22 03:14:56.121 +03:00 [INF] Now listening on: http://localhost:5294
+2026-06-22 03:14:56.121 +03:00 [DBG] Loaded hosting startup assembly HR_System.WepApi
+2026-06-22 03:14:56.122 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-22 03:14:56.123 +03:00 [INF] Hosting environment: Development
+2026-06-22 03:14:56.123 +03:00 [INF] Content root path: /home/firas/RiderProjects/HR_System/src/HR_System.WepApi
+2026-06-22 03:14:56.123 +03:00 [DBG] Hosting started
+2026-06-22 03:14:56.199 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-06-22 03:14:57.164 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-06-22 03:14:57.166 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-06-22 03:14:57.584 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-06-22 03:14:57.654 +03:00 [DBG] Compiling query expression: 
+'DbSet<RefreshToken>()
+    .Where(rt => rt.Expires <= DateTime.UtcNow)
+    .ExecuteDelete()'
+2026-06-22 03:14:58.138 +03:00 [DBG] Generated query execution expression: 
+'queryContext => RelationalShapedQueryCompilingExpressionVisitor.NonQueryResultAsync(
+    relationalQueryContext: (RelationalQueryContext)queryContext, 
+    relationalCommandResolver: parameters => [LIFTABLE Constant: RelationalCommandCache.QueryExpression(
+        DELETE FROM RefreshTokens AS r
+        SELECT 1
+        FROM RefreshTokens AS r
+        WHERE r.Expires <= GETUTCDATE()) | Resolver: c => new RelationalCommandCache(
+        c.Dependencies.MemoryCache, 
+        c.RelationalDependencies.QuerySqlGeneratorFactory, 
+        c.RelationalDependencies.RelationalParameterBasedSqlProcessorFactory, 
+        DELETE FROM RefreshTokens AS r
+        SELECT 1
+        FROM RefreshTokens AS r
+        WHERE r.Expires <= GETUTCDATE(), 
+        False, 
+        MultipleParameters
+    )].GetRelationalCommandTemplate(parameters), 
+    contextType: HR_System.Infrastructure.ApplicationDbContext, 
+    commandSource: BulkUpdate, 
+    threadSafetyChecksEnabled: True)'
+2026-06-22 03:14:58.203 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-06-22 03:14:58.206 +03:00 [DBG] Creating DbConnection.
+2026-06-22 03:14:58.241 +03:00 [DBG] Created DbConnection. (28ms).
+2026-06-22 03:14:58.255 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (46ms).
+2026-06-22 03:14:58.260 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (58ms).
+2026-06-22 03:14:58.267 +03:00 [DBG] Opening connection to database 'HR_SystemDb' on server 'localhost,1433'.
+2026-06-22 03:14:58.621 +03:00 [DBG] Opened connection to database 'HR_SystemDb' on server 'localhost,1433'.
+2026-06-22 03:14:58.634 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DELETE FROM [r]
+FROM [RefreshTokens] AS [r]
+WHERE [r].[Expires] <= GETUTCDATE()
+2026-06-22 03:14:58.710 +03:00 [INF] Executed DbCommand (77ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DELETE FROM [r]
+FROM [RefreshTokens] AS [r]
+WHERE [r].[Expires] <= GETUTCDATE()
+2026-06-22 03:14:58.716 +03:00 [DBG] Closing connection to database 'HR_SystemDb' on server 'localhost,1433'.
+2026-06-22 03:14:58.733 +03:00 [DBG] Closed connection to database 'HR_SystemDb' on server 'localhost,1433' (9ms).
+2026-06-22 03:14:58.738 +03:00 [DBG] 'ApplicationDbContext' disposed.
+2026-06-22 03:14:58.742 +03:00 [DBG] Disposing connection to database 'HR_SystemDb' on server 'localhost,1433'.
+2026-06-22 03:14:58.744 +03:00 [DBG] Disposed connection to database '' on server '' (2ms).
+2026-06-22 03:15:02.895 +03:00 [INF] Application is shutting down...
+2026-06-22 03:15:02.896 +03:00 [DBG] Hosting stopping
+2026-06-22 03:15:02.914 +03:00 [DBG] Hosting stopped

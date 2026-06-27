@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit.Abstractions;
+using Task = System.Threading.Tasks.Task;
 
 namespace HR_System.Core.UnitTests.ServicesTests;
 

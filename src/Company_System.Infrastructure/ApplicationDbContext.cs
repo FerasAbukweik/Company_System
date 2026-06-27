@@ -4,6 +4,7 @@ using HR_System.Core.Domain.Idnetity;
 using HR_System.Core.ENUM;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Task = System.Threading.Tasks.Task;
 
 namespace HR_System.Infrastructure;
 
@@ -27,8 +28,22 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .WithMany(u => u.RefreshTokens)
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+
+        builder.Entity<AppTask>()
+            .HasOne(t => t.User)
+            .WithMany(u => u.Tasks)
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+        
+        builder.Entity<AppTask>()
+            .HasOne(t => t.Manager)
+            .WithMany(u => u.CreatedTasks)
+            .HasForeignKey(t => t.ManagerId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
     
     
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+    public virtual DbSet<AppTask> Tasks { get; set; }
 }

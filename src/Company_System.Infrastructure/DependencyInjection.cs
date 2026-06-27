@@ -39,7 +39,6 @@ public static class InfrastructureDependencyInjectionExtensionMethod
                 options.Password.RequiredUniqueChars = 1;
             })
             .AddRoles<ApplicationRole>()
-            // decide who is the DB
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         

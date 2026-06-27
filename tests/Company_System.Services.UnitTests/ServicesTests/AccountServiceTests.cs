@@ -5,6 +5,8 @@ using HR_System.Core.common;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.Domain.Idnetity;
 using HR_System.Core.DTO;
+using HR_System.Core.DTO.Auth;
+using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;

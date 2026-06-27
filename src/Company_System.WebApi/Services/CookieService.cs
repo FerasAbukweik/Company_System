@@ -3,6 +3,7 @@ using System.Net;
 using HR_System.Core.common;
 using HR_System.Core.Constraints;
 using HR_System.Core.DTO;
+using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 
 namespace HR_System.Services;

@@ -1,4 +1,4 @@
-namespace HR_System.Core.DTO;
+namespace HR_System.Core.DTO.Token;
 
 public class AccessAndRefreshTokenDTO
 {

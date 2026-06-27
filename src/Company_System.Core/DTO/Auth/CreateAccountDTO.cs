@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using HR_System.Core.ENUM;
 
-namespace HR_System.Core.DTO;
+namespace HR_System.Core.DTO.Auth;
 
 public class CreateAccountDTO
 {

@@ -15,7 +15,6 @@ builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider service, L
         .ReadFrom.Services(service);
 });
 
-
 // DI ---------------------------------
 
 builder.Services.AddCore()

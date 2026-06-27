@@ -22,6 +22,47 @@ namespace HR_System.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.AppTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("Nvarchar(500)");
+
+                    b.Property<Guid>("ManagerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("Nvarchar(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ManagerId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Tasks");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -33,7 +74,7 @@ namespace HR_System.Infrastructure.Migrations
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -255,6 +296,25 @@ namespace HR_System.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.AppTask", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Idnetity.ApplicationUser", "Manager")
+                        .WithMany("CreatedTasks")
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HR_System.Core.Domain.Idnetity.ApplicationUser", "User")
+                        .WithMany("Tasks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Manager");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("HR_System.Core.Domain.Idnetity.ApplicationUser", "User")
@@ -319,7 +379,11 @@ namespace HR_System.Infrastructure.Migrations
 
             modelBuilder.Entity("HR_System.Core.Domain.Idnetity.ApplicationUser", b =>
                 {
+                    b.Navigation("CreatedTasks");
+
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

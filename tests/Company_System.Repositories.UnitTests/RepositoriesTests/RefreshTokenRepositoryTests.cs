@@ -9,6 +9,7 @@ using HR_System.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit.Abstractions;
+using Task = System.Threading.Tasks.Task;
 
 namespace TestProject1.RepositoriesTests;
 

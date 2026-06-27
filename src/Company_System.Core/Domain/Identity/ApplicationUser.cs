@@ -14,8 +14,16 @@ public class ApplicationUser : IdentityUser<Guid>
     [Column(TypeName =  "nvarchar(100)")]
     public required string FullName { get; set; }
 
+    
+    // relations
     [JsonIgnore]
     public List<RefreshToken> RefreshTokens { get; set; } = [];
+    
+    [JsonIgnore]
+    public List<AppTask> Tasks { get; set; } = [];
+    
+    [JsonIgnore]
+    public List<AppTask> CreatedTasks { get; set; } = [];
 
     
     

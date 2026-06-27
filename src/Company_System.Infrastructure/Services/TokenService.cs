@@ -8,6 +8,7 @@ using HR_System.Core.Constraints;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Domain.Idnetity;
 using HR_System.Core.DTO;
+using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;

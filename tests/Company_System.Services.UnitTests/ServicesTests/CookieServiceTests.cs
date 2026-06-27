@@ -1,6 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.DTO;
+using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 using HR_System.Infrastructure.Services;
 using HR_System.Services;

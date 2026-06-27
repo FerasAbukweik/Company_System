@@ -11,13 +11,10 @@
       - Jwt__Key=${JWT_KEY}
       - ConnectionStrings__Default=Server=hr_system.sqlserver;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
       - ConnectionStrings__Redis=hr_system.redis:6379
-      - ConnectionStrings__MongoDB=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@hr_system.mongodb:27017/${DB_NAME}?authSource=admin
     depends_on:
       hr_system.sqlserver:
         condition: service_healthy
       hr_system.redis:
-        condition: service_healthy
-      hr_system.mongodb:
         condition: service_healthy
 
   hr_system.sqlserver:
@@ -50,25 +47,7 @@
       timeout: 3s
       retries: 5
 
-  hr_system.mongodb:
-    image: mongo:7
-    container_name: hr_system.mongodb
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_INITDB_DATABASE=${DB_NAME}
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
 
 volumes:
   sqlserver_data:
   redis_data:
-  mongodb_data:

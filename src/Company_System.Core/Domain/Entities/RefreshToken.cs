@@ -10,7 +10,7 @@ public class RefreshToken
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     
     [Required(ErrorMessage = "{0} Is Required")]
-    [Column(TypeName = "varchar(max)")]
+    [Column(TypeName = "varchar(100)")]
     public required string Token { get; set; }
     
     [Required(ErrorMessage = "{0} Is Required")]

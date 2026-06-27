@@ -15,4 +15,16 @@ public class TaskDTO
     public required TaskStatusEnum Status { get; set; }
     public required Guid UserId { get; set; }
     public required Guid ManagerId { get; set; }
+    
+    
+    
+    // override
+
+    public override string ToString()
+    {
+        return
+            $"Id: {Id}\nTitle: {Title}\nDescription: {Description}\nCreated: {Created}" +
+            $"\nDeadline: {Deadline}\nPriority:{Priority.ToString()}\nstatus: {Status}" +
+            $"\nuser id: {UserId}\nmanager id: {ManagerId}";
+    }
 }

@@ -8,10 +8,10 @@ using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 
 namespace HR_System.Services;
 
-public class CookieService(IHttpContextAccessor httpContextAccessor,
+public class CookiesesServices(IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration,
-    ILogger<CookieService> logger
-    ) : ICookieService
+    ILogger<CookiesesServices> logger
+    ) : ICookiesesServices
 {
     public Result Add(string key, string toAdd, int lifetimeInMinutes)
     {

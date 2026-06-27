@@ -6,5 +6,5 @@ namespace HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
 
 public interface ITaskUpdateService
 {
-    Task<Result<TaskDTO>> UpdateStatus(Guid currentUserId, Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default);
+    Task<Result<TaskDTO>> UpdateStatusAsync(Guid currentUserId, Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default);
 }

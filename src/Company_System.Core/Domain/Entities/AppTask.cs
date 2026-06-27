@@ -73,7 +73,7 @@ public class AppTask
         return
             $"Id: {Id}\nTitle: {Title}\nDescription: {Description}\nCreated: {Created}" +
             $"\nDeadline: {Deadline}\nPriority:{Priority.ToString()}\nstatus: {Status}" +
-            $"\nuser id: {UserId}\nmanager id: {ManagerId}";
+            $"\nuserId: {UserId}\nmanagerId: {ManagerId}";
     }
 
     public override bool Equals(object? obj)

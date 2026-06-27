@@ -17,38 +17,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d32e4c7-bb77-4be3-8eff-140dfcca719b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Task/AddTaskDTO.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Task/TaskDTO.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Domain/Entities/AppTask.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Enums/PrioritiesEnum.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Enums/TaskStatusEnum.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IAppTaskRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITaskSetService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITaskUpdateService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITasksGetService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITasksService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/ValidationAttributes/NewDateAttribute.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Core/common/ResultT.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Migrations/20260627051514_add tasks entity.Designer.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Migrations/20260627051514_add tasks entity.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Migrations/20260627062848_small changes 2.Designer.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Migrations/20260627062848_small changes 2.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/AppTaskRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/TasksesService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.WebApi/Controllers/TasksController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Company_System.WebApi/ExtensionMethods/ClaimsExtensionMethods.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/TasksRepositoryTests.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/TasksServiceTests.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.HR_System/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.HR_System/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/DTO/Auth/CreateAccountDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Auth/CreateAccountDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/DTO/Auth/LoginDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Auth/LoginDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/DTO/Token/AccessAndRefreshTokenDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Token/AccessAndRefreshTokenDTO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Domain/Entities/RefreshToken.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Domain/Entities/RefreshToken.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Domain/Identity/ApplicationUser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Domain/Identity/ApplicationUser.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/IAccountServices/IAccountCreateService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/IAccountServices/IAccountCreateService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/IAccountServices/IAccountLoginService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/IAccountServices/IAccountLoginService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/IAddCookieService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/IAddCookieService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITokenServices/IGenerateTokenService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITokenServices/IGenerateTokenService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/DTO/Task/AddTaskDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Task/AddTaskDTO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/DTO/Task/TaskDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/DTO/Task/TaskDTO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Domain/Entities/AppTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Domain/Entities/AppTask.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IAppTaskRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IAppTasksRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IApplicationUserRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IApplicationUsersRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IRefreshTokenRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IRefreshTokensRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/IAddCookieService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/IAddCookiesService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/ICookieService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/ICookiesesServices.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/IGetCookieService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ICookieServices/IGetCookiesService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITaskUpdateService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITaskUpdateService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.AssemblyInfo.cs" afterDir="false" />
@@ -59,10 +40,13 @@
       <change beforePath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.sourcelink.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/ref/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/ref/Company_System.Core.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/refint/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Core/obj/Debug/net10.0/refint/Company_System.Core.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/ApplicationDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/ApplicationDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/BackGroundServices/RemoveExpiredRefreshTokens.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/BackGroundServices/RemoveExpiredRefreshTokens.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/DependencyInjection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/DependencyInjection.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/AppTaskRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/AppTasksesRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/ApplicationUserRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/ApplicationUsersesRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/RefreshTokenRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/RefreshTokensesRepository.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/AccountService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/AccountService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/TasksesService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/TasksesService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/TokenService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/Services/TokenService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/bin/Debug/net10.0/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/bin/Debug/net10.0/Company_System.Core.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/bin/Debug/net10.0/Company_System.Core.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/bin/Debug/net10.0/Company_System.Core.pdb" afterDir="false" />
@@ -77,19 +61,15 @@
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/obj/Debug/net10.0/Company_System.Infrastructure.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/obj/Debug/net10.0/Company_System.Infrastructure.sourcelink.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/obj/Debug/net10.0/ref/Company_System.Infrastructure.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/obj/Debug/net10.0/ref/Company_System.Infrastructure.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.Infrastructure/obj/Debug/net10.0/refint/Company_System.Infrastructure.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.Infrastructure/obj/Debug/net10.0/refint/Company_System.Infrastructure.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/Controllers/Auth.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/Controllers/AuthController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/ExtensionMethods/ModelStateExtensionMethods.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/Services/CookieService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/Services/CookieService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/Controllers/TasksController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/Controllers/TasksController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/DependancyInjection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/DependancyInjection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/Services/CookieService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/Services/CookiesesServices.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Core.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Core.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Core.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Infrastructure.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Infrastructure.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Infrastructure.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.Infrastructure.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.WebApi.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.WebApi.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.WebApi.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/Company_System.WebApi.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/bin/Debug/net10.0/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/logs/log20260627.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/logs/log20260627.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.AssemblyInfoInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.csproj.AssemblyReference.cache" afterDir="false" />
@@ -101,8 +81,8 @@
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/refint/Company_System.WebApi.dll" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/refint/Company_System.WebApi.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/rjsmrazor.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Company_System.WebApi/obj/Debug/net10.0/rpswa.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/RefreshTokenRepositoryTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/RefreshTokenRepositoryTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/ApplicationUserRepositoryTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/ApplicationUsersesRepositoryTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/RefreshTokenRepositoryTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/RefreshTokensesRepositoryTests.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Core.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Core.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Core.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Infrastructure.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Infrastructure.dll" afterDir="false" />
@@ -111,17 +91,17 @@
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Repositories.UnitTests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.Repositories.UnitTests.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.WebApi.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.WebApi.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.WebApi.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/Company_System.WebApi.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/appsettings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.AssemblyInfoInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.csproj.CoreCompileInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.sourcelink.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/ref/Company_System.Repositories.UnitTests.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/ref/Company_System.Repositories.UnitTests.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/refint/Company_System.Repositories.UnitTests.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/refint/Company_System.Repositories.UnitTests.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/AccountServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/AccountServiceTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/CookieServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/CookieServiceTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/CookieServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/CookiesesServicesTests.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/TokenServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/TokenServiceTests.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.Core.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.Core.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.Core.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.Core.pdb" afterDir="false" />
@@ -131,10 +111,10 @@
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.Services.UnitTests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.Services.UnitTests.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.WebApi.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.WebApi.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.WebApi.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/Company_System.WebApi.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/bin/Debug/net10.0/appsettings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.AssemblyInfoInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.csproj.CoreCompileInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.dll" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Company_System.Services.UnitTests/obj/Debug/net10.0/Company_System.Services.UnitTests.sourcelink.json" afterDir="false" />
@@ -165,6 +145,7 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/713e261f9376418494846576529a078cdbb200/0d/8f0a3fe5/Guid.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/713e261f9376418494846576529a078cdbb200/2f/6a310550/Task`1.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/713e261f9376418494846576529a078cdbb200/92/38936031/CancellationToken.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/713e261f9376418494846576529a078cdbb200/cf/41a3f630/TaskStatus.cs" root0="SKIP_HIGHLIGHTING" />
@@ -181,15 +162,14 @@
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/DTO/Task/TaskDTO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/Enums/PrioritiesEnum.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/Enums/TaskStatusEnum.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Company_System.Core/Interfaces/RepositoryContracts/IAppTaskRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITaskSetService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITaskUpdateService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/Interfaces/ServiceContracts/ITaskServices/ITasksGetService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.Core/ValidationAttributes/NewDateAttribute.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Company_System.Infrastructure/Repositories/AppTaskRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/src/Company_System.Infrastructure/Services/TasksService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.WebApi/Controllers/TasksController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/Company_System.WebApi/ExtensionMethods/ClaimsExtensionMethods.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/tests/Company_System.Repositories.UnitTests/RepositoriesTests/TasksRepositoryTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/tests/Company_System.Services.UnitTests/ServicesTests/TasksServiceTests.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -198,61 +178,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.5562695353613143" />
-      <entry key="MS500" value="3.1933330395443926" />
-      <entry key="S2" value="5.0997844286491185" />
-      <entry key="S5" value="6.296381634391264" />
-      <entry key="S10" value="7.154078124789073" />
-      <entry key="S30" value="10.101993069603601" />
-      <entry key="S60" value="14.047591325274702" />
-      <entry key="M2" value="22.520060385233386" />
-      <entry key="M5" value="54.66706334415687" />
-      <entry key="M10" value="99.46109851007508" />
-      <entry key="M15" value="141.6585499938005" />
-      <entry key="M30" value="267.16862065259005" />
-      <entry key="H1" value="478.07325733262394" />
-      <entry key="H2" value="769.3835653806699" />
-      <entry key="H4" value="1107.0556518312042" />
-      <entry key="D1" value="2018.3470496858627" />
-      <entry key="W1" value="4651.987693256328" />
+      <entry key="MS100" value="1.0001667529610296" />
+      <entry key="MS500" value="1.1755556094672497" />
+      <entry key="S2" value="1.6472971244605743" />
+      <entry key="S5" value="1.8403374416087814" />
+      <entry key="S10" value="1.9312681222085102" />
+      <entry key="S30" value="3.4568903737319427" />
+      <entry key="S60" value="7.3543262830633696" />
+      <entry key="M2" value="13.026917660351629" />
+      <entry key="M5" value="24.80228185504137" />
+      <entry key="M10" value="49.59167757079607" />
+      <entry key="M15" value="77.061463619606" />
+      <entry key="M30" value="154.45816489601467" />
+      <entry key="H1" value="263.64701895400066" />
+      <entry key="H2" value="383.9839627504957" />
+      <entry key="H4" value="592.8631826537003" />
+      <entry key="D1" value="1975.5443421916207" />
+      <entry key="W1" value="4993.929013911787" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.4554868988938844E-146" />
-      <entry key="S2" value="3.473378222141189E-37" />
-      <entry key="S5" value="2.6103368526133194E-15" />
-      <entry key="S10" value="5.4358624060321825E-8" />
-      <entry key="S30" value="0.010418851518133522" />
-      <entry key="S60" value="0.42959938821799126" />
-      <entry key="M2" value="3.7121501263074133" />
-      <entry key="M5" value="18.115174587039434" />
-      <entry key="M10" value="40.77132913101775" />
-      <entry key="M15" value="63.15286270238196" />
-      <entry key="M30" value="125.81308356570845" />
-      <entry key="H1" value="221.09736660644614" />
-      <entry key="H2" value="348.5221622280239" />
-      <entry key="H4" value="503.42167065957364" />
-      <entry key="D1" value="936.8135363484357" />
-      <entry key="W1" value="1958.2523571027398" />
+      <entry key="MS500" value="2.687827403345719E-69" />
+      <entry key="S2" value="1.0452311669637164E-17" />
+      <entry key="S5" value="2.5672451366538435E-7" />
+      <entry key="S10" value="9.69445793147046E-4" />
+      <entry key="S30" value="0.4455756336240016" />
+      <entry key="S60" value="2.560805926249719" />
+      <entry key="M2" value="6.803306769025566" />
+      <entry key="M5" value="16.134152156063916" />
+      <entry key="M10" value="30.29818987129656" />
+      <entry key="M15" value="44.74198839071349" />
+      <entry key="M30" value="87.94013894895147" />
+      <entry key="H1" value="152.83383389952684" />
+      <entry key="H2" value="223.9772460705624" />
+      <entry key="H4" value="331.01024084370346" />
+      <entry key="D1" value="984.2266198372564" />
+      <entry key="W1" value="2195.313364830118" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4629130953145326" />
-      <entry key="MS500" value="3.151998596317235" />
-      <entry key="S2" value="5.083932818626319" />
-      <entry key="S5" value="6.2887507124453395" />
-      <entry key="S10" value="7.149801346200842" />
-      <entry key="S30" value="10.109373447648748" />
-      <entry key="S60" value="14.460253467389437" />
-      <entry key="M2" value="26.171762338861203" />
-      <entry key="M5" value="72.66878203032105" />
-      <entry key="M10" value="140.10828313577787" />
-      <entry key="M15" value="204.68637758702494" />
-      <entry key="M30" value="392.86268014025677" />
-      <entry key="H1" value="699.0688809966232" />
-      <entry key="H2" value="1117.826811059456" />
-      <entry key="H4" value="1610.4214496197937" />
-      <entry key="D1" value="2955.1439642676323" />
-      <entry key="W1" value="6610.235065282247" />
+      <entry key="MS100" value="2.9796226750006526E-4" />
+      <entry key="MS500" value="0.341867491756331" />
+      <entry key="S2" value="1.2857359179276573" />
+      <entry key="S5" value="1.6760143071549773" />
+      <entry key="S10" value="1.8460676056700747" />
+      <entry key="S30" value="3.8545058265516308" />
+      <entry key="S60" value="9.85159558336849" />
+      <entry key="M2" value="19.759573050539174" />
+      <entry key="M5" value="40.87311384270904" />
+      <entry key="M10" value="79.82988148112301" />
+      <entry key="M15" value="121.74366888350242" />
+      <entry key="M30" value="242.3386083826388" />
+      <entry key="H1" value="416.428049468028" />
+      <entry key="H2" value="607.921599024414" />
+      <entry key="H4" value="923.84263302503" />
+      <entry key="D1" value="2959.754395232298" />
+      <entry key="W1" value="7189.236924666012" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -415,7 +395,7 @@
       <workItem from="1782087543012" duration="94000" />
       <workItem from="1782087674968" duration="289000" />
       <workItem from="1782088010949" duration="14446000" />
-      <workItem from="1782165077145" duration="104377000" />
+      <workItem from="1782165077145" duration="113349000" />
     </task>
     <task id="LOCAL-00001" summary="refactor code into cleaner architecture, add more unit tests, add auth controller, add redis caching">
       <option name="closed" value="true" />
@@ -425,7 +405,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782533806052</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="add tasks controller with its service">
+      <option name="closed" value="true" />
+      <created>1782541776680</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1782541776680</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -444,7 +432,8 @@
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="refactor code into cleaner architecture, add more unit tests, add auth controller, add redis caching" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor code into cleaner architecture, add more unit tests, add auth controller, add redis caching" />
+    <MESSAGE value="add tasks controller with its service" />
+    <option name="LAST_COMMIT_MESSAGE" value="add tasks controller with its service" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

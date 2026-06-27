@@ -14,8 +14,8 @@ using Microsoft.Extensions.Logging;
 namespace HR_System.Infrastructure.Services;
 
 public class AccountService(UserManager<ApplicationUser> userManager,
-    IApplicationUserRepository userRepository,
-    ICookieService cookieService,
+    IApplicationUsersRepository usersRepository,
+    ICookiesesServices cookiesesServices,
     ILogger<AccountService> logger,
     ITokenService tokenService) : IAccountService
 {
@@ -28,7 +28,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
             return Result<ApplicationUser>.Failure(doesUsesExist.Value!, HttpStatusCode.Conflict); // return fields used in other users
 
         // use dbContext transaction so we Roll back in case something went wrong 
-        using var transaction = await userRepository.BeginTransactionAsync(cancellationToken);
+        using var transaction = await usersRepository.BeginTransactionAsync(cancellationToken);
         
         // Add user to DB
         var toAddUser = new ApplicationUser()
@@ -53,7 +53,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
             return generateTokensResult.MapFailure<ApplicationUser>();
         
         // add tokens to cookies
-        cookieService.AddTokens(generateTokensResult.Value!);
+        cookiesesServices.AddTokens(generateTokensResult.Value!);
 
         // apply changes to DB
         await transaction.CommitAsync(cancellationToken);
@@ -65,7 +65,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
     private async Task<Result<string>> DoesUserExist(CreateAccountDTO toCreate, CancellationToken cancellationToken = default)
     {
         // check if user already Exists
-        var existingUsers = await userRepository.FilterAsync((u =>
+        var existingUsers = await usersRepository.FilterAsync((u =>
                 (u!.UserName!.ToLower() == toCreate.UserName.ToLower() || 
                  u!.Email!.ToLower() == toCreate.Email.ToLower() || 
                  u.PhoneNumber == toCreate.PhoneNumber)
@@ -117,7 +117,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         if (!generateTokensResult.IsSuccess)
             return generateTokensResult;
 
-        var addTokensToCookiesResult = cookieService.AddTokens(generateTokensResult.Value!);
+        var addTokensToCookiesResult = cookiesesServices.AddTokens(generateTokensResult.Value!);
         if (!addTokensToCookiesResult.IsSuccess) return addTokensToCookiesResult.MapFailure<AccessAndRefreshTokenDTO>();
 
         return Result<AccessAndRefreshTokenDTO>.Success(generateTokensResult.Value!);

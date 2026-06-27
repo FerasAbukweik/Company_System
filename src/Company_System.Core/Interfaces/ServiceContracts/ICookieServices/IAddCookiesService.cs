@@ -4,7 +4,7 @@ using HR_System.Core.DTO.Token;
 
 namespace HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 
-public interface IAddCookieService
+public interface IAddCookiesService
 {
     Result Add(string key, string toAdd, int lifetimeInMinutes);
     Result AddTokens(AccessAndRefreshTokenDTO tokens);

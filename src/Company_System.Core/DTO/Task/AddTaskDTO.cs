@@ -23,4 +23,15 @@ public class AddTaskDTO
         
     [Required]
     public required Guid UserId { get; set; }
+    
+    
+    // override
+
+    public override string ToString()
+    {
+        return
+            $"Title: {Title}\nDescription: {Description}\n" +
+            $"\nDeadline: {Deadline}\nPriority:{Priority.ToString()}\n" +
+            $"\nuser id: {UserId}\n";
+    }
 }

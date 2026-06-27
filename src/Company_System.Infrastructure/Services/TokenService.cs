@@ -18,8 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HR_System.Infrastructure.Services;
 
-public class TokenService(ICookieService cookieService,
-    IRefreshTokenRepository refreshTokenRepository,
+public class TokenService(ICookiesesServices cookiesesServices,
+    IRefreshTokensRepository refreshTokensRepository,
     UserManager<ApplicationUser> userManager,
     IConfiguration configuration) : ITokenService
 {
@@ -83,8 +83,8 @@ public class TokenService(ICookieService cookieService,
             UserId = userId,
             Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:RefreshTokenLifeTime")),
         };
-        refreshTokenRepository.AddAsync(toAddRefreshToken , cancellationToken);
-        await refreshTokenRepository.SaveChangesAsync(cancellationToken);
+        refreshTokensRepository.AddAsync(toAddRefreshToken , cancellationToken);
+        await refreshTokensRepository.SaveChangesAsync(cancellationToken);
         
         return Result<string>.Success(refreshToken);
     }
@@ -113,12 +113,12 @@ public class TokenService(ICookieService cookieService,
     public async Task<Result<RefreshToken>> IsRefreshTokenValid(Guid userId, CancellationToken cancellationToken = default)
     {
         // get refresh token from cookies
-        var refreshTokenResult = cookieService.Get(CookieKeys.RefreshToken);
+        var refreshTokenResult = cookiesesServices.Get(CookieKeys.RefreshToken);
         if (!refreshTokenResult.IsSuccess) 
             return refreshTokenResult.MapFailure<RefreshToken>(HttpStatusCode.Unauthorized);
 
         // get refresh token object 
-        var refreshToken = await refreshTokenRepository
+        var refreshToken = await refreshTokensRepository
             .FindRefreshTokenByRefreshTokenStringAsync(refreshTokenResult.Value!, cancellationToken);
         if (refreshToken is null) 
             return Result<RefreshToken>.Failure("Refresh token not found", HttpStatusCode.Unauthorized);

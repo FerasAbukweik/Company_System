@@ -43,8 +43,8 @@ public static class InfrastructureDependencyInjectionExtensionMethod
 
         
         services.AddHostedRemoveExpiredRefreshTokens();
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+        services.AddScoped<IRefreshTokensRepository, RefreshTokensesRepository>();
+        services.AddScoped<IApplicationUsersRepository, ApplicationUsersesRepository>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IRedisService, RedisService>();

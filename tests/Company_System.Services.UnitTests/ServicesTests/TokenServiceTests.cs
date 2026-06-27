@@ -18,11 +18,11 @@ namespace HR_System.Core.UnitTests.ServicesTests;
 public class TokenServiceTests
 {
     private readonly ITokenService _tokenService;
-    private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<IRefreshTokensRepository> _refreshTokenRepositoryMock;
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly IFixture _fixture;
     private readonly ITestOutputHelper _output;
-    private readonly Mock<ICookieService> _cookieService;
+    private readonly Mock<ICookiesesServices> _cookieService;
 
     public TokenServiceTests(ITestOutputHelper output)
     {
@@ -35,8 +35,8 @@ public class TokenServiceTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         
         // refresh token repository mock
-        _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
-        _cookieService = new Mock<ICookieService>();
+        _refreshTokenRepositoryMock = new Mock<IRefreshTokensRepository>();
+        _cookieService = new Mock<ICookiesesServices>();
         
         // user manager mock
         var storeMock = new Mock<IUserStore<ApplicationUser>>();

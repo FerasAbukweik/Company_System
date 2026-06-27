@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class ApplicationUserRepository(ApplicationDbContext dbContext) : IApplicationUserRepository
+public class ApplicationUsersesRepository(ApplicationDbContext dbContext) : IApplicationUsersRepository
 {
     public async Task<IReadOnlyList<ApplicationUser>> FilterAsync(
         Expression<Func<ApplicationUser, bool>> checks,

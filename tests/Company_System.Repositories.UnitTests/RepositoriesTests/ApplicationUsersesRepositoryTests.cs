@@ -10,14 +10,14 @@ using Xunit.Abstractions;
 
 namespace TestProject1.RepositoriesTests;
 
-public class ApplicationUserRepositoryTests
+public class ApplicationUsersesRepositoryTests
 {
-    private readonly IApplicationUserRepository _applicationUserRepository;
+    private readonly IApplicationUsersRepository _applicationUsersRepository;
     private readonly ApplicationDbContext _dbContext;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
 
-    public ApplicationUserRepositoryTests(ITestOutputHelper output)
+    public ApplicationUsersesRepositoryTests(ITestOutputHelper output)
     {
         _output = output;
         
@@ -34,7 +34,7 @@ public class ApplicationUserRepositoryTests
         
         _dbContext = Create.MockedDbContextFor<ApplicationDbContext>(dbContextOptions);
         
-        _applicationUserRepository = new ApplicationUserRepository(_dbContext);
+        _applicationUsersRepository = new ApplicationUsersesRepository(_dbContext);
     }
     
     [Fact]
@@ -52,7 +52,7 @@ public class ApplicationUserRepositoryTests
         _output.WriteLine($"Expected Value:\n{expected.ToString()}");
 
         // Act
-        var actual = await _applicationUserRepository.FilterAsync(u => u.FullName == "Test Name");
+        var actual = await _applicationUsersRepository.FilterAsync(u => u.FullName == "Test Name");
         _output.WriteLine($"Actual Value:\n{actual.ToString()}");
         
         // Assert

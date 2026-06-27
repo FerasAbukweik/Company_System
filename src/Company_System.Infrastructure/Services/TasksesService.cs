@@ -9,7 +9,7 @@ using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
 
 namespace HR_System.Infrastructure.Services;
 
-public class TasksesService(IAppTaskRepository taskRepository) : ITasksService
+public class TasksesService(IAppTasksRepository tasksRepository) : ITasksService
 {
     public async Task<Result<TaskDTO>> SetAsync(AddTaskDTO toAddData, Guid currUserId, CancellationToken cancellationToken = default)
     {
@@ -23,9 +23,9 @@ public class TasksesService(IAppTaskRepository taskRepository) : ITasksService
             Created = DateTime.UtcNow,
             Deadline = toAddData.Deadline,
         };
-        taskRepository.Set(toAddTask);
+        tasksRepository.Set(toAddTask);
         
-        if(!await taskRepository.SaveChangesAsync(cancellationToken))
+        if(!await tasksRepository.SaveChangesAsync(cancellationToken))
             return Result<TaskDTO>.Failure("Failed to save task");
 
         return Result<TaskDTO>.Success(toAddTask.ToDTO());
@@ -33,21 +33,21 @@ public class TasksesService(IAppTaskRepository taskRepository) : ITasksService
 
     public async Task<IReadOnlyList<TaskDTO>> GetUserTasksAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var usersTasks = await taskRepository.GetUserTasksAsync(userId, cancellationToken);
+        var usersTasks = await tasksRepository.GetUserTasksAsync(userId, cancellationToken);
 
         return usersTasks.Select(t => t.ToDTO()).ToImmutableList();
     }
 
-    public async Task<Result<TaskDTO>> UpdateStatus(Guid currentUserId, Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
+    public async Task<Result<TaskDTO>> UpdateStatusAsync(Guid currentUserId, Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
-        var updated = await taskRepository.UpdateStatusAsync(taskId, newStatus, cancellationToken);
+        var updated = await tasksRepository.UpdateStatusAsync(taskId, newStatus, cancellationToken);
         if (updated is null)
             return Result<TaskDTO>.Failure("Failed to update task status or task want found");
         
         if(updated.UserId != currentUserId)
             return  Result<TaskDTO>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
         
-        if(!await taskRepository.SaveChangesAsync(cancellationToken))
+        if(!await tasksRepository.SaveChangesAsync(cancellationToken))
             return Result<TaskDTO>.Failure("Failed to save task");
         
         return Result<TaskDTO>.Success(updated.ToDTO());

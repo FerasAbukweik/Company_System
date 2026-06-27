@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class RefreshTokenRepository(ApplicationDbContext dbContext,
-    IRedisService cache) : IRefreshTokenRepository
+public class RefreshTokensesRepository(ApplicationDbContext dbContext,
+    IRedisService cache) : IRefreshTokensRepository
 {
     public void AddAsync(RefreshToken refreshToken , CancellationToken cancellationToken = default)
     {

@@ -2,7 +2,7 @@ using HR_System.Core.Domain.Entities;
 
 namespace HR_System.Core.Interfaces.RepositoryContracts;
 
-public interface IRefreshTokenRepository
+public interface IRefreshTokensRepository
 {
     void AddAsync(RefreshToken refreshToken , CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RefreshToken>> RemoveExpiredRefreshTokensAsync(CancellationToken cancellationToken = default);

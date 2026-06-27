@@ -13,14 +13,14 @@ using Xunit.Abstractions;
 
 namespace HR_System.Core.UnitTests.ServicesTests;
 
-public class CookieServiceTests
+public class CookiesesServicesTests
 {
-    private readonly ICookieService _cookieService;
+    private readonly ICookiesesServices _cookiesesServices;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
     private readonly Mock<IHttpContextAccessor>  _httpContextAccessorMock;
 
-    public CookieServiceTests(ITestOutputHelper output)
+    public CookiesesServicesTests(ITestOutputHelper output)
     {
         _output = output;
         
@@ -40,7 +40,7 @@ public class CookieServiceTests
             .AddInMemoryCollection(memoryData!)
             .Build();
         
-        _cookieService = new CookieService(_httpContextAccessorMock.Object, configuration, NullLogger<CookieService>.Instance);
+        _cookiesesServices = new CookiesesServices(_httpContextAccessorMock.Object, configuration, NullLogger<CookiesesServices>.Instance);
     }
 
 
@@ -53,7 +53,7 @@ public class CookieServiceTests
         _httpContextAccessorMock.Setup(t => t.HttpContext!.Response.Cookies.Append(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CookieOptions>()));
         
         // Act
-        var actual =  _cookieService.Add("Dummy Key","Dummy Data",10);
+        var actual =  _cookiesesServices.Add("Dummy Key","Dummy Data",10);
         _output.WriteLine($"Actual: {actual}");
         
         // Assert
@@ -68,7 +68,7 @@ public class CookieServiceTests
         _httpContextAccessorMock.Setup(t => t.HttpContext).Returns(null as HttpContext);
         
         // Act
-        var actual =  _cookieService.Add("Dummy Key","Dummy Data",10);
+        var actual =  _cookiesesServices.Add("Dummy Key","Dummy Data",10);
         _output.WriteLine($"Actual: {actual.ToString()}");
         
         // Assert
@@ -88,7 +88,7 @@ public class CookieServiceTests
             t.HttpContext!.Response.Cookies.Append(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CookieOptions>()));
         
         // Act
-        var result = _cookieService.AddTokens(_fixture.Create<AccessAndRefreshTokenDTO>());
+        var result = _cookiesesServices.AddTokens(_fixture.Create<AccessAndRefreshTokenDTO>());
         
         // Assert
         result.Should().NotBeNull();
@@ -113,7 +113,7 @@ public class CookieServiceTests
         _output.WriteLine($"Expected: {expected}");
 
         // Act
-        var actual = _cookieService.GetValue<Guid>("dummy key");
+        var actual = _cookiesesServices.GetValue<Guid>("dummy key");
         _output.WriteLine($"Actual: {actual.ToString()}");
 
         // Assert
@@ -135,7 +135,7 @@ public class CookieServiceTests
         _output.WriteLine($"Expected: {badData}");
 
         // Act
-        var actual = _cookieService.GetValue<Guid>("dummy key");
+        var actual = _cookiesesServices.GetValue<Guid>("dummy key");
         _output.WriteLine($"Actual: {actual.ToString()}");
 
         // Assert

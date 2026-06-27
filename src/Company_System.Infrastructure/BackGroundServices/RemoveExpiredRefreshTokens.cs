@@ -21,7 +21,7 @@ public class RemoveExpiredRefreshTokens(IServiceScopeFactory serviceScopeFactory
         using var scope = serviceScopeFactory.CreateScope();
         
         // get RefreshTokenRepository
-        var refreshTokenRepository = scope.ServiceProvider.GetRequiredService<IRefreshTokenRepository>();
+        var refreshTokenRepository = scope.ServiceProvider.GetRequiredService<IRefreshTokensRepository>();
 
         // renove expired refresh tokens
         await refreshTokenRepository.RemoveExpiredRefreshTokensAsync(stoppingToken);

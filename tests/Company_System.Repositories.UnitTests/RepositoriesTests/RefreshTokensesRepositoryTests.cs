@@ -13,15 +13,15 @@ using Task = System.Threading.Tasks.Task;
 
 namespace TestProject1.RepositoriesTests;
 
-public class RefreshTokenRepositoryTests
+public class RefreshTokensesRepositoryTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IFixture _fixture;
     private readonly ApplicationDbContext _dbContext;
     private readonly Mock<IRedisService> _redisMock;
 
-    public RefreshTokenRepositoryTests(ITestOutputHelper output)
+    public RefreshTokensesRepositoryTests(ITestOutputHelper output)
     {
         _output = output;
         
@@ -37,7 +37,7 @@ public class RefreshTokenRepositoryTests
 
         _redisMock = new Mock<IRedisService>();
         
-        _refreshTokenRepository = new RefreshTokenRepository(_dbContext, _redisMock.Object);
+        _refreshTokensRepository = new RefreshTokensesRepository(_dbContext, _redisMock.Object);
     }
 
 
@@ -47,16 +47,21 @@ public class RefreshTokenRepositoryTests
     public async Task FindRefreshTokenByRefreshTokenString_validData_ShouldSucceed()
     {
         // Arrange
-        var expected = _fixture.Create<RefreshToken>();
-        _dbContext.RefreshTokens.Add(expected);
+        var initalData = _fixture.CreateMany<RefreshToken>(10).ToArray();
+        _dbContext.RefreshTokens.AddRange(initalData);
         _dbContext.SaveChanges();
 
         _redisMock.Setup(t => t.Get<RefreshToken>(It.IsAny<string>()))
             .ReturnsAsync(null as RefreshToken);
+
+        _redisMock.Setup(t => t.Set(It.IsAny<string>(), It.IsAny<object>()));
+
+        var expected = initalData[0];
         
         _output.WriteLine($"Expected: {expected}");
+        
         // Act
-        var actual = await _refreshTokenRepository.FindRefreshTokenByRefreshTokenStringAsync(expected.Token);
+        var actual = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(expected.Token);
         _output.WriteLine($"Actual: {actual}");
         
         // Assert
@@ -71,8 +76,11 @@ public class RefreshTokenRepositoryTests
         _redisMock.Setup(t => t.Get<RefreshToken>(It.IsAny<string>()))
             .ReturnsAsync(null as RefreshToken);
         
+        _redisMock.Setup(t => t.Set(It.IsAny<string>(), It.IsAny<object>()));
+        
+        
         // Act
-        var actual = await _refreshTokenRepository.FindRefreshTokenByRefreshTokenStringAsync(_fixture.Create<string>());
+        var actual = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(_fixture.Create<string>());
         _output.WriteLine($"Actual: {actual}");
         
         // Assert

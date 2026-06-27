@@ -30,7 +30,7 @@ public class TasksController(ITasksService tasksesService) : ApplicationControll
         if (!userId.IsSuccess)
             return ((Result)userId).ToActionResult();
 
-        Result result = await tasksesService.UpdateStatus(userId.Value, taskId, newStatus, cancellationToken);
+        Result result = await tasksesService.UpdateStatusAsync(userId.Value, taskId, newStatus, cancellationToken);
         return result.ToActionResult();
     }
 

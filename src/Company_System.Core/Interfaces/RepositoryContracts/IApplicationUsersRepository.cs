@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HR_System.Core.Interfaces.RepositoryContracts;
 
-public interface IApplicationUserRepository
+public interface IApplicationUsersRepository
 {
     Task<IReadOnlyList<ApplicationUser>> FilterAsync(Expression<Func<ApplicationUser, bool>> checks ,
         Expression<Func<ApplicationUser, Object?>>[]? includes = null,

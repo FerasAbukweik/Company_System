@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class AppTaskRepository(ApplicationDbContext dbContext) : IAppTaskRepository
+public class AppTasksesRepository(ApplicationDbContext dbContext) : IAppTasksRepository
 {
     public void Set(AppTask task, CancellationToken cancellationToken = default)
     {

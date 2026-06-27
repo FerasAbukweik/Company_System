@@ -4,7 +4,6 @@ using FluentAssertions;
 using HR_System.Core.common;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.Domain.Idnetity;
-using HR_System.Core.DTO;
 using HR_System.Core.DTO.Auth;
 using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.RepositoryContracts;
@@ -26,9 +25,9 @@ public class AccountServiceTests
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private readonly Mock<IApplicationUserRepository>  _userRepositoryMock;
+    private readonly Mock<IApplicationUsersRepository>  _userRepositoryMock;
     private readonly Mock<RoleManager<ApplicationRole>>  _roleManagerMock;
-    private readonly Mock<ICookieService> _cookieServiceMock;
+    private readonly Mock<ICookiesesServices> _cookieServiceMock;
     private readonly Mock<ITokenService> _tokenServiceMock;
 
     public AccountServiceTests(ITestOutputHelper output)
@@ -46,8 +45,8 @@ public class AccountServiceTests
         var roleStore = new Mock<IRoleStore<ApplicationRole>>();
         _roleManagerMock = new Mock<RoleManager<ApplicationRole>>(roleStore.Object, null!, null!, null!, null!);
         
-        _userRepositoryMock = new Mock<IApplicationUserRepository>();
-        _cookieServiceMock = new Mock<ICookieService>();
+        _userRepositoryMock = new Mock<IApplicationUsersRepository>();
+        _cookieServiceMock = new Mock<ICookiesesServices>();
         _tokenServiceMock = new Mock<ITokenService>();
 
         _accountService = new AccountService(_userManagerMock.Object,

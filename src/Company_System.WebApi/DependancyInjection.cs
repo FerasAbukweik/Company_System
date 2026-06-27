@@ -47,7 +47,7 @@ public static class WebApiDependencyInjectionExtensionMethod
         services.AddControllers();
         services.AddOpenApi();
         services.AddHttpContextAccessor();
-        services.AddScoped<ICookieService, CookieService>();
+        services.AddScoped<ICookiesesServices, CookiesesServices>();
         
         return services;
     }

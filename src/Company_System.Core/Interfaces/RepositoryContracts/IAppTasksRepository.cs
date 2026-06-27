@@ -3,7 +3,7 @@ using HR_System.Core.Enums;
 
 namespace HR_System.Core.Interfaces.RepositoryContracts;
 
-public interface IAppTaskRepository
+public interface IAppTasksRepository
 {
     void Set(AppTask task, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<AppTask>> GetUserTasksAsync(Guid userId, CancellationToken cancellationToken = default);

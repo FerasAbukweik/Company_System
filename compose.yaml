@@ -1,0 +1,74 @@
+﻿services:
+  hr_system.api:
+    container_name: hr_system.api
+    build:
+      context: .
+      dockerfile: src/HR_System.WebApi/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - Jwt__Key=${JWT_KEY}
+      - ConnectionStrings__Default=Server=hr_system.sqlserver;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - ConnectionStrings__Redis=hr_system.redis:6379
+      - ConnectionStrings__MongoDB=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@hr_system.mongodb:27017/${DB_NAME}?authSource=admin
+    depends_on:
+      hr_system.sqlserver:
+        condition: service_healthy
+      hr_system.redis:
+        condition: service_healthy
+      hr_system.mongodb:
+        condition: service_healthy
+
+  hr_system.sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hr_system.sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  hr_system.redis:
+    image: redis:7-alpine
+    container_name: hr_system.redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  hr_system.mongodb:
+    image: mongo:7
+    container_name: hr_system.mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DB_NAME}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  sqlserver_data:
+  redis_data:
+  mongodb_data:

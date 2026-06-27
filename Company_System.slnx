@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".env" />
+    <File Path="compose.yaml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src\Company_System.Core\Company_System.Core.csproj" />
+    <Project Path="src\Company_System.Infrastructure\Company_System.Infrastructure.csproj" />
+    <Project Path="src\Company_System.WebApi\Company_System.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\Company_System.Repositories.UnitTests\Company_System.Repositories.UnitTests.csproj" />
+    <Project Path="tests\Company_System.Services.UnitTests\Company_System.Services.UnitTests.csproj" />
+  </Folder>
+</Solution>

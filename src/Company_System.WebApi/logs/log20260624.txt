@@ -1,0 +1,107 @@
+2026-06-24 00:08:14.244 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-06-24 00:08:15.005 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-06-24 00:08:15.008 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-06-24 00:08:15.291 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-06-24 00:08:15.506 +03:00 [DBG] Creating DbConnection.
+2026-06-24 00:08:15.546 +03:00 [DBG] Created DbConnection. (35ms).
+2026-06-24 00:08:15.551 +03:00 [DBG] Migrating using database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:15.558 +03:00 [DBG] Opening connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:15.826 +03:00 [DBG] Opened connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:15.834 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-06-24 00:08:15.843 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (6ms).
+2026-06-24 00:08:15.846 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (14ms).
+2026-06-24 00:08:15.856 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-06-24 00:08:15.892 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-06-24 00:08:15.895 +03:00 [DBG] Closing connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:15.908 +03:00 [DBG] Closed connection to database 'HR_System' on server 'localhost,1433' (7ms).
+2026-06-24 00:08:15.908 +03:00 [DBG] Opening connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:15.910 +03:00 [DBG] Opened connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:15.912 +03:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-06-24 00:08:15.915 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-06-24 00:08:15.915 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-06-24 00:08:15.916 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-06-24 00:08:15.916 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2026-06-24 00:08:15.946 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2026-06-24 00:08:16.045 +03:00 [DBG] Beginning transaction with isolation level 'Unspecified'.
+2026-06-24 00:08:16.053 +03:00 [DBG] Began transaction with isolation level 'ReadCommitted'.
+2026-06-24 00:08:16.055 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-06-24 00:08:16.055 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-06-24 00:08:16.057 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (1ms).
+2026-06-24 00:08:16.057 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2026-06-24 00:08:16.060 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2026-06-24 00:08:16.063 +03:00 [DBG] Committing transaction.
+2026-06-24 00:08:16.070 +03:00 [DBG] Committed transaction.
+2026-06-24 00:08:16.072 +03:00 [DBG] Disposing transaction.
+2026-06-24 00:08:16.075 +03:00 [DBG] Beginning transaction with isolation level 'Unspecified'.
+2026-06-24 00:08:16.077 +03:00 [DBG] Began transaction with isolation level 'ReadCommitted'.
+2026-06-24 00:08:16.080 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-06-24 00:08:16.081 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-06-24 00:08:16.081 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-06-24 00:08:16.081 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-06-24 00:08:16.082 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-06-24 00:08:16.084 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-06-24 00:08:16.084 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-06-24 00:08:16.084 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-06-24 00:08:16.084 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-06-24 00:08:16.086 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-06-24 00:08:16.088 +03:00 [DBG] Creating DbCommand for 'ExecuteReader'.
+2026-06-24 00:08:16.089 +03:00 [DBG] Created DbCommand for 'ExecuteReader' (0ms).
+2026-06-24 00:08:16.089 +03:00 [DBG] Initialized DbCommand for 'ExecuteReader' (0ms).
+2026-06-24 00:08:16.090 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-06-24 00:08:16.094 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-06-24 00:08:16.099 +03:00 [DBG] Closing data reader to 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:16.101 +03:00 [DBG] A data reader for 'HR_System' on server 'localhost,1433' is being disposed after spending 4ms reading results.
+2026-06-24 00:08:16.107 +03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-24 00:08:16.108 +03:00 [DBG] Committing transaction.
+2026-06-24 00:08:16.109 +03:00 [DBG] Committed transaction.
+2026-06-24 00:08:16.110 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-06-24 00:08:16.110 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-06-24 00:08:16.110 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-06-24 00:08:16.110 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+2026-06-24 00:08:16.115 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+2026-06-24 00:08:16.116 +03:00 [DBG] Disposing transaction.
+2026-06-24 00:08:16.116 +03:00 [DBG] Closing connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:16.117 +03:00 [DBG] Closed connection to database 'HR_System' on server 'localhost,1433' (0ms).
+2026-06-24 00:08:16.119 +03:00 [DBG] 'ApplicationDbContext' disposed.
+2026-06-24 00:08:16.122 +03:00 [DBG] Disposing connection to database 'HR_System' on server 'localhost,1433'.
+2026-06-24 00:08:16.124 +03:00 [DBG] Disposed connection to database '' on server '' (1ms).

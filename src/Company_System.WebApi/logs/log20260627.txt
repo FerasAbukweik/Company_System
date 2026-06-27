@@ -1,0 +1,5 @@
+2026-06-27 07:12:59.075 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-06-27 07:12:59.851 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-06-27 07:12:59.854 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-06-27 07:13:00.162 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-06-27 07:13:01.756 +03:00 [DBG] 'ApplicationDbContext' disposed.

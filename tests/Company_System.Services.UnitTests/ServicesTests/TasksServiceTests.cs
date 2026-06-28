@@ -1,10 +1,11 @@
+using System.Net;
 using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Task;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
 using HR_System.Infrastructure.Services;
 using Moq;
 using Xunit.Abstractions;
@@ -13,210 +14,340 @@ namespace HR_System.Core.UnitTests.ServicesTests;
 
 public class TasksServiceTests
 {
-    private readonly ITasksService _tasksService;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
-    private readonly Mock<ITasksRepository> _tasksRepository;
+    private readonly Mock<ITasksRepository> _tasksRepositoryMock;
+    private readonly TasksService _tasksService;
 
     public TasksServiceTests(ITestOutputHelper output)
     {
         _output = output;
-        
+
         _fixture = new Fixture();
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _tasksRepository = new Mock<ITasksRepository>();
-
-        _tasksService = new TasksesService(_tasksRepository.Object);
+        _tasksRepositoryMock = new Mock<ITasksRepository>();
+        _tasksService = new TasksService(_tasksRepositoryMock.Object);
     }
 
-    #region GetUserTasksTests
+    #region AddAsync
 
     [Fact]
-    public async Task GetUserTasksTests_ValidData_ShouldSucceed()
+    public async Task AddAsync_ValidData_ShouldSucceed()
     {
         // Arrange
-        var userId = Guid.NewGuid();
-        
-        var userTasks = _fixture.CreateMany<AppTask>(4).ToArray();
-        for (int i = 0; i < userTasks.Length; i++)
-            userTasks[i].UserId = userId;
-        
-        _tasksRepository.Setup(t => t.GetUserTasksAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(userTasks);
+        var currUserId = Guid.NewGuid();
+        var toAdd = _fixture.Create<TaskAddDTO>();
 
-        var expected = userTasks.Select(t => t.ToDTO()).ToArray();
-        
-        foreach (var item in expected)
-            _output.WriteLine($"Expected: {item.ToString()}\n");
-        
-        // Act
-        var actual = await  _tasksService.GetUserTasksAsync(userId);
-        foreach (var item in actual)
-            _output.WriteLine($"Actual: {item.ToString()}\n");
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Count.Should().Be(expected.Length);
-        actual.Should().BeEquivalentTo(expected);
-    }
-    
-
-    #endregion
-    
-    #region SetTests
-
-    [Fact]
-    public async Task SetTests_ValidData_ShouldSucceed()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var toAddTask =  _fixture.Create<TaskAddDTO>();
-        
-        _tasksRepository.Setup(t => t.SaveChangesAsync())
+        _tasksRepositoryMock
+            .Setup(r => r.Add(It.IsAny<AppTask>(), It.IsAny<CancellationToken>()));
+        _tasksRepositoryMock
+            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _output.WriteLine($"userId: {userId}\nToAddTask: {toAddTask.ToString()}");
-        
-        
+        _output.WriteLine($"ManagerId (currUserId): {currUserId}");
+        _output.WriteLine($"UserId   : {toAdd.UserId}");
+        _output.WriteLine($"Title    : {toAdd.Title}");
+        _output.WriteLine($"Priority : {toAdd.Priority}");
+
         // Act
-        var actual = await _tasksService.AddAsync(toAddTask, userId);
-        _output.WriteLine($"Actual: {actual.ToString()}");
-        
+        var actual = await _tasksService.AddAsync(toAdd, currUserId);
+        _output.WriteLine($"IsSuccess       : {actual.IsSuccess}");
+        _output.WriteLine($"Actual Title    : {actual.Value?.Title}");
+        _output.WriteLine($"Actual UserId   : {actual.Value?.UserId}");
+        _output.WriteLine($"Actual ManagerId: {actual.Value?.ManagerId}");
+
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeTrue();
         actual.Value.Should().NotBeNull();
-        actual.Value.UserId.Should().Be(toAddTask.UserId);
-        actual.Value.Deadline.Should().Be(toAddTask.Deadline);
-        actual.Value.Title.Should().Be(toAddTask.Title);
-        actual.Value.Description.Should().Be(toAddTask.Description);
-        actual.Value.Priority.Should().Be(toAddTask.Priority);
+        actual.Value!.Title.Should().Be(toAdd.Title);
+        actual.Value!.Description.Should().Be(toAdd.Description);
+        actual.Value!.Priority.Should().Be(toAdd.Priority);
+        actual.Value!.UserId.Should().Be(toAdd.UserId);
+        actual.Value!.ManagerId.Should().Be(currUserId);
+
+        _tasksRepositoryMock.Verify(r =>
+            r.Add(It.IsAny<AppTask>(), It.IsAny<CancellationToken>()), Times.Once);
+        _tasksRepositoryMock.Verify(r =>
+            r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
-    
+
     [Fact]
-    public async Task SetTests_FailedToSaveToDB_ShouldSucceed()
+    public async Task AddAsync_SaveChangesFails_ShouldReturnFailure()
     {
         // Arrange
-        var userId = Guid.NewGuid();
-        var toAddTask =  _fixture.Create<TaskAddDTO>();
-        
-        _tasksRepository.Setup(t => t.SaveChangesAsync())
+        var currUserId = Guid.NewGuid();
+        var toAdd = _fixture.Create<TaskAddDTO>();
+
+        _tasksRepositoryMock
+            .Setup(r => r.Add(It.IsAny<AppTask>(), It.IsAny<CancellationToken>()));
+        _tasksRepositoryMock
+            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _output.WriteLine($"userId: {userId}\nToAddTask: {toAddTask.ToString()}");
-        
-        
+        _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine("SaveChanges returns false — expecting failure");
+
         // Act
-        var actual = await _tasksService.AddAsync(toAddTask, userId);
-        _output.WriteLine($"Actual: {actual.ToString()}");
-        
+        var actual = await _tasksService.AddAsync(toAdd, currUserId);
+        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
+        _output.WriteLine($"ErrorMessage : {actual.ErrorMessage}");
+
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeFalse();
-        actual.Value.Should().BeNull();
+        actual.ErrorMessage.Should().Be("Failed to save task");
+
+        _tasksRepositoryMock.Verify(r =>
+            r.Add(It.IsAny<AppTask>(), It.IsAny<CancellationToken>()), Times.Once);
+        _tasksRepositoryMock.Verify(r =>
+            r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
 
-    #region UpdateStatusTests
+    #region LazyGetUserTasksAsync
 
     [Fact]
-    public async Task UpdateStatus_ValidData_ShouldSucceed()
+    public async Task LazyGetUserTasksAsync_ValidData_ShouldReturnMappedDTOs()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var taskId = Guid.NewGuid();
-        var newStatus = _fixture.Create<TaskStatusEnum>();
+        var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+        var tasks = _fixture.CreateMany<AppTask>(3).ToList();
 
-        var updatedTask = _fixture.Create<AppTask>();
-        updatedTask.UserId = userId;
-        updatedTask.Status = newStatus;
+        _tasksRepositoryMock
+            .Setup(r => r.LazyGetUserTasksAsync(userId, lazyData, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(tasks);
 
-        _tasksRepository.Setup(t => t.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<TaskStatusEnum>()))
-            .ReturnsAsync(updatedTask);
-        
-        _tasksRepository.Setup(t => t.SaveChangesAsync())
-            .ReturnsAsync(true);
-        
-        var expected = updatedTask.ToDTO();
-        
-        _output.WriteLine($"Expected: {expected.ToString()}");
+        _output.WriteLine($"UserId        : {userId}");
+        _output.WriteLine($"Expected Count: {tasks.Count}");
+        tasks.ForEach(t => _output.WriteLine($"  Expected: {t.Id} | {t.Title}"));
 
         // Act
-        var actual = await _tasksService.UpdateStatusAsync(userId, taskId, newStatus);
-        _output.WriteLine($"Actual: {actual.Value?.ToString() ?? "null"}");
+        var actual = await _tasksService.LazyGetUserTasksAsync(userId, lazyData);
+        _output.WriteLine($"IsSuccess   : {actual.IsSuccess}");
+        _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
+        actual.Value?.ToList().ForEach(t => _output.WriteLine($"  Actual: {t.Id} | {t.Title}"));
 
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeTrue();
-        actual.Value.Should().BeEquivalentTo(expected);
+        actual.Value.Should().NotBeNull();
+        actual.Value.Should().HaveCount(tasks.Count);
+        actual.Value.Should().BeAssignableTo<IReadOnlyList<TaskDTO>>();
+
+        _tasksRepositoryMock.Verify(r =>
+            r.LazyGetUserTasksAsync(userId, lazyData, It.IsAny<CancellationToken>()), Times.Once);
     }
-    
-    
+
     [Fact]
-    public async Task UpdateStatus_FailedToSaveChanges_ShouldSucceed()
+    public async Task LazyGetUserTasksAsync_NoTasks_ShouldReturnEmpty()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var taskId = Guid.NewGuid();
-        var newStatus = _fixture.Create<TaskStatusEnum>();
+        var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
 
-        var updatedTask = _fixture.Create<AppTask>();
-        updatedTask.UserId = userId;
-        updatedTask.Status = newStatus;
+        _tasksRepositoryMock
+            .Setup(r => r.LazyGetUserTasksAsync(userId, lazyData, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
-        _tasksRepository.Setup(t => t.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<TaskStatusEnum>()))
-            .ReturnsAsync(updatedTask);
-        
-        _tasksRepository.Setup(t => t.SaveChangesAsync())
-            .ReturnsAsync(false);
-        
-        var expected = updatedTask.ToDTO();
-        
-        _output.WriteLine($"Expected: {expected.ToString()}");
+        _output.WriteLine($"UserId        : {userId}");
+        _output.WriteLine("Expected Count: 0");
 
         // Act
-        var actual = await _tasksService.UpdateStatusAsync(userId, taskId, newStatus);
-        _output.WriteLine($"Actual: {actual.Value?.ToString() ?? "null"}");
+        var actual = await _tasksService.LazyGetUserTasksAsync(userId, lazyData);
+        _output.WriteLine($"IsSuccess   : {actual.IsSuccess}");
+        _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeTrue();
+        actual.Value.Should().BeEmpty();
+
+        _tasksRepositoryMock.Verify(r =>
+            r.LazyGetUserTasksAsync(userId, lazyData, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task LazyGetUserTasksAsync_NegativeTaken_ShouldReturnFailure()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var lazyData = new LazyDTO { Taken = -1, SectionSize = 10 };
+
+        _output.WriteLine($"UserId: {userId}");
+        _output.WriteLine($"Taken : {lazyData.Taken} — expecting BadRequest failure");
+
+        // Act
+        var actual = await _tasksService.LazyGetUserTasksAsync(userId, lazyData);
+        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
+        _output.WriteLine($"StatusCode   : {actual.StatusCode}");
+        _output.WriteLine($"ErrorMessage : {actual.ErrorMessage}");
 
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeFalse();
-        actual.Value.Should().BeNull();
-    }
-    
-    
-    [Fact]
-    public async Task UpdateStatus_NoTaskToUpdate_ShouldSucceed()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var taskId = Guid.NewGuid();
-        var newStatus = _fixture.Create<TaskStatusEnum>();
+        actual.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        actual.ErrorMessage.Should().Be("Taken cannot be negative");
 
-        var updatedTask = _fixture.Create<AppTask>();
-        updatedTask.UserId = userId;
-        updatedTask.Status = newStatus;
-
-        _tasksRepository.Setup(t => t.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<TaskStatusEnum>()))
-            .ReturnsAsync(null as AppTask);
-        
-        var expected = updatedTask.ToDTO();
-        
-        _output.WriteLine($"Expected: {expected.ToString()}");
-
-        // Act
-        var actual = await _tasksService.UpdateStatusAsync(userId, taskId, newStatus);
-        _output.WriteLine($"Actual: {actual.Value?.ToString() ?? "null"}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.IsSuccess.Should().BeFalse();
-        actual.Value.Should().BeNull();
+        // Repository should never be called
+        _tasksRepositoryMock.Verify(r =>
+            r.LazyGetUserTasksAsync(It.IsAny<Guid>(), It.IsAny<LazyDTO>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     #endregion
-    
+
+    #region UpdateStatusAsync
+
+    [Fact]
+    public async Task UpdateStatusAsync_ValidData_ShouldSucceed()
+    {
+        // Arrange
+        var currentUserId = Guid.NewGuid();
+        var task = CreateTask(userId: currentUserId);
+        var newStatus = TaskStatusEnum.Pending;
+
+        _tasksRepositoryMock
+            .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(task);
+        _tasksRepositoryMock
+            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        _output.WriteLine($"TaskId       : {task.Id}");
+        _output.WriteLine($"CurrentUserId: {currentUserId}");
+        _output.WriteLine($"New Status   : {newStatus}");
+
+        // Act
+        var actual = await _tasksService.UpdateStatusAsync(currentUserId, task.Id, newStatus);
+        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
+        _output.WriteLine($"Actual Status: {actual.Value?.Status}");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeTrue();
+        actual.Value.Should().NotBeNull();
+        actual.Value!.Id.Should().Be(task.Id);
+        actual.Value!.Status.Should().Be(task.Status);
+
+        _tasksRepositoryMock.Verify(r =>
+            r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()), Times.Once);
+        _tasksRepositoryMock.Verify(r =>
+            r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_TaskNotFound_ShouldReturnFailure()
+    {
+        // Arrange
+        var taskId = Guid.NewGuid();
+        var currentUserId = Guid.NewGuid();
+        var newStatus = TaskStatusEnum.Pending;
+
+        _tasksRepositoryMock
+            .Setup(r => r.UpdateStatusAsync(taskId, newStatus, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(null as AppTask);
+
+        _output.WriteLine($"TaskId: {taskId}");
+        _output.WriteLine("UpdateStatus returns null — expecting failure");
+
+        // Act
+        var actual = await _tasksService.UpdateStatusAsync(currentUserId, taskId, newStatus);
+        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
+        _output.WriteLine($"ErrorMessage : {actual.ErrorMessage}");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeFalse();
+        actual.ErrorMessage.Should().Be("Failed to update task status or task want found");
+
+        _tasksRepositoryMock.Verify(r =>
+            r.UpdateStatusAsync(taskId, newStatus, It.IsAny<CancellationToken>()), Times.Once);
+        _tasksRepositoryMock.Verify(r =>
+            r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_WrongUser_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        var currentUserId = Guid.NewGuid();
+        var task = CreateTask(userId: Guid.NewGuid()); // different user
+        var newStatus = TaskStatusEnum.Pending;
+
+        _tasksRepositoryMock
+            .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(task);
+
+        _output.WriteLine($"TaskId       : {task.Id}");
+        _output.WriteLine($"Task UserId  : {task.UserId}");
+        _output.WriteLine($"CurrentUserId: {currentUserId}");
+        _output.WriteLine("User mismatch — expecting Unauthorized");
+
+        // Act
+        var actual = await _tasksService.UpdateStatusAsync(currentUserId, task.Id, newStatus);
+        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
+        _output.WriteLine($"StatusCode   : {actual.StatusCode}");
+        _output.WriteLine($"ErrorMessage : {actual.ErrorMessage}");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeFalse();
+        actual.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        actual.ErrorMessage.Should().Be("Unauthorized");
+
+        _tasksRepositoryMock.Verify(r =>
+            r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()), Times.Once);
+        _tasksRepositoryMock.Verify(r =>
+            r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_SaveChangesFails_ShouldReturnFailure()
+    {
+        // Arrange
+        var currentUserId = Guid.NewGuid();
+        var task = CreateTask(userId: currentUserId);
+        var newStatus = TaskStatusEnum.Pending;
+
+        _tasksRepositoryMock
+            .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(task);
+        _tasksRepositoryMock
+            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _output.WriteLine($"TaskId: {task.Id}");
+        _output.WriteLine("SaveChanges returns false — expecting failure");
+
+        // Act
+        var actual = await _tasksService.UpdateStatusAsync(currentUserId, task.Id, newStatus);
+        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
+        _output.WriteLine($"ErrorMessage : {actual.ErrorMessage}");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeFalse();
+        actual.ErrorMessage.Should().Be("Failed to save task");
+
+        _tasksRepositoryMock.Verify(r =>
+            r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()), Times.Once);
+        _tasksRepositoryMock.Verify(r =>
+            r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private AppTask CreateTask(Guid? userId = null) =>
+        _fixture.Build<AppTask>()
+            .With(t => t.UserId, userId ?? Guid.NewGuid())
+            .Create();
+
+    #endregion
 }

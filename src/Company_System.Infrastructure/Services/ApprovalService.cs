@@ -2,14 +2,18 @@ using System.Collections.Immutable;
 using System.Net;
 using HR_System.Core.common;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Approval;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
+using Microsoft.AspNetCore.Identity;
 
 namespace HR_System.Infrastructure.Services;
 
-public class ApprovalService(IApprovalRepository approvalRepository) : IApprovalService
+public class ApprovalService(IApprovalRepository approvalRepository,
+    UserManager<ApplicationUser> userManager,
+    ITasksRepository tasksRepository) : IApprovalService
 {
     public async Task<Result<IReadOnlyList<ApprovalDTO>>> GetManagerToApproveAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -20,12 +24,18 @@ public class ApprovalService(IApprovalRepository approvalRepository) : IApproval
 
     public async Task<Result<ApprovalDTO>> AddAsync(ApprovalAddDTO toAddApproval, Guid userId, CancellationToken cancellationToken = default)
     {
+        var generateDescriptionResult =
+            await GenerateApprovalDescription(toAddApproval.TaskId, userId, toAddApproval.Type, cancellationToken);
+        if (!generateDescriptionResult.IsSuccess) return generateDescriptionResult.MapFailure<ApprovalDTO>();
+        
+        
         var toAdd = new Approval()
         {
             ManagerId = Guid.NewGuid(), // TODO implement this later
             Type = toAddApproval.Type,
             TaskId = toAddApproval.TaskId,
             UserRequestingId = userId,
+            Description = generateDescriptionResult.Value!,
         };
         
         // add to DB
@@ -51,5 +61,36 @@ public class ApprovalService(IApprovalRepository approvalRepository) : IApproval
             return Result<ApprovalDTO>.Failure("Failed saving Data to DB");
         
         return Result<ApprovalDTO>.Success(updated.ToDTO(), HttpStatusCode.NoContent);
+    }
+    
+    
+    
+    
+    private async Task<Result<string>> GenerateApprovalDescription(Guid? taskId, Guid currUserId, ApprovalTypeEnum approvalType, CancellationToken cancellationToken = default)
+    {
+        if (approvalType == ApprovalTypeEnum.Holiday)
+        {
+            var currentRequestUser = await userManager.FindByIdAsync(currUserId.ToString());
+            if(currentRequestUser is null)
+                return Result<string>.Failure("user not found", HttpStatusCode.Unauthorized);
+            
+            string result = $"{currentRequestUser.UserName} is requesting holiday";
+            return Result<string>.Success(result);
+        }
+
+        if (approvalType == ApprovalTypeEnum.Task)
+        {
+            if(taskId is null)
+                return Result<string>.Failure("taskId is required", HttpStatusCode.BadRequest);
+            
+            var task = await tasksRepository.GetTaskAsync(taskId.Value, cancellationToken);
+            if(task is null)
+                return  Result<string>.Failure("task not found", HttpStatusCode.NotFound);
+
+            string result = task.Description;
+            return Result<string>.Success(result);
+        }
+        
+        return Result<string>.Failure("not handled ApprovalType", HttpStatusCode.NotFound);
     }
 }

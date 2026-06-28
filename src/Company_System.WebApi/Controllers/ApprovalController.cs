@@ -21,7 +21,7 @@ public class ApprovalController(IApprovalService approvalService) : ApplicationC
     }
 
     [HttpPut("[action]/{approvalId:guid}")]
-    public async Task<IActionResult> UpdateStatus(Guid approvalId, [FromQuery] ApprovalStatusEnum newStatus, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateStatus([FromRoute]Guid approvalId, [FromQuery] ApprovalStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
         var userIdResult = User.GetUserId();
         if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult();

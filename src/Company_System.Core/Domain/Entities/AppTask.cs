@@ -49,6 +49,9 @@ public class AppTask
     [JsonIgnore]
     public Approval? Approval { get; set; }
     
+    [JsonIgnore]
+    public List<Activity> Activities { get; set; } = [];
+    
     
     
     // functions

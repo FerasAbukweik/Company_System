@@ -34,13 +34,13 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .HasOne(t => t.User)
             .WithMany(u => u.Tasks)
             .HasForeignKey(t => t.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
         
         builder.Entity<AppTask>()
             .HasOne(t => t.Manager)
             .WithMany(u => u.CreatedTasks)
             .HasForeignKey(t => t.ManagerId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
         
         
         
@@ -62,12 +62,34 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .WithMany(u => u.ToApprove)
             .HasForeignKey(a => a.ManagerId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        
+        
+        // Activity relations --------------------------------------------------------------------------------
+        builder.Entity<Activity>()
+            .HasOne(a => a.TriggeredBy)
+            .WithMany(u => u.Activities)
+            .HasForeignKey(a => a.TriggeredById)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.Entity<Activity>()
+            .HasOne(a => a.Task)
+            .WithMany(u => u.Activities)
+            .HasForeignKey(a => a.TriggeredById)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.Entity<Activity>()
+            .HasOne(a => a.Approval)
+            .WithMany(u => u.Activities)
+            .HasForeignKey(a => a.TriggeredById)
+            .OnDelete(DeleteBehavior.SetNull);
 
     }
     
     
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<AppTask> Tasks { get; set; }
-    
     public virtual DbSet<Approval> Approvals { get; set; }
+    
+    public virtual DbSet<Activity> Activities { get; set; }
 }

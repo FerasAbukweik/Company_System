@@ -1,8 +1,9 @@
 using AutoFixture;
 using FluentAssertions;
-using Company_System.Infrastructure;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.Domain.Identity;
 using HR_System.Core.Enums;
+using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Infrastructure;
 using HR_System.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -10,171 +11,171 @@ using Xunit.Abstractions;
 
 namespace TestProject1.RepositoriesTests;
 
-public class ApprovalsRepositoryTests : IDisposable
+public class ApprovalRepositoryTests : IDisposable
 {
+    private readonly IApprovalRepository _approvalRepository;
     private readonly ApplicationDbContext _dbContext;
-    private readonly TasksesRepository _repository;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
 
-    private readonly Guid _userId = Guid.NewGuid();
-    private readonly Guid _managerId = Guid.NewGuid();
-
-    public ApprovalsRepositoryTests(ITestOutputHelper output)
+    public ApprovalRepositoryTests(ITestOutputHelper output)
     {
         _output = output;
 
         _fixture = new Fixture();
-        _fixture.Behaviors
-            .OfType<ThrowingRecursionBehavior>()
-            .ToList()
+        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        _dbContext = new ApplicationDbContext(options);
-        _repository = new TasksesRepository(_dbContext);
+        _dbContext = new ApplicationDbContext(dbOptions);
+        _approvalRepository = new ApprovalRepository(_dbContext);
     }
 
     #region Add
 
     [Fact]
-    public async Task Add_ValidTask_ShouldPersistToDatabase()
+    public async Task Add_ValidApproval_ShouldPersistAfterSave()
     {
         // Arrange
-        var task = CreateTask();
-        _output.WriteLine($"Input Task Id   : {task.Id}");
-        _output.WriteLine($"Input Task Title: {task.Title}");
+        var approval = CreateApproval();
+        _output.WriteLine($"Adding Approval: {approval.Id} | {approval.Type}");
 
         // Act
-        _repository.Add(task);
-        await _repository.SaveChangesAsync();
-
-        // Assert — GetUserTasksAsync is the only read method available
-        var actual = await _repository.GetUserTasksAsync(task.UserId);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-        _output.WriteLine($"Actual Task Id: {actual.FirstOrDefault()?.Id}");
-
-        actual.Should().ContainSingle(t => t.Id == task.Id);
-    }
-
-    [Fact]
-    public async Task Add_MultipleTasks_ShouldPersistAll()
-    {
-        // Arrange
-        var tasks = CreateMany(3);
-        _output.WriteLine($"Expected Count: {tasks.Count}");
-        tasks.ForEach(t => _output.WriteLine($"  Task: {t.Id} | {t.Title}"));
-
-        // Act
-        foreach (var task in tasks)
-            _repository.Add(task);
-        await _repository.SaveChangesAsync();
+        _approvalRepository.Add(approval);
+        await _approvalRepository.SaveChangesAsync();
 
         // Assert
-        var actual = await _repository.GetUserTasksAsync(_userId);
+        var actual = await _approvalRepository.GetManagerToApprove(approval.ManagerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
+        _output.WriteLine($"Actual Id   : {actual.FirstOrDefault()?.Id}");
 
-        actual.Should().HaveCount(tasks.Count);
+        actual.Should().ContainSingle(a => a.Id == approval.Id);
     }
 
     [Fact]
     public async Task Add_WithoutSaving_ShouldNotPersist()
     {
         // Arrange
-        var task = CreateTask();
-        _output.WriteLine($"Task Id: {task.Id} — added but not saved");
+        var approval = CreateApproval();
+        _output.WriteLine($"Adding Approval without saving: {approval.Id}");
 
-        // Act — intentionally skip SaveChangesAsync
-        _repository.Add(task);
+        // Act — skip SaveChangesAsync intentionally
+        _approvalRepository.Add(approval);
 
         // Assert
-        var actual = await _repository.GetUserTasksAsync(_userId);
+        var actual = await _approvalRepository.GetManagerToApprove(approval.ManagerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
 
         actual.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Add_MultipleApprovals_ShouldPersistAll()
+    {
+        // Arrange
+        var managerId = Guid.NewGuid();
+        var approvals = CreateMany(3, managerId: managerId);
+        _output.WriteLine($"Expected Count: {approvals.Count}");
+        approvals.ForEach(a => _output.WriteLine($"  Approval: {a.Id} | {a.Type}"));
+
+        // Act
+        foreach (var approval in approvals)
+            _approvalRepository.Add(approval);
+        await _approvalRepository.SaveChangesAsync();
+
+        // Assert
+        var actual = await _approvalRepository.GetManagerToApprove(managerId);
+        _output.WriteLine($"Actual Count: {actual.Count}");
+
+        actual.Should().HaveCount(approvals.Count);
     }
 
     #endregion
 
-    #region GetUserTasksAsync
+    #region GetManagerToApprove
 
     [Fact]
-    public async Task GetUserTasksAsync_UserWithTasks_ShouldReturnOnlyUserTasks()
+    public async Task GetManagerToApprove_ManagerWithApprovals_ShouldReturnOnlyManagerApprovals()
     {
         // Arrange
-        var otherUserId = Guid.NewGuid();
-        var userTasks = CreateMany(2, userId: _userId);
-        var otherTask = CreateTask(userId: otherUserId);
-        await SeedTasksAsync([.. userTasks, otherTask]);
+        var managerId = Guid.NewGuid();
+        var managerApprovals = CreateMany(3, managerId: managerId);
+        var otherApprovals = CreateMany(3); // belong to random managerIds
+        await SeedAsync([.. managerApprovals, .. otherApprovals]);
 
-        _output.WriteLine($"Target UserId : {_userId}");
-        _output.WriteLine($"Expected Count: {userTasks.Count}");
-        userTasks.ForEach(t => _output.WriteLine($"  User Task : {t.Id} | {t.Title}"));
-        _output.WriteLine($"  Other Task: {otherTask.Id} | UserId: {otherTask.UserId}");
+        _output.WriteLine($"ManagerId     : {managerId}");
+        _output.WriteLine($"Expected Count: {managerApprovals.Count}");
+        managerApprovals.ForEach(a => _output.WriteLine($"  Expected: {a.Id} | ManagerId: {a.ManagerId}"));
 
         // Act
-        var actual = await _repository.GetUserTasksAsync(_userId);
+        var actual = await _approvalRepository.GetManagerToApprove(managerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(t => _output.WriteLine($"  Returned: {t.Id} | UserId: {t.UserId}"));
+        actual.ToList().ForEach(a => _output.WriteLine($"  Actual: {a.Id} | ManagerId: {a.ManagerId}"));
 
         // Assert
-        actual.Should().HaveCount(2);
-        actual.Should().OnlyContain(t => t.UserId == _userId);
+        actual.Should().NotBeNull();
+        actual.Should().HaveCount(managerApprovals.Count);
+        actual.Should().OnlyContain(a => a.ManagerId == managerId);
     }
 
     [Fact]
-    public async Task GetUserTasksAsync_UserWithNoTasks_ShouldReturnEmpty()
+    public async Task GetManagerToApprove_ManagerWithNoApprovals_ShouldReturnEmpty()
     {
         // Arrange
-        _output.WriteLine($"Target UserId : {_userId}");
-        _output.WriteLine($"Expected Count: 0");
+        var managerId = Guid.NewGuid();
+        var otherApprovals = CreateMany(3);
+        await SeedAsync([.. otherApprovals]);
+
+        _output.WriteLine($"ManagerId     : {managerId}");
+        _output.WriteLine("Expected Count: 0");
 
         // Act
-        var actual = await _repository.GetUserTasksAsync(_userId);
+        var actual = await _approvalRepository.GetManagerToApprove(managerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
 
         // Assert
+        actual.Should().NotBeNull();
         actual.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetUserTasksAsync_ShouldReturnReadOnlyList()
+    public async Task GetManagerToApprove_ShouldReturnReadOnlyList()
     {
         // Arrange
-        var task = CreateTask(userId: _userId);
-        await SeedTasksAsync(task);
-        _output.WriteLine($"Seeded Task: {task.Id} | {task.Title}");
+        var managerId = Guid.NewGuid();
+        var approval = CreateApproval(managerId: managerId);
+        await SeedAsync(approval);
 
         // Act
-        var actual = await _repository.GetUserTasksAsync(_userId);
+        var actual = await _approvalRepository.GetManagerToApprove(managerId);
         _output.WriteLine($"Actual Type: {actual.GetType().Name}");
 
         // Assert
-        actual.Should().BeAssignableTo<IReadOnlyList<AppTask>>();
+        actual.Should().BeAssignableTo<IReadOnlyList<Approval>>();
     }
 
     #endregion
 
-    #region UpdateStatusAsync
+    #region UpdateStatus
 
     [Fact]
-    public async Task UpdateStatusAsync_ValidTask_ShouldReturnTaskWithUpdatedStatus()
+    public async Task UpdateStatus_ValidApproval_ShouldReturnApprovalWithNewStatus()
     {
         // Arrange
-        var task = CreateTask(status: TaskStatusEnum.Pending);
-        var newStatus = TaskStatusEnum.Pending;
-        await SeedTasksAsync(task);
+        var approval = CreateApproval(status: ApprovalStatusEnum.Pending);
+        await SeedAsync(approval);
+        var newStatus = ApprovalStatusEnum.Approved;
 
-        _output.WriteLine($"Task Id        : {task.Id}");
-        _output.WriteLine($"Initial Status : {task.Status}");
+        _output.WriteLine($"Approval Id    : {approval.Id}");
+        _output.WriteLine($"Initial Status : {approval.Status}");
         _output.WriteLine($"Expected Status: {newStatus}");
 
         // Act
-        var actual = await _repository.UpdateStatusAsync(task.Id, newStatus);
+        var actual = await _approvalRepository.UpdateStatus(approval.Id, newStatus);
         _output.WriteLine($"Actual Status: {actual?.Status}");
 
         // Assert
@@ -183,38 +184,38 @@ public class ApprovalsRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateStatusAsync_ValidTask_ShouldPersistAfterSave()
+    public async Task UpdateStatus_ValidApproval_ShouldPersistAfterSave()
     {
         // Arrange
-        var task = CreateTask(status: TaskStatusEnum.Pending);
-        var newStatus = TaskStatusEnum.Pending;
-        await SeedTasksAsync(task);
+        var managerId = Guid.NewGuid();
+        var approval = CreateApproval(managerId: managerId, status: ApprovalStatusEnum.Pending);
+        await SeedAsync(approval);
+        var newStatus = ApprovalStatusEnum.Approved;
 
-        _output.WriteLine($"Task Id        : {task.Id}");
+        _output.WriteLine($"Approval Id    : {approval.Id}");
         _output.WriteLine($"Expected Status: {newStatus}");
 
         // Act
-        await _repository.UpdateStatusAsync(task.Id, newStatus);
-        await _repository.SaveChangesAsync();
+        await _approvalRepository.UpdateStatus(approval.Id, newStatus);
+        await _approvalRepository.SaveChangesAsync();
 
-        // Assert — re-fetch via GetUserTasksAsync to confirm persistence
-        var persisted = await _repository.GetUserTasksAsync(_userId);
-        var actual = persisted.SingleOrDefault(t => t.Id == task.Id);
-        _output.WriteLine($"Actual Status (after save): {actual?.Status}");
+        // Assert — re-fetch via GetManagerToApprove
+        var approvals = await _approvalRepository.GetManagerToApprove(managerId);
+        var actual = approvals.Single(a => a.Id == approval.Id);
+        _output.WriteLine($"Actual Status (persisted): {actual.Status}");
 
-        actual.Should().NotBeNull();
-        actual!.Status.Should().Be(newStatus);
+        actual.Status.Should().Be(newStatus);
     }
 
     [Fact]
-    public async Task UpdateStatusAsync_NonExistentTask_ShouldReturnNull()
+    public async Task UpdateStatus_NonExistentApproval_ShouldReturnNull()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        _output.WriteLine($"Non-existent Task Id: {nonExistentId}");
+        _output.WriteLine($"Non-existent Approval Id: {nonExistentId}");
 
         // Act
-        var actual = await _repository.UpdateStatusAsync(nonExistentId, TaskStatusEnum.Pending);
+        var actual = await _approvalRepository.UpdateStatus(nonExistentId, ApprovalStatusEnum.Approved);
         _output.WriteLine($"Actual: {actual?.ToString() ?? "null"}");
 
         // Assert
@@ -222,28 +223,29 @@ public class ApprovalsRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateStatusAsync_ShouldNotAffectOtherTasks()
+    public async Task UpdateStatus_ShouldNotAffectOtherApprovals()
     {
         // Arrange
-        var task1 = CreateTask(status: TaskStatusEnum.Pending);
-        var task2 = CreateTask(status: TaskStatusEnum.Pending);
-        await SeedTasksAsync(task1, task2);
+        var managerId = Guid.NewGuid();
+        var approval1 = CreateApproval(managerId: managerId, status: ApprovalStatusEnum.Pending);
+        var approval2 = CreateApproval(managerId: managerId, status: ApprovalStatusEnum.Pending);
+        await SeedAsync(approval1, approval2);
 
-        _output.WriteLine($"Updating Task1: {task1.Id} to Completed");
-        _output.WriteLine($"Task2: {task2.Id} should stay Pending");
+        _output.WriteLine($"Updating Approval1: {approval1.Id} → Approved");
+        _output.WriteLine($"Approval2 should stay Pending: {approval2.Id}");
 
         // Act
-        await _repository.UpdateStatusAsync(task1.Id, TaskStatusEnum.Completed);
-        await _repository.SaveChangesAsync();
+        await _approvalRepository.UpdateStatus(approval1.Id, ApprovalStatusEnum.Approved);
+        await _approvalRepository.SaveChangesAsync();
 
-        // Assert — verify task2 via GetUserTasksAsync
-        var tasks = await _repository.GetUserTasksAsync(_userId);
-        var actual = tasks.Single(t => t.Id == task2.Id);
+        // Assert
+        var approvals = await _approvalRepository.GetManagerToApprove(managerId);
+        var actual = approvals.Single(a => a.Id == approval2.Id);
 
-        _output.WriteLine($"Task2 Expected: {TaskStatusEnum.Pending}");
-        _output.WriteLine($"Task2 Actual  : {actual.Status}");
+        _output.WriteLine($"Approval2 Expected: {ApprovalStatusEnum.Pending}");
+        _output.WriteLine($"Approval2 Actual  : {actual.Status}");
 
-        actual.Status.Should().Be(TaskStatusEnum.Pending);
+        actual.Status.Should().Be(ApprovalStatusEnum.Pending);
     }
 
     #endregion
@@ -254,12 +256,12 @@ public class ApprovalsRepositoryTests : IDisposable
     public async Task SaveChangesAsync_WithPendingChanges_ShouldReturnTrue()
     {
         // Arrange
-        var task = CreateTask();
-        _repository.Add(task);
-        _output.WriteLine($"Added Task: {task.Id} | {task.Title}");
+        var approval = CreateApproval();
+        _approvalRepository.Add(approval);
+        _output.WriteLine($"Added Approval: {approval.Id}");
 
         // Act
-        var actual = await _repository.SaveChangesAsync();
+        var actual = await _approvalRepository.SaveChangesAsync();
         _output.WriteLine($"Expected: true | Actual: {actual}");
 
         // Assert
@@ -273,7 +275,7 @@ public class ApprovalsRepositoryTests : IDisposable
         _output.WriteLine("No changes made");
 
         // Act
-        var actual = await _repository.SaveChangesAsync();
+        var actual = await _approvalRepository.SaveChangesAsync();
         _output.WriteLine($"Expected: false | Actual: {actual}");
 
         // Assert
@@ -284,33 +286,21 @@ public class ApprovalsRepositoryTests : IDisposable
 
     #region Helpers
 
-    private AppTask CreateTask(
-        Guid? userId = null,
-        TaskStatusEnum? status = null)
-    {
-        return _fixture.Build<AppTask>()
-            .With(t => t.UserId, userId ?? _userId)
-            .With(t => t.ManagerId, _managerId)
-            .With(t => t.Status, status ?? _fixture.Create<TaskStatusEnum>())
-            .Without(t => t.User)
-            .Without(t => t.Manager)
+    private Approval CreateApproval(Guid? managerId = null, ApprovalStatusEnum? status = null) =>
+        _fixture.Build<Approval>()
+            .With(a => a.ManagerId, managerId ?? Guid.NewGuid())
+            .With(a => a.Manager, null as ApplicationUser)
+            .With(a => a.Status, status ?? _fixture.Create<ApprovalStatusEnum>())
             .Create();
-    }
 
-    private List<AppTask> CreateMany(
-        int count,
-        Guid? userId = null,
-        TaskStatusEnum? status = null)
-    {
-        return Enumerable
-            .Range(0, count)
-            .Select(_ => CreateTask(userId, status))
+    private List<Approval> CreateMany(int count, Guid? managerId = null) =>
+        Enumerable.Range(0, count)
+            .Select(_ => CreateApproval(managerId))
             .ToList();
-    }
 
-    private async Task SeedTasksAsync(params AppTask[] tasks)
+    private async Task SeedAsync(params Approval[] approvals)
     {
-        await _dbContext.Tasks.AddRangeAsync(tasks);
+        await _dbContext.Approvals.AddRangeAsync(approvals);
         await _dbContext.SaveChangesAsync();
     }
 

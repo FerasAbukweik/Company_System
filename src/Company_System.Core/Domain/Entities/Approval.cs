@@ -17,6 +17,9 @@ public class Approval
 
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
     
+    [Required]
+    public required string Description { get; set; }
+    
     
     
     // relations
@@ -40,6 +43,9 @@ public class Approval
     
     [JsonIgnore]
     public ApplicationUser? Manager { get; set; }
+    
+    [JsonIgnore]
+    public List<Activity> Activities { get; set; } = [];
     
     
     // functions

@@ -1,5 +1,5 @@
 using HR_System.Core.common;
-using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Task;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
@@ -13,18 +13,18 @@ public class TasksController(ITasksService tasksesService) : ApplicationControll
 {
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<IReadOnlyList<AppTask>>> GetUserTasks(CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyList<TaskDTO>>> GetUserTasks([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)
             return ((Result)userId).ToActionResult();
 
-        var userTasks = await tasksesService.GetUserTasksAsync(userId.Value, cancellationToken);
-        return Ok(userTasks);
+        var userTasks = await tasksesService.LazyGetUserTasksAsync(userId.Value, lazyData, cancellationToken);
+        return userTasks.ToActionResult();
     }
 
-    [HttpPut("[action]")]
-    public async Task<IActionResult> Update(Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
+    [HttpPut("[action]/{taskId:guid}")]
+    public async Task<IActionResult> Update([FromRoute]Guid taskId, [FromQuery] TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)

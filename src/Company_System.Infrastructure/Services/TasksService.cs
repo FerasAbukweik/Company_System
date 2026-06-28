@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Net;
 using HR_System.Core.common;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Task;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
@@ -9,7 +10,7 @@ using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
 
 namespace HR_System.Infrastructure.Services;
 
-public class TasksesService(ITasksRepository tasksRepository) : ITasksService
+public class TasksService(ITasksRepository tasksRepository) : ITasksService
 {
     public async Task<Result<TaskDTO>> AddAsync(TaskAddDTO toTaskAddData, Guid currUserId, CancellationToken cancellationToken = default)
     {
@@ -31,11 +32,14 @@ public class TasksesService(ITasksRepository tasksRepository) : ITasksService
         return Result<TaskDTO>.Success(toAddTask.ToDTO());
     }
 
-    public async Task<IReadOnlyList<TaskDTO>> GetUserTasksAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<TaskDTO>>> LazyGetUserTasksAsync(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
-        var usersTasks = await tasksRepository.GetUserTasksAsync(userId, cancellationToken);
+        if (lazyData.Taken < 0)
+            return Result<IReadOnlyList<TaskDTO>>.Failure("Taken cannot be negative", HttpStatusCode.BadRequest);
+        
+        var usersTasks = await tasksRepository.LazyGetUserTasksAsync(userId,lazyData, cancellationToken);
 
-        return usersTasks.Select(t => t.ToDTO()).ToImmutableList();
+        return Result<IReadOnlyList<TaskDTO>>.Success(usersTasks.Select(t => t.ToDTO()).ToImmutableList());
     }
 
     public async Task<Result<TaskDTO>> UpdateStatusAsync(Guid currentUserId, Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default)

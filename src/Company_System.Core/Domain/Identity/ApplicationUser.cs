@@ -31,6 +31,9 @@ public class ApplicationUser : IdentityUser<Guid>
     [JsonIgnore]
     public List<Approval> ToApprove { get; set; } = [];
     
+    [JsonIgnore]
+    public List<Activity> Activities { get; set; } = [];
+    
     
     
     // override

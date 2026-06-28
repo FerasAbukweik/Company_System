@@ -1,20 +1,24 @@
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class TasksesRepository(ApplicationDbContext dbContext) : ITasksRepository
+public class TasksRepository(ApplicationDbContext dbContext) : ITasksRepository
 {
     public void Add(AppTask task, CancellationToken cancellationToken = default)
     {
         dbContext.Tasks.Add(task);
     }
 
-    public async Task<IReadOnlyList<AppTask>> GetUserTasksAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<AppTask>> LazyGetUserTasksAsync(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Tasks.Where(t => t.UserId == userId).ToListAsync(cancellationToken);
+        return await dbContext.Tasks.Where(t => t.UserId == userId)
+            .Skip(lazyData.Taken)
+            .Take(lazyData.SectionSize)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<AppTask?> UpdateStatusAsync(Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
@@ -25,6 +29,13 @@ public class TasksesRepository(ApplicationDbContext dbContext) : ITasksRepositor
         toEdit.Status = newStatus;
 
         return toEdit;
+    }
+
+    public async Task<AppTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var result = await dbContext.Tasks.FindAsync(taskId, cancellationToken);
+
+        return result;
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)

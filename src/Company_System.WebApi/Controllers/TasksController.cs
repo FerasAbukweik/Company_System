@@ -35,13 +35,13 @@ public class TasksController(ITasksService tasksesService) : ApplicationControll
     }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> Add(AddTaskDTO toAddTask, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Add(TaskAddDTO toTaskAdd, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)
             return ((Result)userId).ToActionResult();
         
-        Result result = await tasksesService.SetAsync(toAddTask,userId.Value, cancellationToken);
+        Result result = await tasksesService.AddAsync(toTaskAdd,userId.Value, cancellationToken);
         return result.ToActionResult();
     }
 }

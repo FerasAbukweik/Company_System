@@ -16,7 +16,7 @@ public class TasksServiceTests
     private readonly ITasksService _tasksService;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
-    private readonly Mock<IAppTasksRepository> _tasksRepository;
+    private readonly Mock<ITasksRepository> _tasksRepository;
 
     public TasksServiceTests(ITestOutputHelper output)
     {
@@ -27,7 +27,7 @@ public class TasksServiceTests
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _tasksRepository = new Mock<IAppTasksRepository>();
+        _tasksRepository = new Mock<ITasksRepository>();
 
         _tasksService = new TasksesService(_tasksRepository.Object);
     }
@@ -72,7 +72,7 @@ public class TasksServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var toAddTask =  _fixture.Create<AddTaskDTO>();
+        var toAddTask =  _fixture.Create<TaskAddDTO>();
         
         _tasksRepository.Setup(t => t.SaveChangesAsync())
             .ReturnsAsync(true);
@@ -81,7 +81,7 @@ public class TasksServiceTests
         
         
         // Act
-        var actual = await _tasksService.SetAsync(toAddTask, userId);
+        var actual = await _tasksService.AddAsync(toAddTask, userId);
         _output.WriteLine($"Actual: {actual.ToString()}");
         
         // Assert
@@ -100,7 +100,7 @@ public class TasksServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var toAddTask =  _fixture.Create<AddTaskDTO>();
+        var toAddTask =  _fixture.Create<TaskAddDTO>();
         
         _tasksRepository.Setup(t => t.SaveChangesAsync())
             .ReturnsAsync(false);
@@ -109,7 +109,7 @@ public class TasksServiceTests
         
         
         // Act
-        var actual = await _tasksService.SetAsync(toAddTask, userId);
+        var actual = await _tasksService.AddAsync(toAddTask, userId);
         _output.WriteLine($"Actual: {actual.ToString()}");
         
         // Assert

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace HR_System.Core.Domain.Idnetity;
+namespace HR_System.Core.Domain.Identity;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
@@ -24,7 +24,13 @@ public class ApplicationUser : IdentityUser<Guid>
     
     [JsonIgnore]
     public List<AppTask> CreatedTasks { get; set; } = [];
+    
+    [JsonIgnore]
+    public List<Approval> Approvals { get; set; } = [];
 
+    [JsonIgnore]
+    public List<Approval> ToApprove { get; set; } = [];
+    
     
     
     // override

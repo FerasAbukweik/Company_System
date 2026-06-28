@@ -1,10 +1,8 @@
 ﻿using HR_System.Core.Domain.Entities;
 using HR_System.Core.Domain.Identity;
-using HR_System.Core.Domain.Idnetity;
-using HR_System.Core.ENUM;
+using HR_System.Core.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Task = System.Threading.Tasks.Task;
 
 namespace HR_System.Infrastructure;
 
@@ -23,6 +21,7 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             }
         );
         
+        // refresh token relations -----------------------------------------------------
         builder.Entity<RefreshToken>()
             .HasOne(r => r.User)
             .WithMany(u => u.RefreshTokens)
@@ -30,6 +29,7 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .OnDelete(DeleteBehavior.Cascade);
 
 
+        // Tasks relations ---------------------------------------------------------------------
         builder.Entity<AppTask>()
             .HasOne(t => t.User)
             .WithMany(u => u.Tasks)
@@ -41,9 +41,33 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .WithMany(u => u.CreatedTasks)
             .HasForeignKey(t => t.ManagerId)
             .OnDelete(DeleteBehavior.NoAction);
+        
+        
+        
+        // Approvals relations ------------------------------------------------------------------
+        builder.Entity<Approval>()
+            .HasOne(a => a.Task)
+            .WithOne(t => t.Approval)
+            .HasForeignKey<Approval>(a => a.TaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Approval>()
+            .HasOne(a => a.UserRequesting)
+            .WithMany(u => u.Approvals)
+            .HasForeignKey(a => a.UserRequestingId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Entity<Approval>()
+            .HasOne(a => a.Manager)
+            .WithMany(u => u.ToApprove)
+            .HasForeignKey(a => a.ManagerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
     
     
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<AppTask> Tasks { get; set; }
+    
+    public virtual DbSet<Approval> Approvals { get; set; }
 }

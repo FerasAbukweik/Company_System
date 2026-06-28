@@ -11,3 +11,16 @@
 /home/firas/RiderProjects/HR_System/src/Company_System.Core/obj/Debug/net10.0/refint/Company_System.Core.dll
 /home/firas/RiderProjects/HR_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.pdb
 /home/firas/RiderProjects/HR_System/src/Company_System.Core/obj/Debug/net10.0/ref/Company_System.Core.dll
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.deps.json
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.dll
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/bin/Debug/net10.0/Company_System.Core.pdb
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.csproj.AssemblyReference.cache
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.AssemblyInfoInputs.cache
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.AssemblyInfo.cs
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.csproj.CoreCompileInputs.cache
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.sourcelink.json
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.dll
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/refint/Company_System.Core.dll
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/Company_System.Core.pdb
+/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/Debug/net10.0/ref/Company_System.Core.dll

@@ -1,8 +1,6 @@
 using System.Linq.Expressions;
-using System.Text;
-using HR_System.Core.Domain.Idnetity;
+using HR_System.Core.Domain.Identity;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 

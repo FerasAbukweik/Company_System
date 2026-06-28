@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class AppTasksesRepository(ApplicationDbContext dbContext) : IAppTasksRepository
+public class TasksesRepository(ApplicationDbContext dbContext) : ITasksRepository
 {
-    public void Set(AppTask task, CancellationToken cancellationToken = default)
+    public void Add(AppTask task, CancellationToken cancellationToken = default)
     {
         dbContext.Tasks.Add(task);
     }

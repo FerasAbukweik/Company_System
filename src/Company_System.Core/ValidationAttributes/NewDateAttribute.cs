@@ -1,6 +1,8 @@
 
 using System.ComponentModel.DataAnnotations;
 
+namespace HR_System.Core.ValidationAttributes;
+
 public class NewDateAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)

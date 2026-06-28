@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using HR_System.Core.Domain.Idnetity;
+using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Task;
-using HR_System.Core.ENUM;
 using HR_System.Core.Enums;
 
 namespace HR_System.Core.Domain.Entities;
@@ -33,17 +32,22 @@ public class AppTask
     
     
     // relations
+    
     [Required]
     public required Guid UserId { get; set; }
     
     [JsonIgnore]
     public ApplicationUser? User { get; set; }
     
+    
     [Required]
     public required Guid ManagerId { get; set; }
     
     [JsonIgnore]
     public ApplicationUser? Manager { get; set; }
+    
+    [JsonIgnore]
+    public Approval? Approval { get; set; }
     
     
     

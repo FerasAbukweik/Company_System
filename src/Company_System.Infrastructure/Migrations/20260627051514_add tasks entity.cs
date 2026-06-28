@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace HR_System.Infrastructure.Migrations
+namespace Company_System.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class addtasksentity : Migration

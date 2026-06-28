@@ -3817,11 +3817,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/firas/RiderProjects/HR_System/src/Company_System.WebApi/Company_System.WebApi.csproj",
+      "projectUniqueName": "/home/firas/RiderProjects/Company_System/src/Company_System.WebApi/Company_System.WebApi.csproj",
       "projectName": "Company_System.WebApi",
-      "projectPath": "/home/firas/RiderProjects/HR_System/src/Company_System.WebApi/Company_System.WebApi.csproj",
+      "projectPath": "/home/firas/RiderProjects/Company_System/src/Company_System.WebApi/Company_System.WebApi.csproj",
       "packagesPath": "/home/firas/.nuget/packages/",
-      "outputPath": "/home/firas/RiderProjects/HR_System/src/Company_System.WebApi/obj/",
+      "outputPath": "/home/firas/RiderProjects/Company_System/src/Company_System.WebApi/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/firas/.nuget/NuGet/NuGet.Config"
@@ -3837,8 +3837,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj": {
-              "projectPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj"
+            "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj": {
+              "projectPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj"
             }
           }
         }

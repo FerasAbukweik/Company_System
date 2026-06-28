@@ -1,7 +1,6 @@
 using System.Net;
 using HR_System.Core.common;
-using HR_System.Core.Domain.Idnetity;
-using HR_System.Core.DTO;
+using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Auth;
 using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.RepositoryContracts;
@@ -20,10 +19,10 @@ public class AccountService(UserManager<ApplicationUser> userManager,
     ITokenService tokenService) : IAccountService
 {
     
-    public async Task<Result<ApplicationUser>> CreateAccountAsync(CreateAccountDTO toCreate, CancellationToken cancellationToken = default)
+    public async Task<Result<ApplicationUser>> CreateAccountAsync(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
     {
         // check if user already exists
-        var doesUsesExist = await DoesUserExist(toCreate, cancellationToken);
+        var doesUsesExist = await DoesUserExist(toAccountCreate, cancellationToken);
         if (doesUsesExist.IsSuccess)
             return Result<ApplicationUser>.Failure(doesUsesExist.Value!, HttpStatusCode.Conflict); // return fields used in other users
 
@@ -33,17 +32,17 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         // Add user to DB
         var toAddUser = new ApplicationUser()
         {
-            UserName = toCreate.UserName,
-            Email = toCreate.Email,
-            PhoneNumber = toCreate.PhoneNumber,
-            FullName = toCreate.FullName,
+            UserName = toAccountCreate.UserName,
+            Email = toAccountCreate.Email,
+            PhoneNumber = toAccountCreate.PhoneNumber,
+            FullName = toAccountCreate.FullName,
         };
-        var createUserResult = await userManager.CreateAsync(toAddUser, toCreate.Password);
+        var createUserResult = await userManager.CreateAsync(toAddUser, toAccountCreate.Password);
         if (!createUserResult.Succeeded)
             return Result<ApplicationUser>.Failure(string.Join(" | ", createUserResult.Errors.Select(e => e.Description)));
         
         // add user to his role
-        var addUserToRoleResult = await userManager.AddToRoleAsync(toAddUser, toCreate.Role.ToString());
+        var addUserToRoleResult = await userManager.AddToRoleAsync(toAddUser, toAccountCreate.Role.ToString());
         if (!addUserToRoleResult.Succeeded)
             return Result<ApplicationUser>.Failure(string.Join(" | ", addUserToRoleResult.Errors.Select(e => e.Description)));
         
@@ -62,13 +61,13 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         
         return Result<ApplicationUser>.Success(toAddUser);
     }
-    private async Task<Result<string>> DoesUserExist(CreateAccountDTO toCreate, CancellationToken cancellationToken = default)
+    private async Task<Result<string>> DoesUserExist(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
     {
         // check if user already Exists
         var existingUsers = await usersRepository.FilterAsync((u =>
-                (u!.UserName!.ToLower() == toCreate.UserName.ToLower() || 
-                 u!.Email!.ToLower() == toCreate.Email.ToLower() || 
-                 u.PhoneNumber == toCreate.PhoneNumber)
+                (u!.UserName!.ToLower() == toAccountCreate.UserName.ToLower() || 
+                 u!.Email!.ToLower() == toAccountCreate.Email.ToLower() || 
+                 u.PhoneNumber == toAccountCreate.PhoneNumber)
             ),cancellationToken: cancellationToken);
 
         // if user already exist generate error message and return failure
@@ -79,18 +78,18 @@ public class AccountService(UserManager<ApplicationUser> userManager,
             // see what is used
             foreach (var user in existingUsers)
             {
-                if (user.UserName == toCreate.UserName) isUserNameUsed = true;
-                if (user.Email == toCreate.Email) isEmailUsed = true;
-                if (user.PhoneNumber == toCreate.PhoneNumber) isPhoneUsed = true;
+                if (user.UserName == toAccountCreate.UserName) isUserNameUsed = true;
+                if (user.Email == toAccountCreate.Email) isEmailUsed = true;
+                if (user.PhoneNumber == toAccountCreate.PhoneNumber) isPhoneUsed = true;
                 
                 if(isEmailUsed && isPhoneUsed && isUserNameUsed) break;
             }
  
             // collect used fields in list
             var usedFields = new List<string>();
-            if (isEmailUsed) usedFields.Add($"Email '{toCreate.Email}'");
-            if (isPhoneUsed) usedFields.Add($"Phone number '{toCreate.PhoneNumber}'");
-            if (isUserNameUsed) usedFields.Add($"Username '{toCreate.UserName}'");
+            if (isEmailUsed) usedFields.Add($"Email '{toAccountCreate.Email}'");
+            if (isPhoneUsed) usedFields.Add($"Phone number '{toAccountCreate.PhoneNumber}'");
+            if (isUserNameUsed) usedFields.Add($"Username '{toAccountCreate.UserName}'");
 
             // generate error message
             string fieldsText = string.Join(", ", usedFields);

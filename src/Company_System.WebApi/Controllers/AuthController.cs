@@ -1,7 +1,6 @@
 using HR_System.Core.common;
-using HR_System.Core.DTO;
 using HR_System.Core.DTO.Auth;
-using HR_System.Core.ENUM;
+using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
 using HR_System.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
@@ -27,9 +26,9 @@ public class AuthController(IAccountService accountService) : ApplicationControl
 
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public async Task<IActionResult> Signup(CreateAccountDTO toCreate, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Signup(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
     {
-        Result result = await accountService.CreateAccountAsync(toCreate, cancellationToken);
+        Result result = await accountService.CreateAccountAsync(toAccountCreate, cancellationToken);
 
         return result.ToActionResult();
     }

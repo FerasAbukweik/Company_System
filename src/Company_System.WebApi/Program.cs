@@ -1,3 +1,5 @@
+using Company_System;
+using Company_System.Infrastructure;
 using HR_System;
 using HR_System.Core;
 using HR_System.Infrastructure;

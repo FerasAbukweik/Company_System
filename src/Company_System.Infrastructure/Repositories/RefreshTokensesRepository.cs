@@ -1,5 +1,3 @@
-using System.Net;
-using System.Text.Json;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.IRedisService;

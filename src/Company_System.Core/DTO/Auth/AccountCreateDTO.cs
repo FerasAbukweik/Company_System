@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using HR_System.Core.ENUM;
+using HR_System.Core.Enums;
 
 namespace HR_System.Core.DTO.Auth;
 
-public class CreateAccountDTO
+public class AccountCreateDTO
 {
     [Required]
     public required string Email { get; set; }

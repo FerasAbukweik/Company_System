@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "giiaet9jtv8=",
+  "dgSpecHash": "f1dqtk0t7xQ=",
   "success": true,
-  "projectFilePath": "/home/firas/RiderProjects/HR_System/tests/Company_System.Services.UnitTests/Company_System.Services.UnitTests.csproj",
+  "projectFilePath": "/home/firas/RiderProjects/Company_System/tests/Company_System.Services.UnitTests/Company_System.Services.UnitTests.csproj",
   "expectedPackageFiles": [
     "/home/firas/.nuget/packages/autofixture/5.0.0-preview0012/autofixture.5.0.0-preview0012.nupkg.sha512",
     "/home/firas/.nuget/packages/azure.core/1.47.1/azure.core.1.47.1.nupkg.sha512",

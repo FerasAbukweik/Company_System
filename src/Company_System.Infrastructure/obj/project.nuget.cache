@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "B/MMsCsTA+g=",
+  "dgSpecHash": "zrDqanMVsKI=",
   "success": true,
-  "projectFilePath": "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
+  "projectFilePath": "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
   "expectedPackageFiles": [
     "/home/firas/.nuget/packages/azure.core/1.47.1/azure.core.1.47.1.nupkg.sha512",
     "/home/firas/.nuget/packages/azure.identity/1.14.2/azure.identity.1.14.2.nupkg.sha512",

@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using HR_System.Core.Domain.Idnetity;
-using HR_System.Core.ENUM;
 using HR_System.Core.Enums;
+using HR_System.Core.ValidationAttributes;
 
 namespace HR_System.Core.DTO.Task;
 
-public class AddTaskDTO
+public class TaskAddDTO
 {
         
     [Required]

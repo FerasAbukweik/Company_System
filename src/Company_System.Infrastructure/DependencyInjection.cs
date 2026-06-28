@@ -1,7 +1,7 @@
 using HR_System.Core.Domain.Identity;
-using HR_System.Core.Domain.Idnetity;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
+using HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
 using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
 using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;
 using HR_System.Infrastructure.BackGroundServices;
@@ -48,6 +48,7 @@ public static class InfrastructureDependencyInjectionExtensionMethod
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IRedisService, RedisService>();
+        services.AddScoped<IApprovalService, ApprovalService>();
         
         return services;
     }

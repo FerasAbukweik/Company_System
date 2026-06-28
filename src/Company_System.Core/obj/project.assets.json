@@ -1293,11 +1293,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj",
+      "projectUniqueName": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj",
       "projectName": "Company_System.Core",
-      "projectPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj",
+      "projectPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj",
       "packagesPath": "/home/firas/.nuget/packages/",
-      "outputPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/obj/",
+      "outputPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/firas/.nuget/NuGet/NuGet.Config"

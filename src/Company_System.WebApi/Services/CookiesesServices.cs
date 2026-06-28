@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Net;
 using HR_System.Core.common;
 using HR_System.Core.Constraints;
-using HR_System.Core.DTO;
 using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 
@@ -69,7 +68,7 @@ public class CookiesesServices(IHttpContextAccessor httpContextAccessor,
                 ? Result<T>.Success(parsed)
                 : Result<T>.Failure($"Cookie could not be converted to {typeof(T).Name}", HttpStatusCode.BadRequest);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             logger.LogInformation($"Failed to parse {value} to type {typeof(T).Name}", HttpStatusCode.BadRequest);
             return Result<T>.Failure($"Cookie could not be converted to {typeof(T).Name}", HttpStatusCode.BadRequest);

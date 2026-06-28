@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zmFEoJ795xo=",
+  "dgSpecHash": "ZxMya2HgpJA=",
   "success": true,
-  "projectFilePath": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj",
+  "projectFilePath": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj",
   "expectedPackageFiles": [
     "/home/firas/.nuget/packages/microsoft.aspnetcore.cryptography.internal/8.0.1/microsoft.aspnetcore.cryptography.internal.8.0.1.nupkg.sha512",
     "/home/firas/.nuget/packages/microsoft.aspnetcore.cryptography.keyderivation/8.0.1/microsoft.aspnetcore.cryptography.keyderivation.8.0.1.nupkg.sha512",

@@ -2,7 +2,7 @@ using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.common;
 using HR_System.Core.Domain.Entities;
-using HR_System.Core.Domain.Idnetity;
+using HR_System.Core.Domain.Identity;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj": {}
+    "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj": {}
   },
   "projects": {
-    "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj": {
+    "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj",
+        "projectUniqueName": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj",
         "projectName": "Company_System.Core",
-        "projectPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj",
+        "projectPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj",
         "packagesPath": "/home/firas/.nuget/packages/",
-        "outputPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/obj/",
+        "outputPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/firas/.nuget/NuGet/NuGet.Config"
@@ -368,14 +368,14 @@
         }
       }
     },
-    "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj": {
+    "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
+        "projectUniqueName": "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
         "projectName": "Company_System.Infrastructure",
-        "projectPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
+        "projectPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
         "packagesPath": "/home/firas/.nuget/packages/",
-        "outputPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Infrastructure/obj/",
+        "outputPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/firas/.nuget/NuGet/NuGet.Config"
@@ -391,8 +391,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj": {
-                "projectPath": "/home/firas/RiderProjects/HR_System/src/Company_System.Core/Company_System.Core.csproj"
+              "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj": {
+                "projectPath": "/home/firas/RiderProjects/Company_System/src/Company_System.Core/Company_System.Core.csproj"
               }
             }
           }

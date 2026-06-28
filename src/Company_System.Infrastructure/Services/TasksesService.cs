@@ -9,21 +9,21 @@ using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
 
 namespace HR_System.Infrastructure.Services;
 
-public class TasksesService(IAppTasksRepository tasksRepository) : ITasksService
+public class TasksesService(ITasksRepository tasksRepository) : ITasksService
 {
-    public async Task<Result<TaskDTO>> SetAsync(AddTaskDTO toAddData, Guid currUserId, CancellationToken cancellationToken = default)
+    public async Task<Result<TaskDTO>> AddAsync(TaskAddDTO toTaskAddData, Guid currUserId, CancellationToken cancellationToken = default)
     {
         var toAddTask = new AppTask()
         {
             ManagerId = currUserId,
-            UserId = toAddData.UserId,
-            Title = toAddData.Title,
-            Description = toAddData.Description,
-            Priority = toAddData.Priority,
+            UserId = toTaskAddData.UserId,
+            Title = toTaskAddData.Title,
+            Description = toTaskAddData.Description,
+            Priority = toTaskAddData.Priority,
             Created = DateTime.UtcNow,
-            Deadline = toAddData.Deadline,
+            Deadline = toTaskAddData.Deadline,
         };
-        tasksRepository.Set(toAddTask);
+        tasksRepository.Add(toAddTask);
         
         if(!await tasksRepository.SaveChangesAsync(cancellationToken))
             return Result<TaskDTO>.Failure("Failed to save task");
@@ -50,6 +50,6 @@ public class TasksesService(IAppTasksRepository tasksRepository) : ITasksService
         if(!await tasksRepository.SaveChangesAsync(cancellationToken))
             return Result<TaskDTO>.Failure("Failed to save task");
         
-        return Result<TaskDTO>.Success(updated.ToDTO());
+        return Result<TaskDTO>.Success(updated.ToDTO(), HttpStatusCode.NoContent);
     }
 }

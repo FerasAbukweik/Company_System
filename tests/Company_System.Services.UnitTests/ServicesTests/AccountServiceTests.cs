@@ -3,7 +3,6 @@ using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.common;
 using HR_System.Core.Domain.Identity;
-using HR_System.Core.Domain.Idnetity;
 using HR_System.Core.DTO.Auth;
 using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.RepositoryContracts;
@@ -63,7 +62,7 @@ public class AccountServiceTests
     public async Task CreateAccountAsync_ValidData_ShouldSuccess()
     {
         // Arrange
-        var toCreate = _fixture.Create<CreateAccountDTO>();
+        var toCreate = _fixture.Create<AccountCreateDTO>();
 
         _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
             .ReturnsAsync([]);
@@ -109,7 +108,7 @@ public class AccountServiceTests
     [Fact]
     public async Task CreateAccountAsync_WhenUserAlreadyExists_ShouldReturnFailure()
     {
-        var toCreate = _fixture.Create<CreateAccountDTO>();
+        var toCreate = _fixture.Create<AccountCreateDTO>();
         var existingUser = _fixture.Build<ApplicationUser>()
             .With(u => u.Email, toCreate.Email)
             .Create();
@@ -127,7 +126,7 @@ public class AccountServiceTests
     [Fact]
     public async Task CreateAccountAsync_WhenIdentityCreationFails_ShouldReturnFailure()
     {
-        var toCreate = _fixture.Create<CreateAccountDTO>();
+        var toCreate = _fixture.Create<AccountCreateDTO>();
 
         _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
             .ReturnsAsync([]);
@@ -152,7 +151,7 @@ public class AccountServiceTests
     [Fact]
     public async Task CreateAccountAsync_WhenRoleDoesntExist_ShouldSuccess()
     {
-        var toCreate = _fixture.Create<CreateAccountDTO>();
+        var toCreate = _fixture.Create<AccountCreateDTO>();
 
         _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
             .ReturnsAsync([]);
@@ -190,7 +189,7 @@ public class AccountServiceTests
     [Fact]
     public async Task CreateAccountAsync_WhenAddToRoleFails_ShouldReturnFailure()
     {
-        var toCreate = _fixture.Create<CreateAccountDTO>();
+        var toCreate = _fixture.Create<AccountCreateDTO>();
 
         _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
             .ReturnsAsync([]);

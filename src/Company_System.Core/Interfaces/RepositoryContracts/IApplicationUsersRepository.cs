@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using HR_System.Core.Domain.Idnetity;
+using HR_System.Core.Domain.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HR_System.Core.Interfaces.RepositoryContracts;

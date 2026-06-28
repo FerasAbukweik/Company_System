@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FxuPgLH0NtM=",
+  "dgSpecHash": "Oj6Ilwx/rxw=",
   "success": true,
-  "projectFilePath": "/home/firas/RiderProjects/HR_System/src/Company_System.WebApi/Company_System.WebApi.csproj",
+  "projectFilePath": "/home/firas/RiderProjects/Company_System/src/Company_System.WebApi/Company_System.WebApi.csproj",
   "expectedPackageFiles": [
     "/home/firas/.nuget/packages/azure.core/1.47.1/azure.core.1.47.1.nupkg.sha512",
     "/home/firas/.nuget/packages/azure.identity/1.14.2/azure.identity.1.14.2.nupkg.sha512",

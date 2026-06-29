@@ -1,35 +1,23 @@
-using System.Linq.Expressions;
 using AutoFixture;
 using FluentAssertions;
-using HR_System.Core.common;
-using HR_System.Core.Domain.Identity;
-using HR_System.Core.DTO.Auth;
-using HR_System.Core.DTO.Token;
+using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
+using HR_System.Core.DTO.Message;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
-using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
-using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;
 using HR_System.Infrastructure.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit.Abstractions;
 
-namespace HR_System.Core.UnitTests.ServicesTests;
+namespace HR_System.Tests.Services;
 
-public class AccountServiceTests
+public class MessageServiceTests
 {
-    private readonly IAccountService _accountService;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
-    private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private readonly Mock<IApplicationUsersRepository>  _userRepositoryMock;
-    private readonly Mock<RoleManager<ApplicationRole>>  _roleManagerMock;
-    private readonly Mock<ICookiesesServices> _cookieServiceMock;
-    private readonly Mock<ITokenService> _tokenServiceMock;
+    private readonly Mock<IMessageRepository> _repositoryMock;
+    private readonly MessageService _messageService;
 
-    public AccountServiceTests(ITestOutputHelper output)
+    public MessageServiceTests(ITestOutputHelper output)
     {
         _output = output;
 
@@ -37,184 +25,203 @@ public class AccountServiceTests
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-        
-        var userStore = new Mock<IUserStore<ApplicationUser>>();
-        _userManagerMock = new Mock<UserManager<ApplicationUser>>(userStore.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
-        var roleStore = new Mock<IRoleStore<ApplicationRole>>();
-        _roleManagerMock = new Mock<RoleManager<ApplicationRole>>(roleStore.Object, null!, null!, null!, null!);
-        
-        _userRepositoryMock = new Mock<IApplicationUsersRepository>();
-        _cookieServiceMock = new Mock<ICookiesesServices>();
-        _tokenServiceMock = new Mock<ITokenService>();
-
-        _accountService = new AccountService(_userManagerMock.Object,
-            _userRepositoryMock.Object,
-            _cookieServiceMock.Object,
-            NullLogger<AccountService>.Instance,
-            _tokenServiceMock.Object
-        );
+        _repositoryMock = new Mock<IMessageRepository>();
+        _messageService = new MessageService(_repositoryMock.Object);
     }
 
-    #region CreateAccountTests
+    #region AddAsync
 
     [Fact]
-    public async Task CreateAccountAsync_ValidData_ShouldSuccess()
+    public async Task AddAsync_ValidInput_ShouldReturnSuccessWithCorrectDTO()
     {
         // Arrange
-        var toCreate = _fixture.Create<AccountCreateDTO>();
+        var userId = Guid.NewGuid();
+        var toAdd = _fixture.Create<MessageAddDTO>();
 
-        _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
-            .ReturnsAsync([]);
-
-        var transactionMock = new Mock<IDbContextTransaction>();
-        transactionMock.Setup(t => t.CommitAsync())
-            .Returns(Task.CompletedTask);
-        
-        _userRepositoryMock.Setup(t => t.BeginTransactionAsync())
-            .ReturnsAsync(transactionMock.Object);
-
-        _userManagerMock.Setup(t => t.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
-
-        _roleManagerMock.Setup(t => t.RoleExistsAsync(It.IsAny<string>()))
+        _repositoryMock
+            .Setup(r => r.Add(It.IsAny<Message>()));
+        _repositoryMock
+            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        
-        _userManagerMock.Setup(t => t.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
-        
-        _tokenServiceMock.Setup(t => t.GenerateNewAccessAndRefreshTokenAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(Result<AccessAndRefreshTokenDTO>.Success(_fixture.Create<AccessAndRefreshTokenDTO>()));
 
-        _cookieServiceMock.Setup(t => t.AddTokens(It.IsAny<AccessAndRefreshTokenDTO>()));
-        _output.WriteLine($"Expected:\n{toCreate.ToString()}");
+        _output.WriteLine($"Expected:\nUserId : {userId}\n{toAdd.ToString()}");
 
         // Act
-        var actual = await _accountService.CreateAccountAsync(toCreate);
+        var actual = await _messageService.AddAsync(toAdd, userId);
         _output.WriteLine($"Actual:\n{actual.Value?.ToString() ?? "null"}");
 
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeTrue();
         actual.Value.Should().NotBeNull();
-        actual.Value.Email.Should().Be(toCreate.Email);
-        actual.Value.PhoneNumber.Should().Be(toCreate.PhoneNumber);
-        actual.Value.UserName.Should().Be(toCreate.UserName);
-        actual.Value.FullName.Should().Be(toCreate.FullName);
-        actual.Value.Id.Should().NotBe(Guid.Empty);
-        transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
-    
-    [Fact]
-    public async Task CreateAccountAsync_WhenUserAlreadyExists_ShouldReturnFailure()
-    {
-        var toCreate = _fixture.Create<AccountCreateDTO>();
-        var existingUser = _fixture.Build<ApplicationUser>()
-            .With(u => u.Email, toCreate.Email)
-            .Create();
-        
-        _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
-            .ReturnsAsync([existingUser]);
+        actual.Value!.Content.Should().Be(toAdd.Content);
+        actual.Value!.IsCurrUserSender.Should().BeTrue();
 
-        var actual = await _accountService.CreateAccountAsync(toCreate);
-
-        actual.Should().NotBeNull();
-        actual.IsSuccess.Should().BeFalse();
-        _userManagerMock.Verify(t => t.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        _repositoryMock.Verify(r => r.Add(It.IsAny<Message>()), Times.Once);
+        _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task CreateAccountAsync_WhenIdentityCreationFails_ShouldReturnFailure()
+    public async Task AddAsync_SaveChangesFails_ShouldReturnFailureWithNullValue()
     {
-        var toCreate = _fixture.Create<AccountCreateDTO>();
+        // Arrange
+        var userId = Guid.NewGuid();
+        var toAdd = _fixture.Create<MessageAddDTO>();
 
-        _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
-            .ReturnsAsync([]);
-
-        var transactionMock = new Mock<IDbContextTransaction>();
-        _userRepositoryMock.Setup(t => t.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionMock.Object);
-
-        var identityError = new IdentityError { Code = "PasswordTooShort", Description = "Password is too short" };
-        var failedResult = IdentityResult.Failed(identityError);
-        
-        _userManagerMock.Setup(t => t.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(failedResult);
-
-        var actual = await _accountService.CreateAccountAsync(toCreate);
-
-        actual.Should().NotBeNull();
-        actual.IsSuccess.Should().BeFalse();
-        transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task CreateAccountAsync_WhenRoleDoesntExist_ShouldSuccess()
-    {
-        var toCreate = _fixture.Create<AccountCreateDTO>();
-
-        _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
-            .ReturnsAsync([]);
-
-        var transactionMock = new Mock<IDbContextTransaction>();
-        _userRepositoryMock.Setup(t => t.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionMock.Object);
-
-        _userManagerMock.Setup(t => t.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
-
-        _userManagerMock.Setup(t => t.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
-
-        _roleManagerMock.Setup(t => t.RoleExistsAsync(It.IsAny<string>()))
+        _repositoryMock
+            .Setup(r => r.Add(It.IsAny<Message>()));
+        _repositoryMock
+            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _roleManagerMock.Setup(t => t.CreateAsync(It.IsAny<ApplicationRole>()))
-            .ReturnsAsync(IdentityResult.Success);
+        _output.WriteLine($"Expected:\nUserId : {userId}\n{toAdd.ToString()}");
+        _output.WriteLine("SaveChanges returns false — expecting failure and null Value");
 
-        _cookieServiceMock.Setup(t => t.AddTokens(It.IsAny<AccessAndRefreshTokenDTO>()));
+        // Act
+        var actual = await _messageService.AddAsync(toAdd, userId);
+        _output.WriteLine($"Actual:\nIsSuccess    : {actual.IsSuccess}\nErrorMessage : {actual.ErrorMessage}");
 
-        _tokenServiceMock.Setup(t => t.GenerateNewAccessAndRefreshTokenAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(Result<AccessAndRefreshTokenDTO>.Success(_fixture.Create<AccessAndRefreshTokenDTO>()));
-
-        var actual = await _accountService.CreateAccountAsync(toCreate);
-
-        actual.Should().NotBeNull();
-        actual.IsSuccess.Should().BeTrue();
-        actual.Value.Should().NotBeNull();
-        actual.Value.Should().BeAssignableTo<ApplicationUser>();
-        transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task CreateAccountAsync_WhenAddToRoleFails_ShouldReturnFailure()
-    {
-        var toCreate = _fixture.Create<AccountCreateDTO>();
-
-        _userRepositoryMock.Setup(t => t.FilterAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>()))
-            .ReturnsAsync([]);
-
-        var transactionMock = new Mock<IDbContextTransaction>();
-        _userRepositoryMock.Setup(t => t.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionMock.Object);
-
-        _userManagerMock.Setup(t => t.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
-
-        _roleManagerMock.Setup(t => t.RoleExistsAsync(It.IsAny<string>()))
-            .ReturnsAsync(true);
-
-        var failedRoleResult = IdentityResult.Failed(new IdentityError { Description = "Failed to assign role" });
-        _userManagerMock.Setup(t => t.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-            .ReturnsAsync(failedRoleResult);
-
-        var actual = await _accountService.CreateAccountAsync(toCreate);
-
+        // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeFalse();
-        transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        actual.ErrorMessage.Should().NotBeNullOrEmpty();
+        actual.Value.Should().BeNull();
+
+        _repositoryMock.Verify(r => r.Add(It.IsAny<Message>()), Times.Once);
+        _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
-    
+
+    #region LazyGetMessages
+
+    [Fact]
+    public async Task LazyGetMessages_RepositoryReturnsMessages_ShouldReturnSuccessResult()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var lazyData = CreateLazyDTO();
+        var messages = CreateMessages(3, senderId: userId);
+
+        _repositoryMock
+            .Setup(r => r.LazyGetMessages(userId, lazyData, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(messages);
+
+        _output.WriteLine($"Expected:\nUserId : {userId}");
+        messages.ForEach(m => _output.WriteLine(m.ToString()));
+
+        // Act
+        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        _output.WriteLine($"Actual:\nIsSuccess : {actual.IsSuccess}\nCount     : {actual.Value?.Count}");
+
+        // Assert
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeTrue();
+        actual.Value.Should().NotBeNull();
+        actual.Value.Should().HaveCount(messages.Count);
+        actual.Value.Should().BeAssignableTo<IReadOnlyList<MessageDTO>>();
+
+        _repositoryMock.Verify(r =>
+            r.LazyGetMessages(userId, lazyData, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task LazyGetMessages_SenderMessages_ShouldMarkIsCurrUserSenderAsTrue()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var lazyData = CreateLazyDTO();
+        var messages = CreateMessages(3, senderId: userId);
+
+        _repositoryMock
+            .Setup(r => r.LazyGetMessages(userId, lazyData, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(messages);
+
+        _output.WriteLine($"Expected:\nUserId : {userId}");
+        messages.ForEach(m => _output.WriteLine(m.ToString()));
+
+        // Act
+        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        _output.WriteLine($"Actual:");
+        actual.Value?.ToList().ForEach(m => _output.WriteLine(m.ToString()));
+
+        // Assert
+        actual.Value.Should().OnlyContain(m => m.IsCurrUserSender);
+    }
+
+    [Fact]
+    public async Task LazyGetMessages_ReceiverMessages_ShouldMarkIsCurrUserSenderAsFalse()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var lazyData = CreateLazyDTO();
+        var messages = CreateMessages(3, receiverId: userId);
+
+        _repositoryMock
+            .Setup(r => r.LazyGetMessages(userId, lazyData, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(messages);
+
+        _output.WriteLine($"Expected:\nUserId : {userId}");
+        messages.ForEach(m => _output.WriteLine(m.ToString()));
+
+        // Act
+        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        _output.WriteLine($"Actual:");
+        actual.Value?.ToList().ForEach(m => _output.WriteLine(m.ToString()));
+
+        // Assert
+        actual.Value.Should().OnlyContain(m => !m.IsCurrUserSender);
+    }
+
+    [Fact]
+    public async Task LazyGetMessages_RepositoryReturnsEmpty_ShouldReturnSuccessWithEmptyList()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var lazyData = CreateLazyDTO();
+
+        _repositoryMock
+            .Setup(r => r.LazyGetMessages(userId, lazyData, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        _output.WriteLine($"Expected:\nUserId : {userId}\nCount  : 0");
+
+        // Act
+        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        _output.WriteLine($"Actual:\nIsSuccess : {actual.IsSuccess}\nCount     : {actual.Value?.Count}");
+
+        // Assert
+        actual.IsSuccess.Should().BeTrue();
+        actual.Value.Should().NotBeNull();
+        actual.Value.Should().BeEmpty();
+
+        _repositoryMock.Verify(r =>
+            r.LazyGetMessages(userId, lazyData, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private LazyDTO CreateLazyDTO() =>
+        _fixture.Build<LazyDTO>()
+            .With(l => l.Taken, 0)
+            .With(l => l.SectionSize, 10)
+            .Create();
+
+    private Message CreateMessage(Guid? senderId = null, Guid? receiverId = null) =>
+        _fixture.Build<Message>()
+            .With(m => m.SenderId, senderId ?? Guid.NewGuid())
+            .With(m => m.ReceiverId, receiverId ?? Guid.NewGuid())
+            .With(m => m.Sender, null as HR_System.Core.Domain.Identity.ApplicationUser)
+            .With(m => m.Receiver, null as HR_System.Core.Domain.Identity.ApplicationUser)
+            .Create();
+
+    private List<Message> CreateMessages(int count, Guid? senderId = null, Guid? receiverId = null) =>
+        Enumerable.Range(0, count)
+            .Select(_ => CreateMessage(senderId, receiverId))
+            .ToList();
+
+    #endregion
 }

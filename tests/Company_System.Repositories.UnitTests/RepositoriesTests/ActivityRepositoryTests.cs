@@ -41,7 +41,7 @@ public class ActivityRepositoryTests : IDisposable
     {
         // Arrange
         var activity = CreateActivity();
-        _output.WriteLine($"Adding Activity: {activity.Id} | {activity.Type}");
+        _output.WriteLine($"Adding Activity:\n{activity.ToString()}");
 
         // Act
         _activityRepository.Add(activity);
@@ -50,7 +50,7 @@ public class ActivityRepositoryTests : IDisposable
         // Assert
         var actual = await _activityRepository.LazyGetAllSortedAsync(new LazyDTO { Taken = 0, SectionSize = 10 });
         _output.WriteLine($"Actual Count: {actual.Count}");
-        _output.WriteLine($"Actual Id   : {actual.FirstOrDefault()?.Id}");
+        _output.WriteLine($"Actual      : {actual.FirstOrDefault()?.ToString()}");
 
         actual.Should().ContainSingle(a => a.Id == activity.Id);
     }
@@ -60,7 +60,7 @@ public class ActivityRepositoryTests : IDisposable
     {
         // Arrange
         var activity = CreateActivity();
-        _output.WriteLine($"Adding Activity without saving: {activity.Id}");
+        _output.WriteLine($"Adding Activity without saving:\n{activity.ToString()}");
 
         // Act — skip SaveChangesAsync intentionally
         _activityRepository.Add(activity);
@@ -78,7 +78,7 @@ public class ActivityRepositoryTests : IDisposable
         // Arrange
         var activities = CreateMany(3);
         _output.WriteLine($"Expected Count: {activities.Count}");
-        activities.ForEach(a => _output.WriteLine($"  Activity: {a.Id} | {a.Type}"));
+        activities.ForEach(a => _output.WriteLine($"  {a.ToString()}"));
 
         // Act
         foreach (var activity in activities)
@@ -99,20 +99,25 @@ public class ActivityRepositoryTests : IDisposable
     [Fact]
     public async Task LazyGetAllSortedAsync_ShouldReturnSortedByCreatedAtDescending()
     {
-        // Arrange — create activities with different CreatedAt values
+        // Arrange
         var oldest = CreateActivity(createdAt: DateTime.UtcNow.AddDays(-2));
         var middle = CreateActivity(createdAt: DateTime.UtcNow.AddDays(-1));
         var newest = CreateActivity(createdAt: DateTime.UtcNow);
         await SeedAsync(oldest, middle, newest);
 
-        _output.WriteLine($"Expected Order: {newest.Id} → {middle.Id} → {oldest.Id}");
+        _output.WriteLine($"Expected Order:");
+        _output.WriteLine($"  1: {newest.ToString()}");
+        _output.WriteLine($"  2: {middle.ToString()}");
+        _output.WriteLine($"  3: {oldest.ToString()}");
 
         // Act
         var actual = await _activityRepository.LazyGetAllSortedAsync(new LazyDTO { Taken = 0, SectionSize = 10 });
 
+        _output.WriteLine($"Actual Order:");
+        actual.ToList().ForEach(a => _output.WriteLine($"  {a.ToString()}"));
+
         // Assert
         actual.Should().HaveCount(3);
-        _output.WriteLine($"Actual Order: {actual[0].Id} → {actual[1].Id} → {actual[2].Id}");
         actual[0].Id.Should().Be(newest.Id);
         actual[1].Id.Should().Be(middle.Id);
         actual[2].Id.Should().Be(oldest.Id);
@@ -121,14 +126,14 @@ public class ActivityRepositoryTests : IDisposable
     [Fact]
     public async Task LazyGetAllSortedAsync_ShouldSkipCorrectly()
     {
-        // Arrange — seed 5 activities
+        // Arrange
         var activities = CreateMany(5, spreadDates: true);
         await SeedAsync([.. activities]);
 
         var lazyData = new LazyDTO { Taken = 2, SectionSize = 10 };
-        _output.WriteLine($"Total Seeded: {activities.Count}");
-        _output.WriteLine($"Taken (skip): {lazyData.Taken}");
-        _output.WriteLine($"Expected Count after skip: {activities.Count - lazyData.Taken}");
+        _output.WriteLine($"Total Seeded : {activities.Count}");
+        _output.WriteLine($"Taken (skip) : {lazyData.Taken}");
+        _output.WriteLine($"Expected Count: {activities.Count - lazyData.Taken}");
 
         // Act
         var actual = await _activityRepository.LazyGetAllSortedAsync(lazyData);
@@ -141,13 +146,13 @@ public class ActivityRepositoryTests : IDisposable
     [Fact]
     public async Task LazyGetAllSortedAsync_ShouldTakeCorrectly()
     {
-        // Arrange — seed 10 activities
+        // Arrange
         var activities = CreateMany(10, spreadDates: true);
         await SeedAsync([.. activities]);
 
         var lazyData = new LazyDTO { Taken = 0, SectionSize = 4 };
-        _output.WriteLine($"Total Seeded: {activities.Count}");
-        _output.WriteLine($"SectionSize  : {lazyData.SectionSize}");
+        _output.WriteLine($"Total Seeded  : {activities.Count}");
+        _output.WriteLine($"SectionSize   : {lazyData.SectionSize}");
         _output.WriteLine($"Expected Count: {lazyData.SectionSize}");
 
         // Act
@@ -161,20 +166,20 @@ public class ActivityRepositoryTests : IDisposable
     [Fact]
     public async Task LazyGetAllSortedAsync_SkipAndTake_ShouldReturnCorrectPage()
     {
-        // Arrange — seed 10 activities with spread dates
+        // Arrange
         var activities = CreateMany(10, spreadDates: true);
         await SeedAsync([.. activities]);
 
         var lazyData = new LazyDTO { Taken = 3, SectionSize = 4 };
-        _output.WriteLine($"Total Seeded : {activities.Count}");
-        _output.WriteLine($"Taken (skip) : {lazyData.Taken}");
-        _output.WriteLine($"SectionSize  : {lazyData.SectionSize}");
+        _output.WriteLine($"Total Seeded  : {activities.Count}");
+        _output.WriteLine($"Taken (skip)  : {lazyData.Taken}");
+        _output.WriteLine($"SectionSize   : {lazyData.SectionSize}");
         _output.WriteLine($"Expected Count: {lazyData.SectionSize}");
 
         // Act
         var actual = await _activityRepository.LazyGetAllSortedAsync(lazyData);
         _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(a => _output.WriteLine($"  Actual: {a.Id} | {a.CreatedAt}"));
+        actual.ToList().ForEach(a => _output.WriteLine($"  {a.ToString()}"));
 
         // Assert
         actual.Should().HaveCount(lazyData.SectionSize);
@@ -183,7 +188,7 @@ public class ActivityRepositoryTests : IDisposable
     [Fact]
     public async Task LazyGetAllSortedAsync_EmptyDatabase_ShouldReturnEmpty()
     {
-        // Arrange — nothing seeded
+        // Arrange
         var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
         _output.WriteLine("No activities in database");
 
@@ -203,9 +208,9 @@ public class ActivityRepositoryTests : IDisposable
         var activities = CreateMany(3);
         await SeedAsync([.. activities]);
 
-        var lazyData = new LazyDTO { Taken = 10, SectionSize = 5 }; // skip more than seeded
-        _output.WriteLine($"Total Seeded: {activities.Count}");
-        _output.WriteLine($"Taken (skip): {lazyData.Taken}");
+        var lazyData = new LazyDTO { Taken = 10, SectionSize = 5 };
+        _output.WriteLine($"Total Seeded  : {activities.Count}");
+        _output.WriteLine($"Taken (skip)  : {lazyData.Taken}");
         _output.WriteLine("Expected Count: 0");
 
         // Act
@@ -241,7 +246,7 @@ public class ActivityRepositoryTests : IDisposable
         // Arrange
         var activity = CreateActivity();
         _activityRepository.Add(activity);
-        _output.WriteLine($"Added Activity: {activity.Id}");
+        _output.WriteLine($"Added Activity:\n{activity.ToString()}");
 
         // Act
         var actual = await _activityRepository.SaveChangesAsync();

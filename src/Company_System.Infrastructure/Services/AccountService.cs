@@ -14,7 +14,7 @@ namespace HR_System.Infrastructure.Services;
 
 public class AccountService(UserManager<ApplicationUser> userManager,
     IApplicationUsersRepository usersRepository,
-    ICookiesesServices cookiesesServices,
+    ICookiesServices cookiesServices,
     ILogger<AccountService> logger,
     ITokenService tokenService) : IAccountService
 {
@@ -52,7 +52,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
             return generateTokensResult.MapFailure<ApplicationUser>();
         
         // add tokens to cookies
-        cookiesesServices.AddTokens(generateTokensResult.Value!);
+        cookiesServices.AddTokens(generateTokensResult.Value!);
 
         // apply changes to DB
         await transaction.CommitAsync(cancellationToken);
@@ -116,7 +116,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         if (!generateTokensResult.IsSuccess)
             return generateTokensResult;
 
-        var addTokensToCookiesResult = cookiesesServices.AddTokens(generateTokensResult.Value!);
+        var addTokensToCookiesResult = cookiesServices.AddTokens(generateTokensResult.Value!);
         if (!addTokensToCookiesResult.IsSuccess) return addTokensToCookiesResult.MapFailure<AccessAndRefreshTokenDTO>();
 
         return Result<AccessAndRefreshTokenDTO>.Success(generateTokensResult.Value!);

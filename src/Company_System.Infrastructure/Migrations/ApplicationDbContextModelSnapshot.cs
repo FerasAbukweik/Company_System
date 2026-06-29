@@ -136,6 +136,34 @@ namespace Company_System.Infrastructure.Migrations
                     b.ToTable("Approvals");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
                 {
                     b.Property<Guid>("Id")
@@ -464,6 +492,23 @@ namespace Company_System.Infrastructure.Migrations
                     b.Navigation("UserRequesting");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Receiver")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
                 {
                     b.HasOne("HR_System.Core.Domain.Entities.OrganizationHierarchy", "Parent")
@@ -572,7 +617,11 @@ namespace Company_System.Infrastructure.Migrations
                     b.Navigation("OrganizationHierarchy")
                         .IsRequired();
 
+                    b.Navigation("ReceivedMessages");
+
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("SentMessages");
 
                     b.Navigation("Tasks");
 

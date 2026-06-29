@@ -9,4 +9,12 @@ public class ActivityAddDTO
     public required ActivityTypeEnum Type { get; set; }
     public Guid? TaskId { get; set; }
     public Guid? ApprovalId { get; set; }
+    
+    
+    // override
+
+    public override string ToString()
+    {
+        return $"Type: {Type.ToString()}\nTaskId: {TaskId}\nApprovalId: {ApprovalId}\n";
+    }
 }

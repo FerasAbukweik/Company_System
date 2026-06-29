@@ -1,6 +1,7 @@
 using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.common;
+using HR_System.Core.Constraints;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.Interfaces.RepositoryContracts;
@@ -9,6 +10,7 @@ using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;
 using HR_System.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit.Abstractions;
 using Task = System.Threading.Tasks.Task;
@@ -22,27 +24,25 @@ public class TokenServiceTests
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly IFixture _fixture;
     private readonly ITestOutputHelper _output;
-    private readonly Mock<ICookiesesServices> _cookieService;
+    private readonly Mock<ICookiesServices> _cookieService;
+    private readonly Mock<IOptions<CookieKeys>> _cookieKeysMock;
 
     public TokenServiceTests(ITestOutputHelper output)
     {
         _output = output;
-        
-        // fixture
+
         _fixture = new Fixture();
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-        
-        // refresh token repository mock
+
         _refreshTokenRepositoryMock = new Mock<IRefreshTokensRepository>();
-        _cookieService = new Mock<ICookiesesServices>();
-        
-        // user manager mock
+        _cookieService = new Mock<ICookiesServices>();
+        _cookieKeysMock = new Mock<IOptions<CookieKeys>>();
+
         var storeMock = new Mock<IUserStore<ApplicationUser>>();
         _userManagerMock = new Mock<UserManager<ApplicationUser>>(storeMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-        
-        // configuration
+
         var inMemoryCollection = new Dictionary<string, string> {
             {"Jwt:Issuer", "dummy data"},
             {"Jwt:Audience", "dummy data"},
@@ -50,35 +50,38 @@ public class TokenServiceTests
             {"AccessTokenLifeTime", "15"},
             {"RefreshTokenLifeTime", "10080"}
         };
-        
-        // getCurrentUserService Mock
+
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(inMemoryCollection!)
             .Build();
 
-            
-        _tokenService = new TokenService(_cookieService.Object,_refreshTokenRepositoryMock.Object, _userManagerMock.Object, configuration);
+        _tokenService = new TokenService(_cookieService.Object, _refreshTokenRepositoryMock.Object, _userManagerMock.Object, configuration, _cookieKeysMock.Object);
     }
 
     #region GenerateAccessTokenTests
+
     [Fact]
     public async Task GenerateAccessTokenTest_ValidInput_ShoudSuccess()
     {
         // Arrange
         var testUser = _fixture.Create<ApplicationUser>();
+
+        _userManagerMock
+            .Setup(t => t.GetRolesAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(["test"]);
+
         _output.WriteLine($"User:\n{testUser.ToString()}");
-        
-        _userManagerMock.Setup(t => t.GetRolesAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(new List<string>(){"test"});
 
         // Act
-        var actualResult = await _tokenService.GenerateAccessTokenAsync(testUser);
-        _output.WriteLine($"Actual Token:\n{actualResult?.Value ?? "null"}");
+        var actual = await _tokenService.GenerateAccessTokenAsync(testUser);
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value ?? "null"}");
 
         // Assert
-        actualResult.Should().NotBeNull();
-        actualResult.IsSuccess.Should().BeTrue();
-        actualResult.Value.Should().NotBeNull();
-        actualResult.Value.Should().BeAssignableTo<string>();
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeTrue();
+        actual.Value.Should().NotBeNull();
+        actual.Value.Should().BeAssignableTo<string>();
     }
 
     [Fact]
@@ -86,19 +89,22 @@ public class TokenServiceTests
     {
         // Arrange
         var testUser = _fixture.Create<ApplicationUser>();
+
+        _userManagerMock
+            .Setup(t => t.GetRolesAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync([]);
+
         _output.WriteLine($"User:\n{testUser.ToString()}");
-        
-        // no roles
-        _userManagerMock.Setup(t => t.GetRolesAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(new List<string>(){});
 
         // Act
-        var actualResult = await _tokenService.GenerateAccessTokenAsync(testUser);
-        _output.WriteLine($"Actual Token: {actualResult?.Value ?? "null"}");
+        var actual = await _tokenService.GenerateAccessTokenAsync(testUser);
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value ?? "null"}");
 
         // Assert
-        actualResult.Should().NotBeNull();
-        actualResult.IsSuccess.Should().BeFalse();
-        actualResult.Value.Should().BeNull();
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeFalse();
+        actual.Value.Should().BeNull();
     }
 
     [Fact]
@@ -109,41 +115,51 @@ public class TokenServiceTests
             .With(t => t.UserName, string.Empty)
             .With(t => t.Email, string.Empty)
             .Create();
+
+        _userManagerMock
+            .Setup(t => t.GetRolesAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(["test role"]);
+
         _output.WriteLine($"User:\n{testUser.ToString()}");
-        
-        _userManagerMock.Setup(t => t.GetRolesAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(new List<string>(){"test role"});
 
         // Act
-        var actualResult = await _tokenService.GenerateAccessTokenAsync(testUser);
-        _output.WriteLine($"Actual Token: {actualResult?.Value ?? "null"}");
+        var actual = await _tokenService.GenerateAccessTokenAsync(testUser);
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value ?? "null"}");
 
         // Assert
-        actualResult.Should().NotBeNull();
-        actualResult.IsSuccess.Should().BeFalse();
-        actualResult.Value.Should().BeNull();
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeFalse();
+        actual.Value.Should().BeNull();
     }
-    
+
     #endregion
 
     #region GenerateRefreshTokenTests
+
     [Fact]
     public async Task GenerateRefreshTokenTest_ValidInput_ShouldSuccess()
     {
         // Arrange
-        Guid userId = Guid.NewGuid();
-        _refreshTokenRepositoryMock.Setup(t => t.AddAsync(It.IsAny<RefreshToken>()));
+        var userId = Guid.NewGuid();
+
+        _refreshTokenRepositoryMock
+            .Setup(t => t.AddAsync(It.IsAny<RefreshToken>()));
+
         _output.WriteLine($"UserId: {userId}");
 
         // Act
-        var acutal = await _tokenService.GenerateRefreshTokenAsync(userId);
-        _output.WriteLine($"acutal Token: {acutal?.Value?? "null"}");
+        var actual = await _tokenService.GenerateRefreshTokenAsync(userId);
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value ?? "null"}");
 
         // Assert
-        acutal.Should().NotBeNull();
-        acutal.IsSuccess.Should().BeTrue();
-        acutal.Value.Should().NotBeNull();
-        acutal.Value.Should().BeAssignableTo<string>();
+        actual.Should().NotBeNull();
+        actual.IsSuccess.Should().BeTrue();
+        actual.Value.Should().NotBeNull();
+        actual.Value.Should().BeAssignableTo<string>();
     }
+
     #endregion
 
     #region IsRefreshTokenValidTests
@@ -153,122 +169,138 @@ public class TokenServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        
-        _cookieService.Setup(t => t.Get(It.IsAny<string>()))
-            .Returns(Result<string>.Success(_fixture.Create<string>()));
+        var refreshToken = _fixture.Build<RefreshToken>()
+            .With(rt => rt.UserId, userId)
+            .With(rt => rt.Expires, DateTime.UtcNow.AddDays(1))
+            .Create();
 
-        _refreshTokenRepositoryMock.Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
-            .ReturnsAsync(
-                _fixture.Build<RefreshToken>()
-                    .With(rt => rt.UserId, userId)
-                    .With(rt => rt.Expires, DateTime.UtcNow.AddDays(1))
-                    .Create()
-                );
-        
-        _output.WriteLine($"UserId: {userId}");
+        _cookieService
+            .Setup(t => t.Get(It.IsAny<string>()))
+            .Returns(Result<string>.Success(_fixture.Create<string>()));
+        _refreshTokenRepositoryMock
+            .Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
+            .ReturnsAsync(refreshToken);
+        _cookieKeysMock.Setup(t => t.Value).Returns(new CookieKeys()
+        {
+            AccessToken = "AccessToken",
+            RefreshToken = "RefreshToken"
+        });
+
+
+        _output.WriteLine($"UserId       : {userId}");
+        _output.WriteLine($"refreshToken : {refreshToken.ToString()}");
 
         // Act
         var actual = await _tokenService.IsRefreshTokenValid(userId);
-        _output.WriteLine($"Actual: {actual}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString() ?? "null"}");
 
         // Assert
-        
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeTrue();
         actual.Value.Should().NotBeNull();
     }
-    
+
     [Fact]
-    public async Task IsRefreshTokenValid_ExpiredToken_ShouldSucceed()
+    public async Task IsRefreshTokenValid_ExpiredToken_ShouldFail()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        
-        _cookieService.Setup(t => t.Get(It.IsAny<string>()))
-            .Returns(Result<string>.Success(_fixture.Create<string>()));
+        var refreshToken = _fixture.Build<RefreshToken>()
+            .With(rt => rt.UserId, userId)
+            .With(rt => rt.Expires, DateTime.UtcNow.AddDays(-1))
+            .Create();
 
-        _refreshTokenRepositoryMock.Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
-            .ReturnsAsync(
-                _fixture.Build<RefreshToken>()
-                    .With(rt => rt.UserId, userId)
-                    .With(rt => rt.Expires, DateTime.UtcNow.AddDays(-1))
-                    .Create()
-            );
-        
-        _output.WriteLine($"UserId: {userId}");
+        _cookieService
+            .Setup(t => t.Get(It.IsAny<string>()))
+            .Returns(Result<string>.Success(_fixture.Create<string>()));
+        _refreshTokenRepositoryMock
+            .Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
+            .ReturnsAsync(refreshToken);
+        _cookieKeysMock.Setup(t => t.Value).Returns(new CookieKeys()
+        {
+            AccessToken = "AccessToken",
+            RefreshToken = "RefreshToken"
+        });
+
+        _output.WriteLine($"UserId       : {userId}");
+        _output.WriteLine($"refreshToken : {refreshToken.ToString()}");
 
         // Act
         var actual = await _tokenService.IsRefreshTokenValid(userId);
-        _output.WriteLine($"Actual: {actual}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString() ?? "null"}");
 
         // Assert
-        
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeFalse();
         actual.Value.Should().BeNull();
     }
-    
-    
+
     [Fact]
-    public async Task IsRefreshTokenValid_NoTokenInCookies_ShouldSucceed()
+    public async Task IsRefreshTokenValid_NoTokenInCookies_ShouldFail()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        
-        _cookieService.Setup(t => t.Get(It.IsAny<string>()))
+
+        _cookieService
+            .Setup(t => t.Get(It.IsAny<string>()))
             .Returns(Result<string>.Failure(""));
+        _cookieKeysMock.Setup(t => t.Value).Returns(new CookieKeys()
+        {
+            AccessToken = "AccessToken",
+            RefreshToken = "RefreshToken"
+        });
 
-        _refreshTokenRepositoryMock.Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
-            .ReturnsAsync(
-                _fixture.Build<RefreshToken>()
-                    .With(rt => rt.UserId, userId)
-                    .With(rt => rt.Expires, DateTime.UtcNow.AddDays(-1))
-                    .Create()
-            );
-        
         _output.WriteLine($"UserId: {userId}");
+        _output.WriteLine("Cookie returns failure — expecting failure");
 
         // Act
         var actual = await _tokenService.IsRefreshTokenValid(userId);
-        _output.WriteLine($"Actual: {actual}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString() ?? "null"}");
 
         // Assert
-        
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeFalse();
         actual.Value.Should().BeNull();
     }
-    
-    
+
     [Fact]
-    public async Task IsRefreshTokenValid_NotUserRefreshToken_ShouldSucceed()
+    public async Task IsRefreshTokenValid_NotUserRefreshToken_ShouldFail()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        
-        _cookieService.Setup(t => t.Get(It.IsAny<string>()))
-            .Returns(Result<string>.Success(_fixture.Create<string>()));
+        var refreshToken = _fixture.Build<RefreshToken>()
+            .With(rt => rt.Expires, DateTime.UtcNow.AddDays(1))
+            .Create(); // UserId differs from userId
 
-        _refreshTokenRepositoryMock.Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
-            .ReturnsAsync(
-                _fixture.Build<RefreshToken>()
-                    .With(rt => rt.Expires, DateTime.UtcNow.AddDays(1))
-                    .Create()
-            );
-        
-        _output.WriteLine($"UserId: {userId}");
+        _cookieService
+            .Setup(t => t.Get(It.IsAny<string>()))
+            .Returns(Result<string>.Success(_fixture.Create<string>()));
+        _refreshTokenRepositoryMock
+            .Setup(t => t.FindRefreshTokenByRefreshTokenStringAsync(It.IsAny<string>()))
+            .ReturnsAsync(refreshToken);
+        _cookieKeysMock.Setup(t => t.Value).Returns(new CookieKeys()
+        {
+            AccessToken = "AccessToken",
+            RefreshToken = "RefreshToken"
+        });
+
+        _output.WriteLine($"UserId       : {userId}");
+        _output.WriteLine($"refreshToken : {refreshToken.ToString()}");
+        _output.WriteLine("Token belongs to different user — expecting failure");
 
         // Act
         var actual = await _tokenService.IsRefreshTokenValid(userId);
-        _output.WriteLine($"Actual: {actual}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString() ?? "null"}");
 
         // Assert
-        
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeFalse();
         actual.Value.Should().BeNull();
     }
 
     #endregion
-    
 }

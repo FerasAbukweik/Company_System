@@ -1,7 +1,7 @@
 namespace HR_System.Core.Constraints;
 
-public static class CookieKeys
+public class CookieKeys
 {
-  public static string AccessToken = "AccessToken";
-  public static string RefreshToken = "RefreshToken";
+  public string AccessToken = string.Empty;
+  public string RefreshToken = string.Empty;
 }

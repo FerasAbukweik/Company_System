@@ -1,24 +1,27 @@
 using AutoFixture;
 using FluentAssertions;
+using HR_System.Core.Constraints;
 using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 using HR_System.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit.Abstractions;
 
 namespace HR_System.Core.UnitTests.ServicesTests;
 
-public class CookiesesServicesTests
+public class CookiesServicesTests
 {
-    private readonly ICookiesesServices _cookiesesServices;
+    private readonly ICookiesServices _cookiesServices;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
     private readonly Mock<IHttpContextAccessor>  _httpContextAccessorMock;
+    private readonly Mock<IOptions<CookieKeys>> _cookieKeysMock;
 
-    public CookiesesServicesTests(ITestOutputHelper output)
+    public CookiesServicesTests(ITestOutputHelper output)
     {
         _output = output;
         
@@ -28,6 +31,7 @@ public class CookiesesServicesTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        _cookieKeysMock = new Mock<IOptions<CookieKeys>>();
 
         var memoryData = new Dictionary<string, string>()
         {
@@ -38,7 +42,7 @@ public class CookiesesServicesTests
             .AddInMemoryCollection(memoryData!)
             .Build();
         
-        _cookiesesServices = new CookiesesServices(_httpContextAccessorMock.Object, configuration, NullLogger<CookiesesServices>.Instance);
+        _cookiesServices = new CookiesServices(_httpContextAccessorMock.Object, configuration, NullLogger<CookiesServices>.Instance,_cookieKeysMock.Object);
     }
 
 
@@ -51,7 +55,7 @@ public class CookiesesServicesTests
         _httpContextAccessorMock.Setup(t => t.HttpContext!.Response.Cookies.Append(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CookieOptions>()));
         
         // Act
-        var actual =  _cookiesesServices.Add("Dummy Key","Dummy Data",10);
+        var actual =  _cookiesServices.Add("Dummy Key","Dummy Data",10);
         _output.WriteLine($"Actual: {actual}");
         
         // Assert
@@ -66,7 +70,7 @@ public class CookiesesServicesTests
         _httpContextAccessorMock.Setup(t => t.HttpContext).Returns(null as HttpContext);
         
         // Act
-        var actual =  _cookiesesServices.Add("Dummy Key","Dummy Data",10);
+        var actual =  _cookiesServices.Add("Dummy Key","Dummy Data",10);
         _output.WriteLine($"Actual: {actual.ToString()}");
         
         // Assert
@@ -84,9 +88,14 @@ public class CookiesesServicesTests
         // Arrange
         _httpContextAccessorMock.Setup(t => 
             t.HttpContext!.Response.Cookies.Append(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CookieOptions>()));
-        
+        _cookieKeysMock.Setup(t => t.Value).Returns(new CookieKeys()
+        {
+            AccessToken = "AccessToken",
+            RefreshToken = "RefreshToken"
+        });
+
         // Act
-        var result = _cookiesesServices.AddTokens(_fixture.Create<AccessAndRefreshTokenDTO>());
+        var result = _cookiesServices.AddTokens(_fixture.Create<AccessAndRefreshTokenDTO>());
         
         // Assert
         result.Should().NotBeNull();
@@ -111,7 +120,7 @@ public class CookiesesServicesTests
         _output.WriteLine($"Expected: {expected}");
 
         // Act
-        var actual = _cookiesesServices.GetValue<Guid>("dummy key");
+        var actual = _cookiesServices.GetValue<Guid>("dummy key");
         _output.WriteLine($"Actual: {actual.ToString()}");
 
         // Assert
@@ -133,7 +142,7 @@ public class CookiesesServicesTests
         _output.WriteLine($"Expected: {badData}");
 
         // Act
-        var actual = _cookiesesServices.GetValue<Guid>("dummy key");
+        var actual = _cookiesServices.GetValue<Guid>("dummy key");
         _output.WriteLine($"Actual: {actual.ToString()}");
 
         // Assert

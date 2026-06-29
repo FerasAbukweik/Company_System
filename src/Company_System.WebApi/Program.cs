@@ -2,8 +2,10 @@ using Company_System;
 using Company_System.Infrastructure;
 using HR_System;
 using HR_System.Core;
+using HR_System.Core.Constraints;
 using HR_System.Infrastructure;
 using HR_System.MiddleWares;
+using HR_System.SignalR.Messages;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -44,5 +46,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<MessagesHub>("/hubs/messages");
 
 app.Run();

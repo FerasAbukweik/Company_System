@@ -4,13 +4,14 @@ using HR_System.Core.common;
 using HR_System.Core.Constraints;
 using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
+using Microsoft.Extensions.Options;
 
 namespace HR_System.Services;
 
-public class CookiesesServices(IHttpContextAccessor httpContextAccessor,
+public class CookiesServices(IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration,
-    ILogger<CookiesesServices> logger
-    ) : ICookiesesServices
+    ILogger<CookiesServices> logger,
+    IOptions<CookieKeys> cookieKeys) : ICookiesServices
 {
     public Result Add(string key, string toAdd, int lifetimeInMinutes)
     {
@@ -33,7 +34,7 @@ public class CookiesesServices(IHttpContextAccessor httpContextAccessor,
     public Result AddTokens(AccessAndRefreshTokenDTO tokens)
     {
         var accessResult = Add(
-            CookieKeys.AccessToken,
+            cookieKeys.Value.AccessToken,
             tokens.AccessToken,
             configuration.GetValue<int>("Jwt:AccessTokenLifeTime")
         );
@@ -42,7 +43,7 @@ public class CookiesesServices(IHttpContextAccessor httpContextAccessor,
             return accessResult;
     
         return Add(
-            CookieKeys.RefreshToken,
+            cookieKeys.Value.RefreshToken,
             tokens.RefreshToken,
             configuration.GetValue<int>("Jwt:RefreshTokenLifeTime")
         );

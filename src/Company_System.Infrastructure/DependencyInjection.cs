@@ -3,6 +3,7 @@ using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
 using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
 using HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
+using HR_System.Core.Interfaces.ServiceContracts.IMessageServices;
 using HR_System.Core.Interfaces.ServiceContracts.IOrganizationHierarchyService;
 using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
 using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
@@ -51,6 +52,7 @@ public static class InfrastructureDependencyInjectionExtensionMethod
         services.AddScoped<IApprovalRepository, ApprovalRepository>();
         services.AddScoped<ITasksRepository, TasksRepository>();
         services.AddScoped<IOrganizationHierarchyRepository, OrganizationHierarchyRepository>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
         
         // services
         services.AddScoped<ITokenService, TokenService>();
@@ -59,6 +61,7 @@ public static class InfrastructureDependencyInjectionExtensionMethod
         services.AddScoped<IApprovalService, ApprovalService>();
         services.AddScoped<IActivitiesService, ActivitiesService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IMessageService, MessageService>();
         
         services.AddScoped<IRedisService, RedisService>();
         services.AddHostedRemoveExpiredRefreshTokens();

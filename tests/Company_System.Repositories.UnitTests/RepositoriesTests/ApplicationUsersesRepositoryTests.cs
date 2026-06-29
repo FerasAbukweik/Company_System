@@ -1,7 +1,6 @@
 using AutoFixture;
 using EntityFrameworkCore.Testing.Moq;
 using FluentAssertions;
-using Company_System.Infrastructure;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Infrastructure;
@@ -31,7 +30,6 @@ public class ApplicationUsersesRepositoryTests : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        // ✅ Keep MockedDbContext — needed for BeginTransactionAsync
         _dbContext = Create.MockedDbContextFor<ApplicationDbContext>(dbContextOptions);
         _applicationUsersRepository = new ApplicationUsersesRepository(_dbContext);
     }
@@ -46,13 +44,12 @@ public class ApplicationUsersesRepositoryTests : IDisposable
         var otherUsers = CreateMany(5);
         await SeedAsync([targetUser, .. otherUsers]);
 
-        _output.WriteLine($"Expected Id  : {targetUser.Id}");
-        _output.WriteLine($"Expected Name: {targetUser.FullName}");
+        _output.WriteLine($"Expected:\n{targetUser.ToString()}");
 
         // Act
         var actual = await _applicationUsersRepository.FilterAsync(u => u.FullName == "Target User");
         _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(u => _output.WriteLine($"  Actual: {u.Id} | {u.FullName}"));
+        actual.ToList().ForEach(u => _output.WriteLine($"  {u.ToString()}"));
 
         // Assert
         actual.Should().NotBeNull();
@@ -64,19 +61,19 @@ public class ApplicationUsersesRepositoryTests : IDisposable
     [Fact]
     public async Task FilterAsync_MatchingMultipleUsers_ShouldReturnAllMatches()
     {
-        // Arrange — filter by FullName prefix since it's the only custom property
+        // Arrange
         var sharedName = "John";
         var matchingUsers = CreateMany(3, fullName: sharedName);
         var otherUsers = CreateMany(3, fullName: "Other");
         await SeedAsync([.. matchingUsers, .. otherUsers]);
 
         _output.WriteLine($"Expected Count: {matchingUsers.Count}");
-        matchingUsers.ForEach(u => _output.WriteLine($"  Expected: {u.Id} | {u.FullName}"));
+        matchingUsers.ForEach(u => _output.WriteLine($"  {u.ToString()}"));
 
         // Act
         var actual = await _applicationUsersRepository.FilterAsync(u => u.FullName == sharedName);
         _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(u => _output.WriteLine($"  Actual: {u.Id} | {u.FullName}"));
+        actual.ToList().ForEach(u => _output.WriteLine($"  {u.ToString()}"));
 
         // Assert
         actual.Should().NotBeNull();
@@ -106,7 +103,7 @@ public class ApplicationUsersesRepositoryTests : IDisposable
     [Fact]
     public async Task FilterAsync_EmptyDatabase_ShouldReturnEmpty()
     {
-        // Arrange — nothing seeded
+        // Arrange
         _output.WriteLine("No users in database");
         _output.WriteLine("Expected Count: 0");
 

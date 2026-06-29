@@ -55,17 +55,13 @@ public class TasksServiceTests
             .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _output.WriteLine($"ManagerId (currUserId): {currUserId}");
-        _output.WriteLine($"UserId   : {toAdd.UserId}");
-        _output.WriteLine($"Title    : {toAdd.Title}");
-        _output.WriteLine($"Priority : {toAdd.Priority}");
+        _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine($"toAdd     : {toAdd.ToString()}");
 
         // Act
         var actual = await _tasksService.AddAsync(toAdd, currUserId);
-        _output.WriteLine($"IsSuccess       : {actual.IsSuccess}");
-        _output.WriteLine($"Actual Title    : {actual.Value?.Title}");
-        _output.WriteLine($"Actual UserId   : {actual.Value?.UserId}");
-        _output.WriteLine($"Actual ManagerId: {actual.Value?.ManagerId}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString()}");
 
         // Assert
         actual.Should().NotBeNull();
@@ -100,6 +96,7 @@ public class TasksServiceTests
             .ReturnsAsync(false);
 
         _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine($"toAdd     : {toAdd.ToString()}");
         _output.WriteLine("SaveChanges returns false — expecting failure");
 
         // Act
@@ -136,13 +133,13 @@ public class TasksServiceTests
 
         _output.WriteLine($"UserId        : {userId}");
         _output.WriteLine($"Expected Count: {tasks.Count}");
-        tasks.ForEach(t => _output.WriteLine($"  Expected: {t.Id} | {t.Title}"));
+        tasks.ForEach(t => _output.WriteLine($"  {t.ToString()}"));
 
         // Act
         var actual = await _tasksService.LazyGetUserTasksAsync(userId, lazyData);
         _output.WriteLine($"IsSuccess   : {actual.IsSuccess}");
         _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
-        actual.Value?.ToList().ForEach(t => _output.WriteLine($"  Actual: {t.Id} | {t.Title}"));
+        actual.Value?.ToList().ForEach(t => _output.WriteLine($"  {t.ToString()}"));
 
         // Assert
         actual.Should().NotBeNull();
@@ -205,7 +202,6 @@ public class TasksServiceTests
         actual.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         actual.ErrorMessage.Should().Be("Taken cannot be negative");
 
-        // Repository should never be called
         _tasksRepositoryMock.Verify(r =>
             r.LazyGetUserTasksAsync(It.IsAny<Guid>(), It.IsAny<LazyDTO>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -232,14 +228,14 @@ public class TasksServiceTests
             .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _output.WriteLine($"TaskId       : {task.Id}");
-        _output.WriteLine($"CurrentUserId: {currentUserId}");
-        _output.WriteLine($"New Status   : {newStatus}");
+        _output.WriteLine($"currentUserId: {currentUserId}");
+        _output.WriteLine($"task         : {task.ToString()}");
+        _output.WriteLine($"newStatus    : {newStatus}");
 
         // Act
         var actual = await _tasksService.UpdateStatusAsync(currentUserId, task.Id, newStatus);
-        _output.WriteLine($"IsSuccess    : {actual.IsSuccess}");
-        _output.WriteLine($"Actual Status: {actual.Value?.Status}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString()}");
 
         // Assert
         actual.Should().NotBeNull();
@@ -262,14 +258,12 @@ public class TasksServiceTests
         var currentUserId = Guid.NewGuid();
         var newStatus = TaskStatusEnum.Pending;
 
-        _activitiesServiceMock.Setup(t =>
-                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.UpdateStatusAsync(taskId, newStatus, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as AppTask);
 
-        _output.WriteLine($"TaskId: {taskId}");
+        _output.WriteLine($"currentUserId: {currentUserId}");
+        _output.WriteLine($"taskId       : {taskId}");
         _output.WriteLine("UpdateStatus returns null — expecting failure");
 
         // Act
@@ -296,16 +290,12 @@ public class TasksServiceTests
         var task = CreateTask(userId: Guid.NewGuid()); // different user
         var newStatus = TaskStatusEnum.Pending;
 
-        _activitiesServiceMock.Setup(t =>
-                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
             .ReturnsAsync(task);
 
-        _output.WriteLine($"TaskId       : {task.Id}");
-        _output.WriteLine($"Task UserId  : {task.UserId}");
-        _output.WriteLine($"CurrentUserId: {currentUserId}");
+        _output.WriteLine($"currentUserId: {currentUserId}");
+        _output.WriteLine($"task         : {task.ToString()}");
         _output.WriteLine("User mismatch — expecting Unauthorized");
 
         // Act
@@ -344,7 +334,8 @@ public class TasksServiceTests
             .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _output.WriteLine($"TaskId: {task.Id}");
+        _output.WriteLine($"currentUserId: {currentUserId}");
+        _output.WriteLine($"task         : {task.ToString()}");
         _output.WriteLine("SaveChanges returns false — expecting failure");
 
         // Act

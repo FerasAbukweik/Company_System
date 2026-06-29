@@ -3,6 +3,7 @@ using HR_System.Core.Constraints;
 using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 using HR_System.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HR_System;
@@ -32,7 +33,12 @@ public static class WebApiDependencyInjectionExtensionMethod
                     // Get Token From Cookies
                     OnMessageReceived = context =>
                     {
-                        if (context.HttpContext.Request.Cookies.TryGetValue(CookieKeys.AccessToken, out var accessToken))
+                        
+                        
+                        var cookieKeys = context.HttpContext.RequestServices
+                            .GetRequiredService<IOptions<CookieKeys>>();
+                        
+                        if (context.HttpContext.Request.Cookies.TryGetValue(cookieKeys.Value.AccessToken, out var accessToken))
                         {
                             context.Token = accessToken;
                         }
@@ -47,7 +53,9 @@ public static class WebApiDependencyInjectionExtensionMethod
         services.AddControllers();
         services.AddOpenApi();
         services.AddHttpContextAccessor();
-        services.AddScoped<ICookiesesServices, CookiesesServices>();
+        services.AddScoped<ICookiesServices, CookiesServices>();
+        services.AddSignalR(op => op.EnableDetailedErrors = true);
+        services.Configure<CookieKeys>(configuration.GetSection("CookieKeys"));
         
         return services;
     }

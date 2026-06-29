@@ -85,7 +85,7 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .OnDelete(DeleteBehavior.SetNull);
         
         
-        // OrganizationHierarchy -----------------------------------------------------------------
+        // OrganizationHierarchy relations -----------------------------------------------------------------
         builder.Entity<OrganizationHierarchy>()
             .HasOne(a => a.User)
             .WithOne(u => u.OrganizationHierarchy)
@@ -99,6 +99,20 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .OnDelete(DeleteBehavior.Restrict);
         
         
+        
+        // Message relations ------------------------------------------------------------------------------
+        builder.Entity<Message>()
+            .HasOne(m => m.Sender)
+            .WithMany(s => s.SentMessages)
+            .HasForeignKey(o => o.SenderId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<Message>()
+            .HasOne(m => m.Receiver)
+            .WithMany(r => r.ReceivedMessages)
+            .HasForeignKey(m => m.ReceiverId)
+            .OnDelete(DeleteBehavior.SetNull);
+
     }
     
     
@@ -107,4 +121,5 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
     public virtual DbSet<Approval> Approvals { get; set; }
     public virtual DbSet<Activity> Activities { get; set; }
     public virtual DbSet<OrganizationHierarchy> OrganizationHierarchies { get; set; }
+    public virtual DbSet<Message> Messages { get; set; }
 }

@@ -13,14 +13,16 @@ using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
 using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HR_System.Infrastructure.Services;
 
-public class TokenService(ICookiesesServices cookiesesServices,
+public class TokenService(ICookiesServices cookiesServices,
     IRefreshTokensRepository refreshTokensRepository,
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration) : ITokenService
+    IConfiguration configuration,
+    IOptions<CookieKeys> cookieKeys) : ITokenService
 {
     public async Task<Result<string>> GenerateAccessTokenAsync(ApplicationUser user)
     {
@@ -112,7 +114,7 @@ public class TokenService(ICookiesesServices cookiesesServices,
     public async Task<Result<RefreshToken>> IsRefreshTokenValid(Guid userId, CancellationToken cancellationToken = default)
     {
         // get refresh token from cookies
-        var refreshTokenResult = cookiesesServices.Get(CookieKeys.RefreshToken);
+        var refreshTokenResult = cookiesServices.Get(cookieKeys.Value.RefreshToken);
         if (!refreshTokenResult.IsSuccess) 
             return refreshTokenResult.MapFailure<RefreshToken>(HttpStatusCode.Unauthorized);
 

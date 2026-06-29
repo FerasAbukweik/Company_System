@@ -11,4 +11,13 @@ public class ApprovalDTO
     public Guid? TaskId { get; set; }
     public required Guid UserRequestingId { get; set; }
     public required Guid ManagerId { get; set; }
+    
+    
+    // override
+    override public string ToString()
+    {
+        return
+            $"Id: {Id}\nStatus: {Status.ToString()}\nType: {Type.ToString()}\nCreatedOn: {CreatedOn}\n" +
+            $"TaskId: {TaskId}\nUserRequestingId: {UserRequestingId}\nManagerId: {ManagerId}\n";
+    }
 }

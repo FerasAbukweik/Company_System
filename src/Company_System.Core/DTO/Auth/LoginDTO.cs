@@ -9,4 +9,11 @@ public class LoginDTO
     
     [Required]
     public required  string Password { get; set; }
+    
+    // override
+
+    override public string ToString()
+    {
+        return $"Email: {Email}\nPassword: {Password}\n";
+    }
 }

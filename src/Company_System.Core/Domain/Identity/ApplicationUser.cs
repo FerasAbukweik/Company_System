@@ -37,6 +37,12 @@ public class ApplicationUser : IdentityUser<Guid>
     [JsonIgnore]
     public OrganizationHierarchy OrganizationHierarchy { get; set; }
     
+    [JsonIgnore]
+    public List<Message> SentMessages { get; set; } = [];
+    
+    [JsonIgnore]
+    public List<Message> ReceivedMessages { get; set; } = [];
+    
     
     
     // override

@@ -17,4 +17,12 @@ public class OrganizationHierarchyAddDTO
     public required Guid UserId { get; set; }
     
     public required Guid ParentId { get; set; }
+    
+    
+    // override
+
+    override public string ToString()
+    {
+        return $"Id: {Id}\nPosition: {Position.ToString()}\nUserId: {UserId}\nParentId: {ParentId}\n";
+    }
 }

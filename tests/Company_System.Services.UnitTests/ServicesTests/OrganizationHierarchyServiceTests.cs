@@ -47,14 +47,12 @@ public class OrganizationHierarchyServiceTests
             .ReturnsAsync(true);
 
         _output.WriteLine($"currUserId: {currUserId}");
-        _output.WriteLine($"Position  : {toAdd.Position}");
-        _output.WriteLine($"ParentId  : {toAdd.ParentId}");
+        _output.WriteLine($"toAdd     : {toAdd.ToString()}");
 
         // Act
         var actual = await _service.AddAsync(toAdd, currUserId);
-        _output.WriteLine($"IsSuccess  : {actual.IsSuccess}");
-        _output.WriteLine($"Actual Id  : {actual.Value?.Id}");
-        _output.WriteLine($"Actual UserId: {actual.Value?.UserId}");
+        _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString()}");
 
         // Assert
         actual.Should().NotBeNull();
@@ -83,6 +81,7 @@ public class OrganizationHierarchyServiceTests
             .ReturnsAsync(false);
 
         _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine($"toAdd     : {toAdd.ToString()}");
         _output.WriteLine("SaveChanges returns false — expecting failure");
 
         // Act
@@ -119,13 +118,13 @@ public class OrganizationHierarchyServiceTests
 
         _output.WriteLine($"currUserId    : {currUserId}");
         _output.WriteLine($"Expected Count: {children.Count}");
-        children.ForEach(c => _output.WriteLine($"  Child: {c.Id} | {c.Position}"));
+        children.ForEach(c => _output.WriteLine($"  {c.ToString()}"));
 
         // Act
         var actual = await _service.GetChildrenAsync(currUserId, parentIds);
         _output.WriteLine($"IsSuccess   : {actual.IsSuccess}");
         _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
-        actual.Value?.ToList().ForEach(c => _output.WriteLine($"  Actual: {c.Id} | {c.Position}"));
+        actual.Value?.ToList().ForEach(c => _output.WriteLine($"  {c.ToString()}"));
 
         // Assert
         actual.Should().NotBeNull();
@@ -179,11 +178,13 @@ public class OrganizationHierarchyServiceTests
 
         _output.WriteLine($"currUserId    : {currUserId}");
         _output.WriteLine($"Expected Count: {roots.Count}");
+        roots.ForEach(r => _output.WriteLine($"  {r.ToString()}"));
 
         // Act
         var actual = await _service.GetChildrenAsync(currUserId, null);
         _output.WriteLine($"IsSuccess   : {actual.IsSuccess}");
         _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
+        actual.Value?.ToList().ForEach(r => _output.WriteLine($"  {r.ToString()}"));
 
         // Assert
         actual.Should().NotBeNull();
@@ -212,14 +213,13 @@ public class OrganizationHierarchyServiceTests
             .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _output.WriteLine($"NodeId    : {node.Id}");
-        _output.WriteLine($"ParentId  : {node.ParentId}");
         _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine($"node      : {node.ToString()}");
 
         // Act
         var actual = await _service.RemoveAsync(node.Id, currUserId);
         _output.WriteLine($"IsSuccess : {actual.IsSuccess}");
-        _output.WriteLine($"Actual Id : {actual.Value?.Id}");
+        _output.WriteLine($"Value     : {actual.Value?.ToString()}");
 
         // Assert
         actual.Should().NotBeNull();
@@ -244,7 +244,8 @@ public class OrganizationHierarchyServiceTests
             .Setup(r => r.RemoveAsync(nonExistentId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as OrganizationHierarchy);
 
-        _output.WriteLine($"Non-existent Id: {nonExistentId}");
+        _output.WriteLine($"currUserId    : {currUserId}");
+        _output.WriteLine($"nonExistentId : {nonExistentId}");
         _output.WriteLine("RemoveAsync returns null — expecting failure");
 
         // Act
@@ -276,8 +277,8 @@ public class OrganizationHierarchyServiceTests
             .Setup(r => r.RemoveAsync(rootNode.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(rootNode);
 
-        _output.WriteLine($"NodeId  : {rootNode.Id}");
-        _output.WriteLine($"ParentId: {rootNode.ParentId} — root node, expecting failure");
+        _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine($"rootNode  : {rootNode.ToString()} — root node, expecting failure");
 
         // Act
         var actual = await _service.RemoveAsync(rootNode.Id, currUserId);
@@ -311,7 +312,8 @@ public class OrganizationHierarchyServiceTests
             .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _output.WriteLine($"NodeId: {node.Id}");
+        _output.WriteLine($"currUserId: {currUserId}");
+        _output.WriteLine($"node      : {node.ToString()}");
         _output.WriteLine("SaveChanges returns false — expecting failure");
 
         // Act

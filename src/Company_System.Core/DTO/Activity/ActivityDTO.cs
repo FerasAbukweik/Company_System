@@ -10,4 +10,14 @@ public class ActivityDTO
     public required string Title { get; set; }
     public required string Description { get; set; }
     public string? Name { get; set; }
+    
+    
+    
+    // override
+
+    public override string ToString()
+    {
+        return
+            $"Id: {Id}\nType: {Type.ToString()}\nCreatedAt: {CreatedAt}\nTitle: {Title}\nDescription: {Description}\nName: {Name}\n";
+    }
 }

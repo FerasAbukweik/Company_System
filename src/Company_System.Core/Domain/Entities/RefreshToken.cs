@@ -18,7 +18,7 @@ public class RefreshToken
     public bool IsResolved => Expires <= DateTime.UtcNow;
     
     
-    // foregin relations
+    // relations
     [Required(ErrorMessage = "{0} Is Required")]
     public required Guid UserId { get; set; }
     

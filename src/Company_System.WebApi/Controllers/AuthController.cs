@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HR_System.Controllers;
 
-public class AuthController(IAccountService accountService) : ApplicationControllerBase
+public class AuthController(IAccountService accountService,
+    ILogger<AuthController> logger) : ApplicationControllerBase
 {
     [HttpPost("[action]")]
     [Authorize]
@@ -30,7 +31,7 @@ public class AuthController(IAccountService accountService) : ApplicationControl
     {
         Result result = await accountService.CreateAccountAsync(toAccountCreate, cancellationToken);
 
-        return result.ToActionResult();
+        return result.ToActionResult(logger);
     }
 
     [AllowAnonymous]
@@ -39,6 +40,6 @@ public class AuthController(IAccountService accountService) : ApplicationControl
     {
         Result result = await accountService.LoginAsync(loginData, cancellationToken);
 
-        return result.ToActionResult();
+        return result.ToActionResult(logger);
     }
 }

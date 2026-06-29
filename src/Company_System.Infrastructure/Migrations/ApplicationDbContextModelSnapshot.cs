@@ -47,7 +47,7 @@ namespace Company_System.Infrastructure.Migrations
 
                     b.HasIndex("TriggeredById");
 
-                    b.ToTable("Activities");
+                    b.ToTable("Activities", (string)null);
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.AppTask", b =>
@@ -88,7 +88,7 @@ namespace Company_System.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.Approval", b =>
@@ -129,7 +129,32 @@ namespace Company_System.Infrastructure.Migrations
 
                     b.HasIndex("UserRequestingId");
 
-                    b.ToTable("Approvals");
+                    b.ToTable("Approvals", (string)null);
+                });
+
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("OrganizationHierarchies", (string)null);
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.RefreshToken", b =>
@@ -152,7 +177,7 @@ namespace Company_System.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Identity.ApplicationRole", b =>
@@ -437,6 +462,24 @@ namespace Company_System.Infrastructure.Migrations
                     b.Navigation("UserRequesting");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Entities.OrganizationHierarchy", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithOne("OrganizationHierarchy")
+                        .HasForeignKey("HR_System.Core.Domain.Entities.OrganizationHierarchy", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
@@ -511,6 +554,11 @@ namespace Company_System.Infrastructure.Migrations
                     b.Navigation("Activities");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
+                {
+                    b.Navigation("Children");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Identity.ApplicationUser", b =>
                 {
                     b.Navigation("Activities");
@@ -518,6 +566,9 @@ namespace Company_System.Infrastructure.Migrations
                     b.Navigation("Approvals");
 
                     b.Navigation("CreatedTasks");
+
+                    b.Navigation("OrganizationHierarchy")
+                        .IsRequired();
 
                     b.Navigation("RefreshTokens");
 

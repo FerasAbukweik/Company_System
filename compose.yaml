@@ -1,25 +1,25 @@
 ﻿services:
-  hr_system.api:
-    container_name: hr_system.api
+  company-system-api:
+    container_name: Company_system.api
     build:
       context: .
-      dockerfile: src/HR_System.WebApi/Dockerfile
+      dockerfile: src/Company_System.WebApi/Dockerfile
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - Jwt__Key=${JWT_KEY}
-      - ConnectionStrings__Default=Server=hr_system.sqlserver;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
-      - ConnectionStrings__Redis=hr_system.redis:6379
+      - ConnectionStrings__Default=Server=company-system-sqlserver;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - ConnectionStrings__Redis=company-system-redis:6379
     depends_on:
-      hr_system.sqlserver:
+      company-system-sqlserver:
         condition: service_healthy
-      hr_system.redis:
+      company-system-redis:
         condition: service_healthy
 
-  hr_system.sqlserver:
+  company-system-sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: hr_system.sqlserver
+    container_name: Company_system.sqlserver
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${SA_PASSWORD}
@@ -34,9 +34,9 @@
       retries: 10
       start_period: 30s
 
-  hr_system.redis:
+  company-system-redis:
     image: redis:7-alpine
-    container_name: hr_system.redis
+    container_name: Company_system.redis
     ports:
       - "6379:6379"
     volumes:
@@ -46,7 +46,6 @@
       interval: 5s
       timeout: 3s
       retries: 5
-
 
 volumes:
   sqlserver_data:

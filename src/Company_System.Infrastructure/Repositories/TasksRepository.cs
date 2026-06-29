@@ -18,6 +18,7 @@ public class TasksRepository(ApplicationDbContext dbContext) : ITasksRepository
         return await dbContext.Tasks.Where(t => t.UserId == userId)
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 
@@ -33,7 +34,9 @@ public class TasksRepository(ApplicationDbContext dbContext) : ITasksRepository
 
     public async Task<AppTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
     {
-        var result = await dbContext.Tasks.FindAsync(taskId, cancellationToken);
+        var result = await dbContext.Tasks
+            .AsNoTracking()
+            .SingleOrDefaultAsync(t => t.Id == taskId, cancellationToken);
 
         return result;
     }

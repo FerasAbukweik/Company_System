@@ -3,11 +3,12 @@ using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Interfaces.RepositoryContracts;
+using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
 
 namespace HR_System.Infrastructure.Services;
 using System.Net;
 
-public class ActivitiesService(IActivityRepository activityRepository)
+public class ActivitiesService(IActivityRepository activityRepository) : IActivitiesService
 {
     public async Task<Result> AddAsync(ActivityAddDTO toAdd, Guid triggeredById, CancellationToken cancellationToken = default)
     {

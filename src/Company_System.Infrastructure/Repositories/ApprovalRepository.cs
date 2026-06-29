@@ -25,7 +25,9 @@ public class ApprovalRepository(ApplicationDbContext dbContext) : IApprovalRepos
 
     public async Task<IReadOnlyList<Approval>> GetManagerToApprove(Guid userId, CancellationToken cancellationToken = default)
     {
-        var result = await dbContext.Approvals.Where(a => a.ManagerId == userId).ToListAsync(cancellationToken);
+        var result = await dbContext.Approvals.Where(a => a.ManagerId == userId)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
         
         return result;
     }

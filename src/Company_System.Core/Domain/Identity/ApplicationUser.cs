@@ -34,6 +34,9 @@ public class ApplicationUser : IdentityUser<Guid>
     [JsonIgnore]
     public List<Activity> Activities { get; set; } = [];
     
+    [JsonIgnore]
+    public OrganizationHierarchy OrganizationHierarchy { get; set; }
+    
     
     
     // override

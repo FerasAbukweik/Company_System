@@ -1,8 +1,11 @@
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
+using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
 using HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
+using HR_System.Core.Interfaces.ServiceContracts.IOrganizationHierarchyService;
 using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
+using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
 using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;
 using HR_System.Infrastructure.BackGroundServices;
 using HR_System.Infrastructure.Repositories;
@@ -41,16 +44,24 @@ public static class InfrastructureDependencyInjectionExtensionMethod
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
-        
-        services.AddHostedRemoveExpiredRefreshTokens();
+        // repositories
+        services.AddScoped<IActivityRepository, ActivityRepository>();
         services.AddScoped<IRefreshTokensRepository, RefreshTokensesRepository>();
         services.AddScoped<IApplicationUsersRepository, ApplicationUsersesRepository>();
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IAccountService, AccountService>();
-        services.AddScoped<IRedisService, RedisService>();
-        services.AddScoped<IApprovalService, ApprovalService>();
         services.AddScoped<IApprovalRepository, ApprovalRepository>();
         services.AddScoped<ITasksRepository, TasksRepository>();
+        services.AddScoped<IOrganizationHierarchyRepository, OrganizationHierarchyRepository>();
+        
+        // services
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITasksService, TasksService>();
+        services.AddScoped<IOrganizationHierarchyService, OrganizationHierarchyService>();
+        services.AddScoped<IApprovalService, ApprovalService>();
+        services.AddScoped<IActivitiesService, ActivitiesService>();
+        services.AddScoped<IAccountService, AccountService>();
+        
+        services.AddScoped<IRedisService, RedisService>();
+        services.AddHostedRemoveExpiredRefreshTokens();
         
         
         return services;

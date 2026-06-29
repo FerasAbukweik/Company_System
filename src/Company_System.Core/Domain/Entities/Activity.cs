@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Activity;
 using HR_System.Core.Enums;
@@ -33,6 +34,7 @@ public class Activity
     [Required]
     public required Guid TriggeredById { get; set; }
 
+    [JsonIgnore]
     public ApplicationUser? TriggeredBy { get; set; } 
     
     

@@ -84,12 +84,28 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             .HasForeignKey(a => a.TriggeredById)
             .OnDelete(DeleteBehavior.SetNull);
 
+        
+        
+        // OrganizationHierarchy -----------------------------------------------------------------
+        builder.Entity<OrganizationHierarchy>()
+            .HasOne(a => a.User)
+            .WithOne(u => u.OrganizationHierarchy)
+            .HasForeignKey<OrganizationHierarchy>(a => a.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.Entity<OrganizationHierarchy>()
+            .HasOne(o => o.Parent)
+            .WithMany(o => o.Children)
+            .HasForeignKey(o => o.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        
     }
     
     
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<AppTask> Tasks { get; set; }
     public virtual DbSet<Approval> Approvals { get; set; }
-    
     public virtual DbSet<Activity> Activities { get; set; }
+    public virtual DbSet<OrganizationHierarchy> OrganizationHierarchies { get; set; }
 }

@@ -18,6 +18,7 @@ public class ActivityRepository(ApplicationDbContext dbContext) : IActivityRepos
             .OrderByDescending(a => a.CreatedAt)
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 

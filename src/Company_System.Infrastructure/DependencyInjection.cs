@@ -1,13 +1,6 @@
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IAccountServices;
-using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
-using HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
-using HR_System.Core.Interfaces.ServiceContracts.IMessageServices;
-using HR_System.Core.Interfaces.ServiceContracts.IOrganizationHierarchyService;
-using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
-using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
-using HR_System.Core.Interfaces.ServiceContracts.ITokenServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.Infrastructure.BackGroundServices;
 using HR_System.Infrastructure.Repositories;
 using HR_System.Infrastructure.Services;

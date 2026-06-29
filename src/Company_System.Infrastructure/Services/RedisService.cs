@@ -1,5 +1,5 @@
 using System.Text.Json;
-using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
+using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 

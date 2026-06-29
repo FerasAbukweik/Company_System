@@ -1,6 +1,0 @@
-namespace HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
-
-public interface ITasksService : ITaskAddService, ITasksGetService, ITaskUpdateService
-{
-    
-}

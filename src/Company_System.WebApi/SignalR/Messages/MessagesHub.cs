@@ -1,7 +1,6 @@
 using HR_System.Core.Constraints;
 using HR_System.Core.DTO.Message;
-using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
-using HR_System.Core.Interfaces.ServiceContracts.IMessageServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 

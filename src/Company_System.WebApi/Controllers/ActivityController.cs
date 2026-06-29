@@ -1,7 +1,7 @@
 using HR_System.Core.common;
 using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.LazyLoading;
-using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
+using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

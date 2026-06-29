@@ -7,8 +7,7 @@ using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Task;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
-using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 
 namespace HR_System.Infrastructure.Services;
 

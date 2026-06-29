@@ -1,6 +1,6 @@
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IRedisService;
+using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;

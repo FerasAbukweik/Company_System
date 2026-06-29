@@ -4,7 +4,7 @@ using HR_System.Core.common;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.OrganizationHierarchy;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IOrganizationHierarchyService;
+using HR_System.Core.Interfaces.ServiceContracts;
 
 namespace HR_System.Infrastructure.Services;
 

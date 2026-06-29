@@ -2,7 +2,7 @@ using HR_System.Core.common;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Task;
 using HR_System.Core.Enums;
-using HR_System.Core.Interfaces.ServiceContracts.ITaskServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

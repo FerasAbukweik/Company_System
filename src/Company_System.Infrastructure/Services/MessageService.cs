@@ -4,7 +4,7 @@ using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Message;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IMessageServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 
 namespace HR_System.Infrastructure.Services;
 

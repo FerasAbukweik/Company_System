@@ -1,7 +1,7 @@
 using HR_System.Core.common;
 using HR_System.Core.DTO.OrganizationHierarchy;
 using HR_System.Core.Enums;
-using HR_System.Core.Interfaces.ServiceContracts.IOrganizationHierarchyService;
+using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

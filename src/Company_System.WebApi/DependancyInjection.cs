@@ -1,6 +1,6 @@
 using System.Text;
 using HR_System.Core.Constraints;
-using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;

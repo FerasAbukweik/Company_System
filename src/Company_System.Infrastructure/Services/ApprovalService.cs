@@ -7,8 +7,7 @@ using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.Approval;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
-using HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
+using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.AspNetCore.Identity;
 
 namespace HR_System.Infrastructure.Services;

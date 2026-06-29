@@ -2,7 +2,7 @@ using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.Constraints;
 using HR_System.Core.DTO.Token;
-using HR_System.Core.Interfaces.ServiceContracts.ICookieServices;
+using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;

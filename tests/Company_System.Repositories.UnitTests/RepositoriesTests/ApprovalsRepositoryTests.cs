@@ -49,7 +49,7 @@ public class ApprovalRepositoryTests : IDisposable
         await _approvalRepository.SaveChangesAsync();
 
         // Assert
-        var actual = await _approvalRepository.GetManagerToApprove(approval.ManagerId);
+        var actual = await _approvalRepository.GetNeedsApprovalAsync(approval.ManagerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
         _output.WriteLine($"Actual Id   : {actual.FirstOrDefault()?.Id}");
 
@@ -67,7 +67,7 @@ public class ApprovalRepositoryTests : IDisposable
         _approvalRepository.Add(approval);
 
         // Assert
-        var actual = await _approvalRepository.GetManagerToApprove(approval.ManagerId);
+        var actual = await _approvalRepository.GetNeedsApprovalAsync(approval.ManagerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
 
         actual.Should().BeEmpty();
@@ -88,7 +88,7 @@ public class ApprovalRepositoryTests : IDisposable
         await _approvalRepository.SaveChangesAsync();
 
         // Assert
-        var actual = await _approvalRepository.GetManagerToApprove(managerId);
+        var actual = await _approvalRepository.GetNeedsApprovalAsync(managerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
 
         actual.Should().HaveCount(approvals.Count);
@@ -112,7 +112,7 @@ public class ApprovalRepositoryTests : IDisposable
         managerApprovals.ForEach(a => _output.WriteLine($"  Expected: {a.Id} | ManagerId: {a.ManagerId}"));
 
         // Act
-        var actual = await _approvalRepository.GetManagerToApprove(managerId);
+        var actual = await _approvalRepository.GetNeedsApprovalAsync(managerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
         actual.ToList().ForEach(a => _output.WriteLine($"  Actual: {a.Id} | ManagerId: {a.ManagerId}"));
 
@@ -134,7 +134,7 @@ public class ApprovalRepositoryTests : IDisposable
         _output.WriteLine("Expected Count: 0");
 
         // Act
-        var actual = await _approvalRepository.GetManagerToApprove(managerId);
+        var actual = await _approvalRepository.GetNeedsApprovalAsync(managerId);
         _output.WriteLine($"Actual Count: {actual.Count}");
 
         // Assert
@@ -151,7 +151,7 @@ public class ApprovalRepositoryTests : IDisposable
         await SeedAsync(approval);
 
         // Act
-        var actual = await _approvalRepository.GetManagerToApprove(managerId);
+        var actual = await _approvalRepository.GetNeedsApprovalAsync(managerId);
         _output.WriteLine($"Actual Type: {actual.GetType().Name}");
 
         // Assert
@@ -200,7 +200,7 @@ public class ApprovalRepositoryTests : IDisposable
         await _approvalRepository.SaveChangesAsync();
 
         // Assert — re-fetch via GetManagerToApprove
-        var approvals = await _approvalRepository.GetManagerToApprove(managerId);
+        var approvals = await _approvalRepository.GetNeedsApprovalAsync(managerId);
         var actual = approvals.Single(a => a.Id == approval.Id);
         _output.WriteLine($"Actual Status (persisted): {actual.Status}");
 
@@ -239,7 +239,7 @@ public class ApprovalRepositoryTests : IDisposable
         await _approvalRepository.SaveChangesAsync();
 
         // Assert
-        var approvals = await _approvalRepository.GetManagerToApprove(managerId);
+        var approvals = await _approvalRepository.GetNeedsApprovalAsync(managerId);
         var actual = approvals.Single(a => a.Id == approval2.Id);
 
         _output.WriteLine($"Approval2 Expected: {ApprovalStatusEnum.Pending}");

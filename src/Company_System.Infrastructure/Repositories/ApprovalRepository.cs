@@ -23,7 +23,7 @@ public class ApprovalRepository(ApplicationDbContext dbContext) : IApprovalRepos
         dbContext.Approvals.Add(approval);
     }
 
-    public async Task<IReadOnlyList<Approval>> GetManagerToApprove(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Approval>> GetNeedsApprovalAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var result = await dbContext.Approvals.Where(a => a.ManagerId == userId)
             .AsNoTracking()

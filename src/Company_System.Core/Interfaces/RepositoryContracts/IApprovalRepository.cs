@@ -7,6 +7,6 @@ public interface IApprovalRepository
 {
     Task<Approval?> UpdateStatus(Guid approvalId, ApprovalStatusEnum newStatus, CancellationToken  cancellationToken = default);
     void Add(Approval approval);
-    Task<IReadOnlyList<Approval>> GetManagerToApprove(Guid userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Approval>> GetNeedsApprovalAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

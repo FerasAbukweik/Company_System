@@ -109,10 +109,10 @@ public class ActivityRepositoryTests : IDisposable
 
         // Act
         var actual = await _activityRepository.LazyGetAllSortedAsync(new LazyDTO { Taken = 0, SectionSize = 10 });
-        _output.WriteLine($"Actual Order: {actual[0].Id} → {actual[1].Id} → {actual[2].Id}");
 
         // Assert
         actual.Should().HaveCount(3);
+        _output.WriteLine($"Actual Order: {actual[0].Id} → {actual[1].Id} → {actual[2].Id}");
         actual[0].Id.Should().Be(newest.Id);
         actual[1].Id.Should().Be(middle.Id);
         actual[2].Id.Should().Be(oldest.Id);
@@ -272,6 +272,10 @@ public class ActivityRepositoryTests : IDisposable
     private Activity CreateActivity(DateTime? createdAt = null) =>
         _fixture.Build<Activity>()
             .With(a => a.CreatedAt, createdAt ?? DateTime.UtcNow)
+            .Without(a => a.TaskId)
+            .Without(a => a.Task)
+            .Without(a => a.ApprovalId)
+            .Without(a => a.Approval)
             .Create();
 
     private List<Activity> CreateMany(int count, bool spreadDates = false) =>

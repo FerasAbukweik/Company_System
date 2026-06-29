@@ -36,7 +36,6 @@ public class OrganizationHierarchyService(IOrganizationHierarchyRepository hiera
 
     public async Task<Result<OrganizationHierarchyDTO>> RemoveAsync(Guid toRemoveId, Guid currUserId, CancellationToken cancellationToken = default)
     {
-        // TODO check curr user have access
         var removed = await hierarchyRepository.RemoveAsync(toRemoveId, cancellationToken);
         if(removed == null)
             return Result<OrganizationHierarchyDTO>.Failure("hierarchy not found", HttpStatusCode.BadRequest);

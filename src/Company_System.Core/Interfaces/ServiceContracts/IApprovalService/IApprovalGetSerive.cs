@@ -5,5 +5,5 @@ namespace HR_System.Core.Interfaces.ServiceContracts.IApprovalService;
 
 public interface IApprovalGetSerive
 {
-    Task<Result<IReadOnlyList<ApprovalDTO>>> GetManagerToApproveAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<ApprovalDTO>>> GetNeedsApprovalAsync(Guid userId, CancellationToken cancellationToken = default);
 }

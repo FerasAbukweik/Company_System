@@ -75,15 +75,14 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
         builder.Entity<Activity>()
             .HasOne(a => a.Task)
             .WithMany(u => u.Activities)
-            .HasForeignKey(a => a.TriggeredById)
+            .HasForeignKey(a => a.TaskId)
             .OnDelete(DeleteBehavior.SetNull);
         
         builder.Entity<Activity>()
             .HasOne(a => a.Approval)
             .WithMany(u => u.Activities)
-            .HasForeignKey(a => a.TriggeredById)
+            .HasForeignKey(a => a.ApprovalId)
             .OnDelete(DeleteBehavior.SetNull);
-
         
         
         // OrganizationHierarchy -----------------------------------------------------------------

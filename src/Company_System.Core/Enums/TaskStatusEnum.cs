@@ -5,5 +5,4 @@ public enum TaskStatusEnum
     Completed,
     Rejected,
     Pending,
-    PendingApproval
 }

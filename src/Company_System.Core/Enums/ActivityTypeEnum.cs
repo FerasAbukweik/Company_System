@@ -9,4 +9,5 @@ public enum ActivityTypeEnum
     TaskRejected,
     TaskAdded,
     TaskPendingApproval,
+    MissingType
 }

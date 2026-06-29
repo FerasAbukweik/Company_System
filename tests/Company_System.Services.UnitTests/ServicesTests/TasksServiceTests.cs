@@ -1,11 +1,14 @@
 using System.Net;
 using AutoFixture;
 using FluentAssertions;
+using HR_System.Core.common;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Task;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
+using HR_System.Core.Interfaces.ServiceContracts.IActivitiesService;
 using HR_System.Infrastructure.Services;
 using Moq;
 using Xunit.Abstractions;
@@ -18,6 +21,7 @@ public class TasksServiceTests
     private readonly IFixture _fixture;
     private readonly Mock<ITasksRepository> _tasksRepositoryMock;
     private readonly TasksService _tasksService;
+    private readonly Mock<IActivitiesService> _activitiesServiceMock;
 
     public TasksServiceTests(ITestOutputHelper output)
     {
@@ -28,8 +32,9 @@ public class TasksServiceTests
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
+        _activitiesServiceMock = new Mock<IActivitiesService>();
         _tasksRepositoryMock = new Mock<ITasksRepository>();
-        _tasksService = new TasksService(_tasksRepositoryMock.Object);
+        _tasksService = new TasksService(_tasksRepositoryMock.Object, _activitiesServiceMock.Object);
     }
 
     #region AddAsync
@@ -41,6 +46,9 @@ public class TasksServiceTests
         var currUserId = Guid.NewGuid();
         var toAdd = _fixture.Create<TaskAddDTO>();
 
+        _activitiesServiceMock.Setup(t =>
+                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.Add(It.IsAny<AppTask>(), It.IsAny<CancellationToken>()));
         _tasksRepositoryMock
@@ -82,6 +90,9 @@ public class TasksServiceTests
         var currUserId = Guid.NewGuid();
         var toAdd = _fixture.Create<TaskAddDTO>();
 
+        _activitiesServiceMock.Setup(t =>
+                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.Add(It.IsAny<AppTask>(), It.IsAny<CancellationToken>()));
         _tasksRepositoryMock
@@ -211,6 +222,9 @@ public class TasksServiceTests
         var task = CreateTask(userId: currentUserId);
         var newStatus = TaskStatusEnum.Pending;
 
+        _activitiesServiceMock.Setup(t =>
+                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
             .ReturnsAsync(task);
@@ -248,6 +262,9 @@ public class TasksServiceTests
         var currentUserId = Guid.NewGuid();
         var newStatus = TaskStatusEnum.Pending;
 
+        _activitiesServiceMock.Setup(t =>
+                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.UpdateStatusAsync(taskId, newStatus, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as AppTask);
@@ -279,6 +296,9 @@ public class TasksServiceTests
         var task = CreateTask(userId: Guid.NewGuid()); // different user
         var newStatus = TaskStatusEnum.Pending;
 
+        _activitiesServiceMock.Setup(t =>
+                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
             .ReturnsAsync(task);
@@ -314,6 +334,9 @@ public class TasksServiceTests
         var task = CreateTask(userId: currentUserId);
         var newStatus = TaskStatusEnum.Pending;
 
+        _activitiesServiceMock.Setup(t =>
+                t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
         _tasksRepositoryMock
             .Setup(r => r.UpdateStatusAsync(task.Id, newStatus, It.IsAny<CancellationToken>()))
             .ReturnsAsync(task);

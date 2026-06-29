@@ -18,7 +18,7 @@ public class ApprovalController(IApprovalService approvalService,
         var userIdResult = User.GetUserId();
         if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult(logger);
 
-        var result = await approvalService.GetManagerToApproveAsync(userIdResult.Value, cancellationToken);
+        var result = await approvalService.GetNeedsApprovalAsync(userIdResult.Value, cancellationToken);
 
         return result.ToActionResult(logger);
     }

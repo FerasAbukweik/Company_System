@@ -46,6 +46,15 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
         return toRemove;
     }
 
+    public async Task<OrganizationHierarchy?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.OrganizationHierarchies
+            .Include(o => o.Parent)
+            .Include(o => o.User)
+            .Include(o => o.Children)
+            .SingleOrDefaultAsync(o => o.UserId == userId, cancellationToken);
+    }
+    
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return (await dbContext.SaveChangesAsync(cancellationToken)) > 0;

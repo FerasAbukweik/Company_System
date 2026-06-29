@@ -16,6 +16,8 @@ public class ActivityRepository(ApplicationDbContext dbContext) : IActivityRepos
     {
         return await dbContext.Activities
             .OrderByDescending(a => a.CreatedAt)
+            .Include(a => a.Task)
+            .Include(a => a.Approval)
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)
             .AsNoTracking()

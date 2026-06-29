@@ -10,7 +10,7 @@ using System.Net;
 
 public class ActivitiesService(IActivityRepository activityRepository) : IActivitiesService
 {
-    public async Task<Result> AddAsync(ActivityAddDTO toAdd, Guid triggeredById, CancellationToken cancellationToken = default)
+    public async Task<Result<ActivityDTO>> AddAsync(ActivityAddDTO toAdd, Guid triggeredById, CancellationToken cancellationToken = default)
     {
         var activity = new Activity
         {
@@ -23,9 +23,9 @@ public class ActivitiesService(IActivityRepository activityRepository) : IActivi
         activityRepository.Add(activity);
 
         if (!await activityRepository.SaveChangesAsync(cancellationToken))
-            return Result.Failure("Failed saving activity to DB");
+            return Result<ActivityDTO>.Failure("Failed saving activity to DB");
 
-        return Result.Success();
+        return Result<ActivityDTO>.Success(activity.ToDTO());
     }
 
     public async Task<Result<IReadOnlyList<ActivityDTO>>> LazyGetAllSortedAsync(LazyDTO lazyData, CancellationToken cancellationToken = default)

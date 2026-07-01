@@ -33,8 +33,6 @@ public static class WebApiDependencyInjectionExtensionMethod
                     // Get Token From Cookies
                     OnMessageReceived = context =>
                     {
-                        
-                        
                         var cookieKeys = context.HttpContext.RequestServices
                             .GetRequiredService<IOptions<CookieKeys>>();
                         
@@ -48,6 +46,17 @@ public static class WebApiDependencyInjectionExtensionMethod
                 };
             });
         
+        
+        services.AddCors(options =>
+        {
+            options.AddPolicy("Angular", policy =>
+            {
+                policy.WithOrigins("http://localhost:4200")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
 
         
         services.AddControllers();

@@ -20,13 +20,15 @@ public class Message
     
     // relations
     
-    public Guid? SenderId { get; set; }
+    [Required]
+    public required Guid SenderId { get; set; }
     
     [JsonIgnore]
     public ApplicationUser? Sender { get; set; }
     
     
-    public Guid? ReceiverId { get; set; }
+    [Required]
+    public required Guid ReceiverId { get; set; }
     
     [JsonIgnore]
     public ApplicationUser? Receiver { get; set; }

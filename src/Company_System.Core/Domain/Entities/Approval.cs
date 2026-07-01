@@ -44,6 +44,8 @@ public class Approval
     [JsonIgnore]
     public ApplicationUser? Manager { get; set; }
     
+    
+    
     [JsonIgnore]
     public List<Activity> Activities { get; set; } = [];
     

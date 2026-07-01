@@ -46,6 +46,9 @@ public class AppTask
     [JsonIgnore]
     public ApplicationUser? Manager { get; set; }
     
+    
+    
+    
     [JsonIgnore]
     public Approval? Approval { get; set; }
     

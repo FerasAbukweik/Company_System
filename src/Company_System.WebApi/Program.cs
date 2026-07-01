@@ -1,11 +1,9 @@
-using Company_System;
-using Company_System.Infrastructure;
 using HR_System;
 using HR_System.Core;
-using HR_System.Core.Constraints;
 using HR_System.Infrastructure;
 using HR_System.MiddleWares;
 using HR_System.SignalR.Messages;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -27,6 +25,7 @@ builder.Services.AddCore()
 
 // DI ---------------------------------
 
+
 var app = builder.Build();
 
 app.UseHsts();
@@ -41,11 +40,20 @@ if (builder.Environment.IsDevelopment())
 }
 
 app.UseGlobalExceptionMiddleWare();
+app.UseCors("Angular");
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<MessagesHub>("/hubs/messages");
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 
 app.Run();

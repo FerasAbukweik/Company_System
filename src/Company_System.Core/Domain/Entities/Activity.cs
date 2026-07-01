@@ -23,11 +23,13 @@ public class Activity
     // relations
     public Guid? TaskId { get; set; }
     
+    [JsonIgnore]
     public AppTask? Task { get; set; }
     
     
     public Guid? ApprovalId { get; set; }
     
+    [JsonIgnore]
     public Approval? Approval { get; set; }
     
     

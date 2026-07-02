@@ -50,7 +50,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
             return Result<ApplicationUser>.Failure(string.Join(" | ", addUserToRoleResult.Errors.Select(e => e.Description)));
         
         // generate new Tokens
-        var generateTokensResult = await tokenService.GenerateNewAccessAndRefreshTokenAsync(toAddUser, ct);
+        var generateTokensResult = await tokenService.GenerateNewTokensAsync(toAddUser, ct);
         if(!generateTokensResult.IsSuccess)
             return generateTokensResult.MapFailure<ApplicationUser>();
         
@@ -117,7 +117,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         if(!isPasswordCorrect)
             return Result<AccessAndRefreshTokenDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
 
-        var generateTokensResult = await tokenService.GenerateNewAccessAndRefreshTokenAsync(user, cancellationToken);
+        var generateTokensResult = await tokenService.GenerateNewTokensAsync(user, cancellationToken);
         if (!generateTokensResult.IsSuccess)
             return generateTokensResult;
 

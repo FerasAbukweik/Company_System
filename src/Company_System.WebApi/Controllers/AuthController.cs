@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class AuthController(IAccountService accountService,
-    ILogger<AuthController> logger) : ApplicationControllerBase
+    ILogger<AuthController> logger,
+    ITokenService tokenService) : ApplicationControllerBase
 {
     [HttpPost("[action]")]
     [Authorize]
@@ -25,7 +26,7 @@ public class AuthController(IAccountService accountService,
         return Ok();
     }
 
-    [AllowAnonymous]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
     [HttpPost("[action]")]
     public async Task<IActionResult> Signup(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
     {
@@ -39,6 +40,15 @@ public class AuthController(IAccountService accountService,
     public async Task<IActionResult> Login(LoginDTO loginData, CancellationToken cancellationToken = default)
     {
         Result result = await accountService.LoginAsync(loginData, cancellationToken);
+
+        return result.ToActionResult(logger);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("[action]")]
+    public async Task<IActionResult> UpdateTokens(CancellationToken cancellationToken = default)
+    {
+        Result result = await tokenService.UpdateUserTokensAsync(cancellationToken);
 
         return result.ToActionResult(logger);
     }

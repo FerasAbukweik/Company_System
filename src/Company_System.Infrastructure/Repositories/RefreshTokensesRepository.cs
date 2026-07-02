@@ -44,6 +44,16 @@ public class RefreshTokensesRepository(ApplicationDbContext dbContext,
         
         return token;
     }
-    
+
+    public RefreshToken? RemoveRefreshTokenByRefreshTokenString(string refreshTokenString)
+    {
+        var toRemove = dbContext.RefreshTokens.SingleOrDefault(rt => rt.Token == refreshTokenString);
+        if (toRemove == null) return null;
+
+        dbContext.RefreshTokens.Remove(toRemove);
+        
+        return toRemove;
+    }
+
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default) =>  (await dbContext.SaveChangesAsync(cancellationToken)) > 0;
 }

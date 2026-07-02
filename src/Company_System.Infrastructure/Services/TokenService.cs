@@ -86,7 +86,7 @@ public class TokenService(ICookiesServices cookiesServices,
         
         return Result<string>.Success(refreshToken);
     }
-    public async Task<Result<AccessAndRefreshTokenDTO>> GenerateNewAccessAndRefreshTokenAsync(ApplicationUser user, CancellationToken cancellationToken = default)
+    public async Task<Result<AccessAndRefreshTokenDTO>> GenerateNewTokensAsync(ApplicationUser user, CancellationToken cancellationToken = default)
     {
         // generate access token
         var generateAccessTokenResult = await this.GenerateAccessTokenAsync(user);
@@ -107,28 +107,38 @@ public class TokenService(ICookiesServices cookiesServices,
 
         return Result<AccessAndRefreshTokenDTO>.Success(result);
     }
-    
-    public async Task<Result<RefreshToken>> IsRefreshTokenValid(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<AccessAndRefreshTokenDTO>> RegenerateTokensAsync(CancellationToken cancellationToken = default)
     {
-        // get refresh token from cookies
         var refreshTokenResult = cookiesServices.Get(cookieKeys.Value.RefreshToken);
-        if (!refreshTokenResult.IsSuccess) 
-            return refreshTokenResult.MapFailure<RefreshToken>(HttpStatusCode.Unauthorized);
+        if (!refreshTokenResult.IsSuccess) return refreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
+        
+        // remove refresh Token anyway(doesnt matter if its valid or not)
+        var removedRefreshToken =
+            refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(refreshTokenResult.Value!);
+        if (removedRefreshToken == null)
+            return Result<AccessAndRefreshTokenDTO>.Failure("refresh token expired or not found",
+                HttpStatusCode.BadRequest);
 
-        // get refresh token object 
-        var refreshToken = await refreshTokensRepository
-            .FindRefreshTokenByRefreshTokenStringAsync(refreshTokenResult.Value!, cancellationToken);
-        if (refreshToken is null) 
-            return Result<RefreshToken>.Failure("Refresh token not found", HttpStatusCode.Unauthorized);
+        // check if refresh token is valid
+        if (removedRefreshToken.IsResolved) return Result<AccessAndRefreshTokenDTO>.Failure("Expired refresh token", HttpStatusCode.BadRequest);
+        
+        // get user to generate new tokens for it
+        var user = await userManager.FindByIdAsync(removedRefreshToken.UserId.ToString());
+        if(user == null) return Result<AccessAndRefreshTokenDTO>.Failure("User not found", HttpStatusCode.BadRequest);
+        
+        // generate new tokens
+        var generateNewTokensResult = await GenerateNewTokensAsync(user, cancellationToken);
 
-        // if curr user isn't the owner of the refresh token return 401
-        if (refreshToken.UserId != userId) 
-            return Result<RefreshToken>.Failure("Invalid refresh token", HttpStatusCode.Unauthorized);
+        return generateNewTokensResult;
+    }
+    public async Task<Result<AccessAndRefreshTokenDTO>> UpdateUserTokensAsync(CancellationToken cancellationToken = default)
+    {
+        var newTokensResult = await RegenerateTokensAsync(cancellationToken);
+        if(!newTokensResult.IsSuccess) return newTokensResult;
 
-        // if refresh token is expired return 401
-        if (refreshToken.IsResolved) 
-            return Result<RefreshToken>.Failure("Invalid refresh token", HttpStatusCode.Unauthorized);
+        var addToCookiesResult = cookiesServices.AddTokens(newTokensResult.Value!);
+        if (!addToCookiesResult.IsSuccess) return addToCookiesResult.MapFailure<AccessAndRefreshTokenDTO>();
 
-        return Result<RefreshToken>.Success(refreshToken);
+        return newTokensResult;
     }
 }

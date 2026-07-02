@@ -10,5 +10,6 @@ public interface IApplicationUsersRepository
         Expression<Func<ApplicationUser, Object?>>[]? includes = null,
         CancellationToken cancellationToken = default);
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+    IExecutionStrategy GenerateStrategy();
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

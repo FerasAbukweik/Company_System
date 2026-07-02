@@ -15,15 +15,7 @@ public static class InfrastructureDependencyInjectionExtensionMethod
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // add ApplicationDbContext to services
-        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-            configuration.GetConnectionString("Default"),
-            options => 
-            {
-                options.EnableRetryOnFailure(
-                    maxRetryCount: 10,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null);
-            }));
+        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Default")));
 
         // add redis
         services.AddStackExchangeRedisCache(options =>

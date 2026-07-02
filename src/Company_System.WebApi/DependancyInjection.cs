@@ -51,7 +51,7 @@ public static class WebApiDependencyInjectionExtensionMethod
         {
             options.AddPolicy("Angular", policy =>
             {
-                policy.WithOrigins("http://localhost:4200")
+                policy.WithOrigins("https://localhost:4200", "http://localhost:4200", "http://localhost:8080")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

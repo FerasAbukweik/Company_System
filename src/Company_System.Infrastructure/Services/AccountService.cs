@@ -6,6 +6,7 @@ using HR_System.Core.DTO.Token;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace HR_System.Infrastructure.Services;
@@ -24,8 +25,12 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         if (doesUsesExist.IsSuccess)
             return Result<ApplicationUser>.Failure(doesUsesExist.Value!, HttpStatusCode.Conflict); // return fields used in other users
 
+        var strategy = usersRepository.GenerateStrategy();
+
+        return await strategy.ExecuteAsync(async (ct) => {
+        
         // use dbContext transaction so we Roll back in case something went wrong 
-        using var transaction = await usersRepository.BeginTransactionAsync(cancellationToken);
+        using var transaction = await usersRepository.BeginTransactionAsync(ct);
         
         // Add user to DB
         var toAddUser = new ApplicationUser()
@@ -45,7 +50,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
             return Result<ApplicationUser>.Failure(string.Join(" | ", addUserToRoleResult.Errors.Select(e => e.Description)));
         
         // generate new Tokens
-        var generateTokensResult = await tokenService.GenerateNewAccessAndRefreshTokenAsync(toAddUser, cancellationToken);
+        var generateTokensResult = await tokenService.GenerateNewAccessAndRefreshTokenAsync(toAddUser, ct);
         if(!generateTokensResult.IsSuccess)
             return generateTokensResult.MapFailure<ApplicationUser>();
         
@@ -53,11 +58,13 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         cookiesServices.AddTokens(generateTokensResult.Value!);
 
         // apply changes to DB
-        await transaction.CommitAsync(cancellationToken);
+        await transaction.CommitAsync(ct);
         
         logger.LogInformation($"User Created At: {DateTime.UtcNow}\n\nUser:\n{toAddUser.ToString()}");
         
         return Result<ApplicationUser>.Success(toAddUser);
+        
+        }, cancellationToken);
     }
     private async Task<Result<string>> DoesUserExist(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
     {
@@ -104,11 +111,11 @@ public class AccountService(UserManager<ApplicationUser> userManager,
     {
         var user = await userManager.FindByEmailAsync(loginData.Email);
         if(user is null)
-            return Result<AccessAndRefreshTokenDTO>.Failure("Invalid Email Or Password", HttpStatusCode.Unauthorized);
+            return Result<AccessAndRefreshTokenDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
         
         var isPasswordCorrect = await userManager.CheckPasswordAsync(user, loginData.Password);
         if(!isPasswordCorrect)
-            return Result<AccessAndRefreshTokenDTO>.Failure("Invalid Email Or Password", HttpStatusCode.Unauthorized);
+            return Result<AccessAndRefreshTokenDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
 
         var generateTokensResult = await tokenService.GenerateNewAccessAndRefreshTokenAsync(user, cancellationToken);
         if (!generateTokensResult.IsSuccess)

@@ -3,7 +3,6 @@ using HR_System.Core;
 using HR_System.Infrastructure;
 using HR_System.MiddleWares;
 using HR_System.SignalR.Messages;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -47,13 +46,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<MessagesHub>("/hubs/messages");
-
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
-}
-
 
 app.Run();

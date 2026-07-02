@@ -27,9 +27,11 @@ public class TokenService(ICookiesServices cookiesServices,
     {
         // if there is no email or userName return failure --because we need them later to create the token
         if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(user.Email))
-        {
             return Result<string>.Failure("access token Cannt be Created because of missing userName or Email" , HttpStatusCode.BadRequest);
-        }
+        
+        var roles = await userManager.GetRolesAsync(user);
+        if (!roles.Any())
+            return Result<string>.Failure("user has no roles" , HttpStatusCode.BadRequest);
         
         // claims
         var claims = new List<Claim>
@@ -42,10 +44,6 @@ public class TokenService(ICookiesServices cookiesServices,
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim(ClaimTypes.Email, user.Email!),
         };
-        
-        var roles = await userManager.GetRolesAsync(user);
-        if (!roles.Any())
-            return Result<string>.Failure("user have no roles" , HttpStatusCode.BadRequest);
         
         // add roles to claims
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -103,7 +101,7 @@ public class TokenService(ICookiesServices cookiesServices,
         // return result
         var result = new AccessAndRefreshTokenDTO()
         {
-            AccessToken = generateRefreshTokenResult.Value!,
+            AccessToken = generateAccessTokenResult.Value!,
             RefreshToken = generateRefreshTokenResult.Value!
         };
 

@@ -36,6 +36,11 @@ public class ApplicationUsersesRepository(ApplicationDbContext dbContext) : IApp
     {
         return await dbContext.Database.BeginTransactionAsync(cancellationToken);
     }
-    
+
+    public IExecutionStrategy GenerateStrategy()
+    {
+        return dbContext.Database.CreateExecutionStrategy();
+    }
+
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default) =>  (await dbContext.SaveChangesAsync(cancellationToken)) > 0;
 }

@@ -14,14 +14,14 @@ public class AuthController(IAccountService accountService,
 {
     [HttpPost("[action]")]
     [Authorize]
-    public IActionResult IsAuthenticated()
+    public ActionResult<AuthDTO> IsAuthenticated()
     {
         return Ok();
     }
     
     [HttpPost("[action]")]
-    [Authorize(Roles =  nameof(RolesEnum.Admin))]
-    public IActionResult IsAdmin()
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
+    public ActionResult<AuthDTO> IsAdmin()
     {
         return Ok();
     }

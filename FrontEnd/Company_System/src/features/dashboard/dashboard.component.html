@@ -1,0 +1,204 @@
+<div class="mb-6 flex justify-between items-end">
+  <div>
+    <h2 class="text-2xl font-semibold text-corporate-blue tracking-tight">Operational Overview</h2>
+    <p class="text-sm text-text-secondary mt-1">
+      Welcome back, Alex. You have 4 tasks requiring immediate attention today.
+    </p>
+  </div>
+</div>
+
+<div class="grid grid-cols-12 gap-6">
+  <section class="col-span-12 lg:col-span-8 space-y-6">
+    <div class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary-blue">assignment_turned_in</span>
+          My Active Tasks
+        </h3>
+        <a class="text-secondary-blue text-xs font-semibold hover:underline" href="#">View All</a>
+      </div>
+
+      <div class="space-y-4">
+        @for (task of activeTasks(); track task.id) {
+          <div
+            [class]="
+              'group flex items-center justify-between p-4 bg-surface-base border border-outline-light rounded-lg hover:border-vibrant-turquoise transition-colors border-l-4 ' +
+              task.borderColorClass
+            "
+          >
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-lg bg-surface-low flex items-center justify-center">
+                <span class="material-symbols-outlined text-corporate-blue"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-6"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                    />
+                  </svg>
+                </span>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-corporate-blue">{{ task.title }}</h4>
+                <p class="text-xs text-text-secondary mt-0.5">
+                  {{ task.category }} • Priority {{ task.priority }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-6">
+              <div class="text-right">
+                <p
+                  class="text-xs font-bold"
+                  [class.text-error]="task.id === 1"
+                  [class.text-text-primary]="task.id !== 1"
+                >
+                  {{ task.deadline }}
+                </p>
+                <p class="text-xs text-text-secondary">Deadline</p>
+              </div>
+              <span [class]="'px-3 py-1 rounded-full text-xs font-bold ' + task.statusColorClass">{{
+                task.status
+              }}</span>
+              <button
+                class="cursor-pointer hover:bg-surface-low rounded-full opacity-0 group-hover:opacity-100 p-2 text-text-secondary hover:text-corporate-blue transition-all"
+              >
+                <span class="material-symbols-outlined"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-6"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary-blue">rate_review</span> Pending
+          Approvals
+        </h3>
+        <span class="bg-error text-surface-lowest rounded-full px-2 py-0.5 text-xs font-medium"
+          >2 New</span
+        >
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (req of approvals(); track req.id) {
+          <div
+            class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden group"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-2">
+                <img class="w-8 h-8 rounded-full" [src]="req.avatarUrl" [alt]="req.name" />
+                <div>
+                  <p class="text-xs font-bold text-corporate-blue">{{ req.name }}</p>
+                  <p class="text-xs text-text-secondary">{{ req.role }}</p>
+                </div>
+              </div>
+              <span class="text-text-secondary font-mono text-xs">{{ req.id }}</span>
+            </div>
+            <p class="text-sm text-text-primary mb-4 line-clamp-2">{{ req.description }}</p>
+            <div class="flex gap-2">
+              <button
+                (click)="onAction('reject', req)"
+                class="cursor-pointer flex-1 py-2 rounded-lg border border-outline-light text-xs font-bold hover:bg-surface-low transition-colors text-text-primary"
+              >
+                Reject
+              </button>
+              <button
+                (click)="onAction('approve', req)"
+                class="cursor-pointer flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold hover:opacity-90 transition-opacity"
+              >
+                Approve
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="col-span-12 lg:col-span-4">
+    <div
+      class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm h-full flex flex-col"
+    >
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary-blue">bolt</span> Recent Activity
+        </h3>
+        <button
+          (click)="onAction('refresh-feed')"
+          class="cursor-pointer p-2 hover:bg-surface-low rounded-full transition-colors"
+        >
+          <span class="material-symbols-outlined text-text-secondary">refresh</span>
+        </button>
+      </div>
+
+      <div
+        class="flex-1 overflow-y-auto pr-1 space-y-6 relative before:absolute before:left-4.75 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-low"
+      >
+        @for (act of activities(); track act.description) {
+          <div class="relative pl-12">
+            <div
+              [class]="
+                'absolute left-0 top-1 w-10 h-10 rounded-full flex items-center justify-center border-4 border-surface-lowest z-10 ' +
+                act.badgeBgClass
+              "
+            >
+              <span [class]="'material-symbols-outlined text-[20px] ' + act.badgeTextClass"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    [attr.d]="act.iconPath"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div class="bg-surface-base p-4 rounded-lg border border-outline-light">
+              <p class="text-sm text-text-primary">
+                <span class="font-bold">{{ act.title }}</span> {{ act.description }}
+              </p>
+              <span class="text-xs text-text-secondary mt-1 block">{{ act.time }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <button
+        (click)="onAction('view-logs')"
+        class="w-full mt-6 py-2 border border-secondary-blue text-secondary-blue font-semibold text-xs rounded-lg hover:bg-secondary-blue/5 transition-colors"
+      >
+        View Full Audit Log
+      </button>
+    </div>
+  </section>
+</div>

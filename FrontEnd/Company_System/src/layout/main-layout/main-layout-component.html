@@ -1,0 +1,11 @@
+<header>
+  <nav app-top-nav></nav>
+</header>
+
+<div class="flex">
+  <aside app-side-bar [navItems]="sideBarItems"></aside>
+
+  <main class="max-w-[1800px] mx-auto">
+    <router-outlet />
+  </main>
+</div>

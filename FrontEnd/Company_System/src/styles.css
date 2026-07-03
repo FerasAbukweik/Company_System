@@ -1,0 +1,28 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'tailwindcss';
+
+@theme {
+  --color-corporate-blue: #0A2540;
+  --color-vibrant-turquoise: #00D1B2;
+  --color-secondary-blue: #3B82F6;
+  --color-surface-base: #F9F9FF;
+  --color-surface-dim: #D0DAF0;
+  --color-surface-lowest: #FFFFFF;
+  --color-surface-low: #F0F3FF;
+  --color-surface-high: #E2E7FF;
+  --color-text-primary: #1A1C1E;
+  --color-text-secondary: #44474E;
+  --color-outline-strong: #74777F;
+  --color-outline-light: #C4C6CF;
+  --color-error: #E63946;
+}
+
+*{
+  box-sizing: border-box;
+  scrollbar-width: none;
+}
+
+body{
+  background-color: var(--color-surface-base);
+}

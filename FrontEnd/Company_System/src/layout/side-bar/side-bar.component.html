@@ -1,0 +1,30 @@
+<div class="flex items-center gap-2 mb-12">
+  <div class="w-10 h-10 bg-corporate-blue rounded-xl flex items-center justify-center">
+    <span
+      class="material-symbols-outlined text-surface-lowest"
+      style="font-variation-settings: 'FILL' 1"
+      >hub</span
+    >
+  </div>
+  <div>
+    <h1 class="text-xl font-bold text-corporate-blue tracking-tight">FlexiOps</h1>
+    <p class="text-xs font-medium text-text-secondary">Enterprise SaaS</p>
+  </div>
+</div>
+
+<nav class="space-y-1">
+  @for (item of navItems(); track item.label) {
+    <a
+      [class]="
+        item.active
+          ? 'flex items-center gap-4 p-4 rounded-lg text-corporate-blue font-bold border-r-2 border-vibrant-turquoise bg-surface-high transition-colors'
+          : 'flex items-center gap-4 p-4 rounded-lg text-text-secondary hover:bg-surface-low transition-colors active:scale-[0.98] duration-150'
+      "
+      href="#"
+      (click)="$event.preventDefault()"
+    >
+      <span class="material-symbols-outlined">{{ item.icon }}</span>
+      <span class="text-sm font-medium">{{ item.label }}</span>
+    </a>
+  }
+</nav>

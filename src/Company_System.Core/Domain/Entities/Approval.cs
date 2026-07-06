@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Approval;
 using HR_System.Core.Enums;
@@ -9,12 +8,10 @@ namespace HR_System.Core.Domain.Entities;
 public class Approval
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-
     public ApprovalStatusEnum Status { get; set; } =  ApprovalStatusEnum.Pending;
 
     [Required]
     public required ApprovalTypeEnum Type { get; set; }
-
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
     
     
@@ -22,27 +19,16 @@ public class Approval
     // relations
     
     public Guid? TaskId { get; set; }
-    
-    [JsonIgnore]
     public AppTask? Task { get; set; }
-    
     
     [Required]
     public required Guid UserRequestingId { get; set; }
-    
-    [JsonIgnore]
     public ApplicationUser? UserRequesting { get; set; }
-    
     
     [Required]
     public required Guid ManagerId { get; set; }
-    
-    [JsonIgnore]
     public ApplicationUser? Manager { get; set; }
     
-    
-    
-    [JsonIgnore]
     public List<Activity> Activities { get; set; } = [];
     
     

@@ -113,8 +113,8 @@ public class TokenService(ICookiesServices cookiesServices,
         if (!refreshTokenResult.IsSuccess) return refreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
         
         // remove refresh Token anyway(doesnt matter if its valid or not)
-        var removedRefreshToken =
-            refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(refreshTokenResult.Value!);
+        var removedRefreshToken = await
+            refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(refreshTokenResult.Value!, cancellationToken);
         if (removedRefreshToken == null)
             return Result<AccessAndRefreshTokenDTO>.Failure("refresh token expired or not found",
                 HttpStatusCode.BadRequest);

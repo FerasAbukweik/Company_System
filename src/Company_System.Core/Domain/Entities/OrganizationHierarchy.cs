@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.OrganizationHierarchy;
 using HR_System.Core.Enums;
@@ -19,18 +18,11 @@ public class OrganizationHierarchy
     
     [Required]
     public required Guid UserId { get; set; }
-    
-    [JsonIgnore]
     public ApplicationUser? User { get; set; }
-
     
     public Guid? ParentId { get; set; }
-    
-    [JsonIgnore]
     public OrganizationHierarchy? Parent { get; set; }
-    
 
-    [JsonIgnore]
     public List<OrganizationHierarchy> Children { get; set; } = [];
     
     

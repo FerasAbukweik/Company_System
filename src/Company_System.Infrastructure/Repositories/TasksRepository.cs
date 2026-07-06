@@ -2,11 +2,13 @@ using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
+using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class TasksRepository(ApplicationDbContext dbContext) : ITasksRepository
+public class TasksRepository(ApplicationDbContext dbContext,
+    IRedisService cache) : ITasksRepository
 {
     public void Add(AppTask task, CancellationToken cancellationToken = default)
     {
@@ -34,9 +36,14 @@ public class TasksRepository(ApplicationDbContext dbContext) : ITasksRepository
 
     public async Task<AppTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
     {
+        var cachedValue = await cache.GetAsync<AppTask>($"Task-Id-{taskId}", cancellationToken);
+        if(cachedValue != null) return cachedValue;
+        
         var result = await dbContext.Tasks
             .AsNoTracking()
             .SingleOrDefaultAsync(t => t.Id == taskId, cancellationToken);
+
+        if (result != null) await cache.SetAsync($"Task-Id-{taskId}", result, cancellationToken);
 
         return result;
     }

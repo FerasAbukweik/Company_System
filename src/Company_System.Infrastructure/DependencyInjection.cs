@@ -40,7 +40,7 @@ public static class InfrastructureDependencyInjectionExtensionMethod
 
         // repositories
         services.AddScoped<IActivityRepository, ActivityRepository>();
-        services.AddScoped<IRefreshTokensRepository, RefreshTokensesRepository>();
+        services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
         services.AddScoped<IApplicationUsersRepository, ApplicationUsersesRepository>();
         services.AddScoped<IApprovalRepository, ApprovalRepository>();
         services.AddScoped<ITasksRepository, TasksRepository>();

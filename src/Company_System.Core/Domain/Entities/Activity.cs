@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Activity;
 using HR_System.Core.Enums;
@@ -14,29 +13,19 @@ public class Activity
     [Required]
     [CheckActivityType(nameof(TaskId), nameof(ApprovalId))]
     public required ActivityTypeEnum Type { get; set; }
-    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 
     
-    
     // relations
     public Guid? TaskId { get; set; }
-    
-    [JsonIgnore]
     public AppTask? Task { get; set; }
     
-    
     public Guid? ApprovalId { get; set; }
-    
-    [JsonIgnore]
     public Approval? Approval { get; set; }
-    
     
     [Required]
     public required Guid TriggeredById { get; set; }
-
-    [JsonIgnore]
     public ApplicationUser? TriggeredBy { get; set; } 
     
     

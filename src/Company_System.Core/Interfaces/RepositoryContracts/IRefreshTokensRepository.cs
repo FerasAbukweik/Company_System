@@ -7,6 +7,6 @@ public interface IRefreshTokensRepository
     void AddAsync(RefreshToken refreshToken , CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RefreshToken>> RemoveExpiredRefreshTokensAsync(CancellationToken cancellationToken = default);
     Task<RefreshToken?> FindRefreshTokenByRefreshTokenStringAsync(string refreshTokenString, CancellationToken cancellationToken = default);
-    RefreshToken? RemoveRefreshTokenByRefreshTokenString(string refreshTokenString);
+    Task<RefreshToken?> RemoveRefreshTokenByRefreshTokenString(string refreshTokenString, CancellationToken cancellationToken = default);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

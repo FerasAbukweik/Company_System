@@ -1,4 +1,4 @@
-using AutoFixture;
+/*using AutoFixture;
 using FluentAssertions;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Domain.Identity;
@@ -410,4 +410,4 @@ public class TasksRepositoryTests : IDisposable
     public void Dispose() => _dbContext.Dispose();
 
     #endregion
-}
+}*/

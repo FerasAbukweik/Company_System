@@ -1,11 +1,12 @@
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Infrastructure.extensionMethods;
+using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : IOrganizationHierarchyRepository
+public class OrganizationHierarchyRepository(ApplicationDbContext dbContext,
+    IRedisService cache) : IOrganizationHierarchyRepository
 {
     public void Add(OrganizationHierarchy toAdd)
     {
@@ -39,21 +40,29 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
             .AsNoTracking()
             .SingleOrDefaultAsync(o => o.Id == toRemoveId, cancellationToken);
 
-        if (toRemove == null)
-            return toRemove;
+        if (toRemove == null) return null;
         
         dbContext.OrganizationHierarchies.Remove(toRemove);
+        await cache.RemoveAsync($"OrganizationHierarchy-userId-{toRemove.UserId}", cancellationToken);
+        
 
         return toRemove;
     }
 
     public async Task<OrganizationHierarchy?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await dbContext.OrganizationHierarchies
+        var cachedValue = await cache.GetAsync<OrganizationHierarchy>($"OrganizationHierarchy-userId-{userId}", cancellationToken);
+        if(cachedValue != null) return cachedValue;
+        
+        var actualValue = await dbContext.OrganizationHierarchies
             .Include(o => o.Parent)
             .Include(o => o.User)
             .Include(o => o.Children)
             .SingleOrDefaultAsync(o => o.UserId == userId, cancellationToken);
+        
+        if(actualValue != null) await cache.SetAsync($"OrganizationHierarchy-userId-{userId}", actualValue, cancellationToken);
+
+        return actualValue;
     }
     
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)

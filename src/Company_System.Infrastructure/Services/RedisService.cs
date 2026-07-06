@@ -5,13 +5,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace HR_System.Infrastructure.Services;
 
-public class RedisService(IDistributedCache cach,
+public class RedisService(IDistributedCache cache,
     IConfiguration configuration) : IRedisService
 {
     
-    public async Task<T?> Get<T>(string key, CancellationToken cancellationToken = default)
+    public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
-        var data = await cach.GetAsync(key, cancellationToken);
+        var data = await cache.GetAsync(key, cancellationToken);
         
         if (data == null)
             return default(T);
@@ -24,7 +24,7 @@ public class RedisService(IDistributedCache cach,
         return JsonSerializer.Deserialize<T>(data, options);
     }
     
-    public async Task Set<T>(string key, T value, CancellationToken cancellationToken = default)
+    public async Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         var options = new DistributedCacheEntryOptions()
         {
@@ -34,7 +34,11 @@ public class RedisService(IDistributedCache cach,
         
         var serializedData = JsonSerializer.Serialize(value);
         
-        await cach.SetStringAsync(key, serializedData,  options, cancellationToken);
+        await cache.SetStringAsync(key, serializedData,  options, cancellationToken);
     }
 
+    public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+    {
+        await cache.RemoveAsync(key, cancellationToken);
+    }
 }

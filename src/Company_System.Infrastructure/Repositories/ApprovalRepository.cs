@@ -40,7 +40,7 @@ public class ApprovalRepository(ApplicationDbContext dbContext) : IApprovalRepos
         return await query
             .Where(filter)
             .AsNoTracking()
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken); 
     }
     
     public async Task<IReadOnlyList<Approval>> LazyGetApprovals(LazyDTO lazyData, 

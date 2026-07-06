@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace TestProject1.RepositoriesTests;
 
-public class RefreshTokensesRepositoryTests : IDisposable
+public class RefreshTokensRepositoryTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly IRefreshTokensRepository _refreshTokensRepository;
@@ -19,7 +19,7 @@ public class RefreshTokensesRepositoryTests : IDisposable
     private readonly ApplicationDbContext _dbContext;
     private readonly Mock<IRedisService> _redisMock;
 
-    public RefreshTokensesRepositoryTests(ITestOutputHelper output)
+    public RefreshTokensRepositoryTests(ITestOutputHelper output)
     {
         _output = output;
 
@@ -38,13 +38,13 @@ public class RefreshTokensesRepositoryTests : IDisposable
 
         
         _redisMock
-            .Setup(t => t.Get<RefreshToken>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(t => t.GetAsync<RefreshToken>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as RefreshToken);
         _redisMock
-            .Setup(t => t.Set(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .Setup(t => t.SetAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        _refreshTokensRepository = new RefreshTokensesRepository(_dbContext, _redisMock.Object);
+        _refreshTokensRepository = new RefreshTokensRepository(_dbContext, _redisMock.Object);
     }
 
     #region FindRefreshTokenByRefreshTokenStringAsync
@@ -68,9 +68,9 @@ public class RefreshTokensesRepositoryTests : IDisposable
 
         // Verify cache was checked then set
         _redisMock.Verify(t =>
-            t.Get<RefreshToken>(token.Token, It.IsAny<CancellationToken>()), Times.Once);
+            t.GetAsync<RefreshToken>(token.Token, It.IsAny<CancellationToken>()), Times.Once);
         _redisMock.Verify(t =>
-            t.Set(token.Token, It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
+            t.SetAsync(token.Token, It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class RefreshTokensesRepositoryTests : IDisposable
 
         // Override default — cache returns the token
         _redisMock
-            .Setup(t => t.Get<RefreshToken>(token.Token, It.IsAny<CancellationToken>()))
+            .Setup(t => t.GetAsync<RefreshToken>(token.Token, It.IsAny<CancellationToken>()))
             .ReturnsAsync(token);
 
         _output.WriteLine($"Expected Token: {token.Token}");
@@ -96,7 +96,7 @@ public class RefreshTokensesRepositoryTests : IDisposable
 
         // Verify DB was never hit and cache was never set
         _redisMock.Verify(t =>
-            t.Set(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Never);
+            t.SetAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

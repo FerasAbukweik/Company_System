@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class RefreshTokensesRepository(ApplicationDbContext dbContext,
+public class RefreshTokensRepository(ApplicationDbContext dbContext,
     IRedisService cache) : IRefreshTokensRepository
 {
     public void AddAsync(RefreshToken refreshToken , CancellationToken cancellationToken = default)
@@ -33,24 +33,25 @@ public class RefreshTokensesRepository(ApplicationDbContext dbContext,
         )
     {
         // check if cache has the token
-        var cachedToken = await cache.Get<RefreshToken>(refreshTokenString, cancellationToken);
+        var cachedToken = await cache.GetAsync<RefreshToken>(refreshTokenString, cancellationToken);
         if (cachedToken != null) return cachedToken;
         
         // get token from Db
         var token = await dbContext.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == refreshTokenString, cancellationToken);
 
         // set token to cache
-        await cache.Set(refreshTokenString, token, cancellationToken);
+        await cache.SetAsync(refreshTokenString, token, cancellationToken);
         
         return token;
     }
 
-    public RefreshToken? RemoveRefreshTokenByRefreshTokenString(string refreshTokenString)
+    public async Task<RefreshToken?> RemoveRefreshTokenByRefreshTokenString(string refreshTokenString, CancellationToken cancellationToken = default)
     {
-        var toRemove = dbContext.RefreshTokens.SingleOrDefault(rt => rt.Token == refreshTokenString);
+        var toRemove = await FindRefreshTokenByRefreshTokenStringAsync(refreshTokenString, cancellationToken);
         if (toRemove == null) return null;
 
         dbContext.RefreshTokens.Remove(toRemove);
+        await cache.RemoveAsync(refreshTokenString, cancellationToken);
         
         return toRemove;
     }

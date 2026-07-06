@@ -1,28 +1,25 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Identity;
 
 namespace HR_System.Core.Domain.Entities;
 
 public class RefreshToken
-{
-    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+{ 
+    public Guid Id { get; set; } = Guid.NewGuid();
     
-    [Required(ErrorMessage = "{0} Is Required")]
+    [Required]
     [Column(TypeName = "varchar(100)")]
     public required string Token { get; set; }
     
-    [Required(ErrorMessage = "{0} Is Required")]
+    [Required]
     public required DateTime Expires { get; set; }
     public bool IsResolved => Expires <= DateTime.UtcNow;
     
     
     // relations
-    [Required(ErrorMessage = "{0} Is Required")]
+    [Required]
     public required Guid UserId { get; set; }
-    
-    [JsonIgnore]
     public ApplicationUser? User { get; set; }
     
     

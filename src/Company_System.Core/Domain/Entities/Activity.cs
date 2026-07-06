@@ -51,7 +51,6 @@ public class Activity
             Type = Type,
             Title = GenerateTitle(),
             Description = GenerateDescription(),
-            Name = TriggeredBy?.UserName ?? ""
         };
     }
     
@@ -70,10 +69,10 @@ public class Activity
     private string GenerateTitle()
     {
         if (IsTask(Type))
-            return Task?.Title ?? "Task Is Null";
+            return $"Task: {Task?.Title ?? "Task Is Null"}";
 
         if (IsApproval(Type))
-            return Approval?.Status.ToString() ?? "Approval Is Null";
+            return $"Approval";
 
         return "Error Generating Title";
     }
@@ -81,10 +80,23 @@ public class Activity
     private string GenerateDescription()
     {
         if (IsTask(Type))
-            return Task?.Description ?? "Task Is Null";
+            return $"NewStatus: {Task?.Status.ToString() ?? "task is null"}\nwas changed by {Task?.User?.UserName ?? "missing Task or User"}\n";
 
         if (IsApproval(Type))
-            return Approval?.Description.ToString() ?? "Approval Is Null";
+        {
+            var manamgerName = Approval?.Manager?.UserName ?? "missing Manager or missing Approval";
+            var emplyeeName = Approval?.UserRequesting?.UserName ?? "missing UserRequesting or missing Approval";
+
+            string desc = "missing description";
+            if (Approval == null) desc = "Approval is null";
+            else
+            {
+                if(Approval.Type == ApprovalTypeEnum.Holiday) desc = "Type: holiday Request";
+                if (Approval.Type == ApprovalTypeEnum.Task) desc = $"NewTaskStatus: {Approval.Task?.Status.ToString() ?? "task is null"}";
+            }
+            
+            return $"Manager: {manamgerName}, Employee: {emplyeeName}\n{desc}\nStatus: {Approval?.Status.ToString() ?? "approval is null"}";
+        }
 
         return "Error Generating Title";
     }

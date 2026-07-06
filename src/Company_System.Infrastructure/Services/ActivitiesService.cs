@@ -28,12 +28,12 @@ public class ActivitiesService(IActivityRepository activityRepository) : IActivi
         return Result<ActivityDTO>.Success(activity.ToDTO());
     }
 
-    public async Task<Result<IReadOnlyList<ActivityDTO>>> LazyGetAllSortedAsync(LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<ActivityDTO>>> LazyGetAllSortedAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
     {
         if (lazyData.Taken < 0)
             return Result<IReadOnlyList<ActivityDTO>>.Failure("Taken cannot be negative", HttpStatusCode.BadRequest);
 
-        var activities = await activityRepository.LazyGetAllSortedAsync(lazyData, cancellationToken);
+        var activities = await activityRepository.LazyGetAllSortedAsync(lazyData, userId, cancellationToken);
 
         var result = activities.Select(a => a.ToDTO()).ToList();
 

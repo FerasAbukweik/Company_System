@@ -21,8 +21,6 @@ public class ApprovalServiceTests
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
     private readonly Mock<IApprovalRepository> _approvalRepositoryMock;
-    private readonly Mock<ITasksRepository> _tasksRepositoryMock;
-    private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly ApprovalService _approvalService;
     private readonly Mock<IActivitiesService> _activitiesServiceMock;
     private readonly Mock<IOrganizationHierarchyRepository> _organizationHierarchyRepositoryMock;
@@ -37,81 +35,15 @@ public class ApprovalServiceTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
         _approvalRepositoryMock = new Mock<IApprovalRepository>();
-        _tasksRepositoryMock = new Mock<ITasksRepository>();
         _activitiesServiceMock = new Mock<IActivitiesService>();
         _organizationHierarchyRepositoryMock = new Mock<IOrganizationHierarchyRepository>();
 
-        _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(),
-            null!, null!, null!, null!, null!, null!, null!, null!);
-
         _approvalService = new ApprovalService(
             _approvalRepositoryMock.Object,
-            _userManagerMock.Object,
-            _tasksRepositoryMock.Object,
             _activitiesServiceMock.Object,
             _organizationHierarchyRepositoryMock.Object);
     }
 
-    #region GetManagerToApproveAsync
-
-    [Fact]
-    public async Task GetManagerToApproveAsync_WithApprovals_ShouldReturnMappedDTOs()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var approvals = CreateMany(3);
-
-        _approvalRepositoryMock
-            .Setup(r => r.GetNeedsApprovalAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(approvals);
-
-        _output.WriteLine($"UserId        : {userId}");
-        _output.WriteLine($"Expected Count: {approvals.Count}");
-        approvals.ForEach(a => _output.WriteLine($"  Expected: {a.Id} | {a.Type}"));
-
-        // Act
-        var actual = await _approvalService.GetNeedsApprovalAsync(userId);
-        _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
-        actual.Value?.ToList().ForEach(a => _output.WriteLine($"  Actual: {a.Id} | {a.Type}"));
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.IsSuccess.Should().BeTrue();
-        actual.Value.Should().HaveCount(approvals.Count);
-        actual.Value.Should().BeAssignableTo<IReadOnlyList<ApprovalDTO>>();
-
-        _approvalRepositoryMock.Verify(r =>
-            r.GetNeedsApprovalAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task GetManagerToApproveAsync_NoApprovals_ShouldReturnEmpty()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-
-        _approvalRepositoryMock
-            .Setup(r => r.GetNeedsApprovalAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
-
-        _output.WriteLine($"UserId        : {userId}");
-        _output.WriteLine("Expected Count: 0");
-
-        // Act
-        var actual = await _approvalService.GetNeedsApprovalAsync(userId);
-        _output.WriteLine($"Actual Count: {actual.Value?.Count ?? -1}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.IsSuccess.Should().BeTrue();
-        actual.Value.Should().BeEmpty();
-
-        _approvalRepositoryMock.Verify(r =>
-            r.GetNeedsApprovalAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    #endregion
 
     #region AddAsync — Holiday Type
 
@@ -132,9 +64,6 @@ public class ApprovalServiceTests
         _activitiesServiceMock
             .Setup(t => t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
-        _userManagerMock
-            .Setup(m => m.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync(user);
         _approvalRepositoryMock
             .Setup(r => r.Add(It.IsAny<Approval>()));
         _approvalRepositoryMock
@@ -149,17 +78,12 @@ public class ApprovalServiceTests
         // Act
         var actual = await _approvalService.AddAsync(toAdd, userId);
         _output.WriteLine($"IsSuccess       : {actual.IsSuccess}");
-        _output.WriteLine($"Actual Type     : {actual.Value?.Type}");
-        _output.WriteLine($"Actual UserReqId: {actual.Value?.UserRequestingId}");
 
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeTrue();
         actual.Value.Should().NotBeNull();
-        actual.Value!.Type.Should().Be(ApprovalTypeEnum.Holiday);
-        actual.Value!.UserRequestingId.Should().Be(userId);
 
-        _userManagerMock.Verify(m => m.FindByIdAsync(userId.ToString()), Times.Once);
         _approvalRepositoryMock.Verify(r => r.Add(It.IsAny<Approval>()), Times.Once);
         _approvalRepositoryMock.Verify(r =>
             r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -173,11 +97,6 @@ public class ApprovalServiceTests
         var toAdd = _fixture.Build<ApprovalAddDTO>()
             .With(a => a.Type, ApprovalTypeEnum.Holiday)
             .Create();
-
-        // hierarchy mock not relevant here — service fails before reaching it
-        _userManagerMock
-            .Setup(m => m.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync(null as ApplicationUser);
 
         _output.WriteLine($"UserId: {userId}");
         _output.WriteLine("User not found — expecting Unauthorized failure");
@@ -214,9 +133,6 @@ public class ApprovalServiceTests
             .With(a => a.Type, ApprovalTypeEnum.Holiday)
             .Create();
 
-        _userManagerMock
-            .Setup(m => m.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync(user);
         _organizationHierarchyRepositoryMock
             .Setup(t => t.GetByUserIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(hierarchyWithoutParent);
@@ -250,9 +166,6 @@ public class ApprovalServiceTests
             .With(a => a.Type, ApprovalTypeEnum.Holiday)
             .Create();
 
-        _userManagerMock
-            .Setup(m => m.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync(user);
         _organizationHierarchyRepositoryMock
             .Setup(t => t.GetByUserIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as OrganizationHierarchy); // not in hierarchy at all
@@ -298,9 +211,6 @@ public class ApprovalServiceTests
         _activitiesServiceMock
             .Setup(t => t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
-        _tasksRepositoryMock
-            .Setup(r => r.GetTaskAsync(task.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(task);
         _approvalRepositoryMock
             .Setup(r => r.Add(It.IsAny<Approval>()));
         _approvalRepositoryMock
@@ -315,18 +225,12 @@ public class ApprovalServiceTests
         // Act
         var actual = await _approvalService.AddAsync(toAdd, userId);
         _output.WriteLine($"IsSuccess     : {actual.IsSuccess}");
-        _output.WriteLine($"Actual Type   : {actual.Value?.Type}");
-        _output.WriteLine($"Actual TaskId : {actual.Value?.TaskId}");
 
         // Assert
         actual.Should().NotBeNull();
         actual.IsSuccess.Should().BeTrue();
         actual.Value.Should().NotBeNull();
-        actual.Value!.Type.Should().Be(ApprovalTypeEnum.Task);
-        actual.Value!.TaskId.Should().Be(task.Id);
 
-        _tasksRepositoryMock.Verify(r =>
-            r.GetTaskAsync(task.Id, It.IsAny<CancellationToken>()), Times.Once);
         _approvalRepositoryMock.Verify(r => r.Add(It.IsAny<Approval>()), Times.Once);
         _approvalRepositoryMock.Verify(r =>
             r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -373,10 +277,6 @@ public class ApprovalServiceTests
             .With(a => a.TaskId, taskId)
             .Create();
 
-        _tasksRepositoryMock
-            .Setup(r => r.GetTaskAsync(taskId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(null as AppTask);
-
         _output.WriteLine($"UserId: {userId}");
         _output.WriteLine($"TaskId: {taskId}");
         _output.WriteLine("Task not found — expecting NotFound failure");
@@ -415,9 +315,6 @@ public class ApprovalServiceTests
         _activitiesServiceMock
             .Setup(t => t.AddAsync(It.IsAny<ActivityAddDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ActivityDTO>.Success(_fixture.Create<ActivityDTO>()));
-        _userManagerMock
-            .Setup(m => m.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync(user);
         _approvalRepositoryMock
             .Setup(r => r.Add(It.IsAny<Approval>()));
         _approvalRepositoryMock

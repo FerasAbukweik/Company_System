@@ -7,6 +7,6 @@ namespace HR_System.Core.Interfaces.RepositoryContracts;
 public interface IActivityRepository
 {
     void Add(Activity toAdd);
-    Task<IReadOnlyList<Activity>> LazyGetAllSortedAsync(LazyDTO lazyData,CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Activity>> LazyGetAllSortedAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

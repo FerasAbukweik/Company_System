@@ -104,10 +104,6 @@ namespace HR_System.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("ManagerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -246,6 +242,13 @@ namespace HR_System.Infrastructure.Migrations
                             ConcurrencyStamp = "e2d5c4b1-6a3d-4e9f-829f-3d6a1b2c4d5e",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("3f2c9d11-7a6b-4c8e-9d5f-1b2a9c8e7d3f"),
+                            ConcurrencyStamp = "3f2c9d11-7a6b-4c8e-9d5f-1b2a9c8e7d3f",
+                            Name = "Employee",
+                            NormalizedName = "EMPLOYEE"
                         });
                 });
 

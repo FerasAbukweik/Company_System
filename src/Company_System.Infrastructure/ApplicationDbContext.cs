@@ -20,6 +20,14 @@ protected override void OnModelCreating(ModelBuilder builder)
             ConcurrencyStamp = "e2d5c4b1-6a3d-4e9f-829f-3d6a1b2c4d5e"
         }
     );
+    builder.Entity<ApplicationRole>().HasData(
+        new ApplicationRole(){
+            Id = Guid.Parse("3f2c9d11-7a6b-4c8e-9d5f-1b2a9c8e7d3f"),
+            Name = nameof(RolesEnum.Employee),
+            NormalizedName = nameof(RolesEnum.Employee).ToUpper(),
+            ConcurrencyStamp = "3f2c9d11-7a6b-4c8e-9d5f-1b2a9c8e7d3f"
+        }
+    );
     
     // Refresh Token relations --------------------------------------------------------
     builder.Entity<RefreshToken>()

@@ -17,13 +17,9 @@ public class Approval
 
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
     
-    [Required]
-    public required string Description { get; set; }
-    
     
     
     // relations
-    
     
     public Guid? TaskId { get; set; }
     
@@ -51,17 +47,41 @@ public class Approval
     
     
     // functions
-    public ApprovalDTO ToDTO()
+    public ToApproveDTO ToToApprovalDTO()
     {
-        return new ApprovalDTO()
+        string body = Type switch
+        {
+            ApprovalTypeEnum.Holiday => "is requesting holiday",
+            ApprovalTypeEnum.Task => $"has completed task: {Task?.Title ?? "missing take"}",
+            _ => "unhandled task type"
+        };
+        
+        return new ToApproveDTO()
         {
             Id = Id,
-            Status = Status,
             CreatedOn = CreatedOn,
-            UserRequestingId = UserRequestingId,
-            TaskId = TaskId,
-            Type = Type,
-            ManagerId = ManagerId,
+            RequesterName = "You",
+            Body = body
+        };
+    }
+    
+    
+    public RequestedApproval ToRequestedApprovalDTO()
+    {
+        string body = Type switch
+        {
+            ApprovalTypeEnum.Holiday => "is requesting holiday",
+            ApprovalTypeEnum.Task => $"has completed task: {Task?.Title ?? "missing take"}",
+            _ => "unhandled task type"
+        };
+        
+        return new RequestedApproval()
+        {
+            Id = Id,
+            CreatedOn = CreatedOn,
+            RequesterName = UserRequesting?.UserName ?? "username not found",
+            Body = body,
+            Status = Status
         };
     }
     

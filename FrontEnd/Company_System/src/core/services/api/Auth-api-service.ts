@@ -1,24 +1,33 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { ApiUrls } from '../../constants/urls'; 
-import { AccountCreateDTO } from '../../dto/auth/create-account-dto';
-import { LoginDTO } from '../../dto/auth/login-dto';
+import { Observable, tap } from 'rxjs';
+import { Urls } from '../../constants/urls';
+import { AccountCreateDTO } from '../../dto/create-account-dto';
+import { LoginDTO } from '../../dto/login-dto';
+import { AuthDTO } from '../../dto/auth-dto';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   // DI
   private readonly http = inject(HttpClient);
 
   // private
-  private readonly baseUrl = ApiUrls.api + '/Auth';
+  private readonly baseUrl = Urls.api + '/Auth';
+  private userData: AuthDTO | null = null;
 
+  // getters
+  get getUserData(){
+    return this.userData;
+  }
 
   // IsAuthenticated
   public isAuthenticated() {
-    return this.http.post<void>(`${this.baseUrl}/IsAuthenticated`, {});
+    return this.http.post<AuthDTO>(`${this.baseUrl}/IsAuthenticated`, {})
+    .pipe(tap((authData) => {
+      this.userData = authData;
+    }));
   }
 
   // IsAdmin
@@ -36,8 +45,15 @@ export class AuthService {
     return this.http.post<void>(`${this.baseUrl}/Login`, loginData);
   }
 
+  // Logout
+  public logout() {
+    this.userData = null;
+
+    return this.http.post<void>(`${this.baseUrl}/Logout`, {});
+  }
+
   // Update tokens
-  public UpdateTokens(){
+  public UpdateTokens() {
     return this.http.post<void>(`${this.baseUrl}/UpdateTokens`, {});
   }
 }

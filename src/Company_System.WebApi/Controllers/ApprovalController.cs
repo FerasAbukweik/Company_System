@@ -1,5 +1,6 @@
 using HR_System.Core.common;
 using HR_System.Core.DTO.Approval;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.ExtensionMethods;
@@ -11,14 +12,26 @@ namespace HR_System.Controllers;
 public class ApprovalController(IApprovalService approvalService,
     ILogger<ApprovalController> logger) : ApplicationControllerBase
 {
-    [HttpGet]
+    [HttpGet("[action]")]
     [Authorize]
-    public async Task<ActionResult<IReadOnlyList<ApprovalDTO>>> GetNeedsApproval(CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyList<ToApproveDTO>>> GetNeedsApproval([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
         var userIdResult = User.GetUserId();
         if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult(logger);
 
-        var result = await approvalService.GetNeedsApprovalAsync(userIdResult.Value, cancellationToken);
+        var result = await approvalService.GetNeedsApprovalAsync(lazyData, userIdResult.Value, cancellationToken);
+
+        return result.ToActionResult(logger);
+    }
+    
+    [HttpGet("[action]")]
+    [Authorize]
+    public async Task<ActionResult<IReadOnlyList<RequestedApproval>>> GetRequested([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
+    {
+        var userIdResult = User.GetUserId();
+        if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult(logger);
+
+        var result = await approvalService.GetRequested(lazyData, userIdResult.Value, cancellationToken);
 
         return result.ToActionResult(logger);
     }

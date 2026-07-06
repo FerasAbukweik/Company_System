@@ -1,4 +1,6 @@
+using System.Linq.Expressions;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,7 @@ public class ApprovalRepository(ApplicationDbContext dbContext) : IApprovalRepos
 
         toUpdate.Status = newStatus;
         
-        return  toUpdate;
+        return toUpdate;
     }
 
     public void Add(Approval approval)
@@ -23,13 +25,45 @@ public class ApprovalRepository(ApplicationDbContext dbContext) : IApprovalRepos
         dbContext.Approvals.Add(approval);
     }
 
-    public async Task<IReadOnlyList<Approval>> GetNeedsApprovalAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Approval>> FilterAsync(Expression<Func<Approval, bool>> filter,Expression<Func<Approval, object>>[]? include = null, CancellationToken cancellationToken = default)
     {
-        var result = await dbContext.Approvals.Where(a => a.ManagerId == userId)
+        var query = dbContext.Approvals.AsQueryable();
+
+        if (include != null)
+        {
+            foreach (var inc in include)
+            {
+                query = query.Include(inc);
+            }
+        }
+
+        return await query
+            .Where(filter)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-        
-        return result;
+    }
+    
+    public async Task<IReadOnlyList<Approval>> LazyGetApprovals(LazyDTO lazyData, 
+        Expression<Func<Approval, bool>> filter,Expression<Func<Approval, object>>[]? include = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.Approvals.AsQueryable();
+
+        if (include != null)
+        {
+            foreach (var inc in include)
+            {
+                query = query.Include(inc);
+            }
+        }
+
+        return await query
+            .Where(filter)
+            .OrderByDescending(a => a.CreatedOn)
+            .Skip(lazyData.Taken)
+            .Take(lazyData.SectionSize)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)

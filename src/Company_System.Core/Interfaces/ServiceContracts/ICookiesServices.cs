@@ -9,5 +9,7 @@ public interface ICookiesServices
     Result AddTokens(AccessAndRefreshTokenDTO tokens);
     Result<T> GetValue<T>(string key);
     Result<string> Get(string key);
+    Result<string> Remove(string key);
+    Result<string> RemoveTokens();
     
 }

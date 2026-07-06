@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using HR_System.Core.common;
 using HR_System.Core.DTO.Auth;
 using HR_System.Core.Enums;
@@ -10,13 +11,19 @@ namespace HR_System.Controllers;
 
 public class AuthController(IAccountService accountService,
     ILogger<AuthController> logger,
-    ITokenService tokenService) : ApplicationControllerBase
+    ITokenService tokenService,
+    ICookiesServices cookiesServices) : ApplicationControllerBase
 {
     [HttpPost("[action]")]
     [Authorize]
     public ActionResult<AuthDTO> IsAuthenticated()
     {
-        return Ok();
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        return Ok(new AuthDTO()
+        {
+            UserName = User.Identity?.Name ?? "Identity is null",
+            Role = role ?? "role is null"
+        });
     }
     
     [HttpPost("[action]")]
@@ -26,7 +33,16 @@ public class AuthController(IAccountService accountService,
         return Ok();
     }
 
-    [Authorize(Roles = nameof(RolesEnum.Admin))]
+    [HttpPost("[action]")]
+    [Authorize]
+    public IActionResult Logout()
+    {
+        cookiesServices.RemoveTokens();
+
+        return Ok();
+    }
+
+    [AllowAnonymous] // only for testing
     [HttpPost("[action]")]
     public async Task<IActionResult> Signup(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
     {

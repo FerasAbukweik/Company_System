@@ -30,7 +30,6 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
     
         return Result.Success();
     }
-
     public Result AddTokens(AccessAndRefreshTokenDTO tokens)
     {
         var accessResult = Add(
@@ -48,8 +47,6 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
             configuration.GetValue<int>("Jwt:RefreshTokenLifeTime")
         );
     }
-    
-    
     public Result<T> GetValue<T>(string key)
     {
         if (httpContextAccessor.HttpContext is null)
@@ -75,6 +72,26 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
             return Result<T>.Failure($"Cookie could not be converted to {typeof(T).Name}", HttpStatusCode.BadRequest);
         }
     }
-
     public Result<string> Get(string key) => GetValue<string>(key);
+    public Result<string> Remove(string key)
+    {
+        // get the value before removing it
+        var removedResult = Get(key);
+
+        // remove the value
+        Add(key, "", -1);
+        
+        // return removed result
+        // --if value doesnt exist this will return error
+        return removedResult;
+    }
+    public Result<string> RemoveTokens()
+    {
+        var removeAccessTokenResult = Remove(cookieKeys.Value.AccessToken);
+        if (!removeAccessTokenResult.IsSuccess) return removeAccessTokenResult;
+
+        var removeRefreshTokenResult = Remove(cookieKeys.Value.RefreshToken);
+
+        return removeRefreshTokenResult;
+    }
 }

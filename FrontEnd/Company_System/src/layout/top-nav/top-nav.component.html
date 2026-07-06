@@ -47,15 +47,48 @@
     </span>
   </button>
   <div class="h-8 w-px bg-outline-light mx-2"></div>
-  <div class="flex items-center gap-2 cursor-pointer group">
+  <div class="flex items-center gap-2 cursor-pointer group relative" (click)="togglePanel()">
     <div class="text-right hidden sm:block">
-      <p class="text-xs font-bold text-corporate-blue">Alex Rivera</p>
-      <p class="text-xs text-text-secondary">Operations Lead</p>
+      <p class="text-xs font-bold text-corporate-blue">{{ authService.getUserData?.userName }}</p>
+      <p class="text-xs text-text-secondary">{{ authService.getUserData?.role }}</p>
     </div>
     <img
       class="w-10 h-10 rounded-full border-2 border-vibrant-turquoise object-cover"
       src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRHfLDf5yvFB-RXlZYcVjs0JD5QW1tZHZ6GAOogBeRzpjiyaNFyCjB79MY5Mtt00Ye2kcKrVvE7tSPysSsSGtBfd5l3xz-daMezIA02TeVKH3-uV5WofKf-Ld-9dqrmLSbLpoTCB3vWFHfaeaWpj_JIuNtOMNTyNYDXg3egWpvOUWs0fbIdeowZSQl4kJbyIo52sBhT46j8Stqov2BWd-xcq3HzaMxoPASeGsWFbBlY94dAzh-GgfGb-7fDGkVRWBIm-cit0bxedQ"
       alt="Alex Rivera Headshot"
     />
+
+    @if (showUserPanel()) {
+      <div
+        class="fixed inset-0 cursor-default"
+        (click)="$event.stopPropagation(); togglePanel()"
+      ></div>
+
+      <div
+        class="absolute right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
+      >
+        <button
+          type="button"
+          class="flex items-center gap-3 px-5 py-2 mx-1 my-1 text-left text-sm font-medium rounded-lg text-error transition-colors hover:bg-red-50 cursor-pointer"
+          (click)="$event.stopPropagation(); logout()"
+        >
+          <span>Logout</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+            />
+          </svg>
+        </button>
+      </div>
+    }
   </div>
 </div>

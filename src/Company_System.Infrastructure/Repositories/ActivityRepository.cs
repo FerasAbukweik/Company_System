@@ -1,6 +1,7 @@
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Interfaces.RepositoryContracts;
+using HR_System.Infrastructure.extensionMethods;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
@@ -12,12 +13,31 @@ public class ActivityRepository(ApplicationDbContext dbContext) : IActivityRepos
         dbContext.Activities.Add(toAdd);
     }
 
-    public async Task<IReadOnlyList<Activity>> LazyGetAllSortedAsync(LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Activity>> LazyGetAllSortedAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
     {
+        // get users under currUser subtree ids
+        var subTreeUserIds = await dbContext.GetSubTreeUserIds(userId).ToListAsync(cancellationToken);
+
         return await dbContext.Activities
-            .OrderByDescending(a => a.CreatedAt)
+                // get activities which where triggered by users under curr user subtree
+            .Where(a => subTreeUserIds.Contains(a.TriggeredById))
+            
+                // include task to use it later for dto
             .Include(a => a.Task)
+            
+                // include approval with its Task to use it later for dto
             .Include(a => a.Approval)
+            .ThenInclude(a => a.Task)
+            
+                // include approval with its userRequesting to use it later for dto
+            .Include(a => a.Approval)
+            .ThenInclude(a => a.UserRequesting)
+            
+                // include approval with its manager to use it later for dto
+            .Include(a => a.Approval)
+            .ThenInclude(a => a.Manager)
+                // for lazy loading
+            .OrderByDescending(a => a.CreatedAt)
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)
             .AsNoTracking()

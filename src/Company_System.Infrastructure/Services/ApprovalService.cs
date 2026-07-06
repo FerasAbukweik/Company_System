@@ -2,40 +2,45 @@ using System.Collections.Immutable;
 using System.Net;
 using HR_System.Core.common;
 using HR_System.Core.Domain.Entities;
-using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.Approval;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
-using Microsoft.AspNetCore.Identity;
 
 namespace HR_System.Infrastructure.Services;
 
 public class ApprovalService(IApprovalRepository approvalRepository,
-    UserManager<ApplicationUser> userManager,
-    ITasksRepository tasksRepository,
     IActivitiesService activitiesService,
     IOrganizationHierarchyRepository hierarchyRepository) : IApprovalService
 {
-    public async Task<Result<IReadOnlyList<ApprovalDTO>>> GetNeedsApprovalAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<ToApproveDTO>>> GetNeedsApprovalAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
     {
-        var result = await approvalRepository.GetNeedsApprovalAsync(userId, cancellationToken);
+        var result = await approvalRepository.LazyGetApprovals( lazyData,
+            (a => (a.ManagerId == userId && a.Status == ApprovalStatusEnum.Pending)),
+            [(a => a.Task!), (a => a.UserRequesting!)],
+            cancellationToken);
 
-        return Result<IReadOnlyList<ApprovalDTO>>.Success(result.Select(r => r.ToDTO()).ToImmutableList());
+        return Result<IReadOnlyList<ToApproveDTO>>.Success(result.Select(a => a.ToToApprovalDTO()).ToImmutableList());
     }
 
-    public async Task<Result<ApprovalDTO>> AddAsync(ApprovalAddDTO toAddApproval, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<RequestedApproval>>> GetRequested(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
     {
-        var generateDescriptionResult =
-            await GenerateApprovalDescription(toAddApproval.TaskId, userId, toAddApproval.Type, cancellationToken);
-        if (!generateDescriptionResult.IsSuccess) return generateDescriptionResult.MapFailure<ApprovalDTO>();
-        
+        var result = await approvalRepository.LazyGetApprovals(lazyData, 
+            (a => a.UserRequestingId == userId),
+            [(a => a.Task!), (a => a.UserRequesting!)],
+            cancellationToken);
+
+        return Result<IReadOnlyList<RequestedApproval>>.Success(result.Select(a => a.ToRequestedApprovalDTO()).ToImmutableList());
+    }
+    public async Task<Result<ToApproveDTO>> AddAsync(ApprovalAddDTO toAddApproval, Guid userId, CancellationToken cancellationToken = default)
+    {
         var userHierarchy = await hierarchyRepository.GetByUserIdAsync(userId, cancellationToken);
         if(userHierarchy is null)
-            return Result<ApprovalDTO>.Failure("User not found in organization hierarchy", HttpStatusCode.BadRequest);
+            return Result<ToApproveDTO>.Failure("User not found in organization hierarchy", HttpStatusCode.BadRequest);
         if (userHierarchy.Parent is null)
-            return Result<ApprovalDTO>.Failure("User has no manager in hierarchy", HttpStatusCode.BadRequest);
+            return Result<ToApproveDTO>.Failure("User has no manager in hierarchy", HttpStatusCode.BadRequest);
         
         var toAdd = new Approval()
         {
@@ -43,7 +48,6 @@ public class ApprovalService(IApprovalRepository approvalRepository,
             Type = toAddApproval.Type,
             TaskId = toAddApproval.TaskId,
             UserRequestingId = userId,
-            Description = generateDescriptionResult.Value!,
         };
         
         // add to DB
@@ -57,23 +61,22 @@ public class ApprovalService(IApprovalRepository approvalRepository,
         }, userId, cancellationToken);
         
         if(!addActitityResult.IsSuccess)
-            return addActitityResult.MapFailure<ApprovalDTO>();
+            return addActitityResult.MapFailure<ToApproveDTO>();
         
         // save changes
         if(!await approvalRepository.SaveChangesAsync(cancellationToken))
-            return Result<ApprovalDTO>.Failure("Failed saving Data to DB");
+            return Result<ToApproveDTO>.Failure("Failed saving Data to DB");
 
-        return Result<ApprovalDTO>.Success(toAdd.ToDTO());
+        return Result<ToApproveDTO>.Success(toAdd.ToToApprovalDTO());
     }
-
-    public async Task<Result<ApprovalDTO>> UpdateStatus(Guid approvalId, ApprovalStatusEnum newStatus,Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<Result<ToApproveDTO>> UpdateStatus(Guid approvalId, ApprovalStatusEnum newStatus,Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var updated = await approvalRepository.UpdateStatus(approvalId, newStatus, cancellationToken);
         if(updated is null)
-            return Result<ApprovalDTO>.Failure("Failed Updating Approval or Approval Doesnt exist");
+            return Result<ToApproveDTO>.Failure("Failed Updating Approval or Approval Doesnt exist");
 
         if (updated.ManagerId != currentUserId)
-            return Result<ApprovalDTO>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
+            return Result<ToApproveDTO>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
         
         // activity type for activity
         var activityType = newStatus switch
@@ -84,49 +87,18 @@ public class ApprovalService(IApprovalRepository approvalRepository,
         };
         
         // add activity
-        var addActitityResult = await activitiesService.AddAsync(new ActivityAddDTO()
+        var addActivityResult = await activitiesService.AddAsync(new ActivityAddDTO()
         {
             Type = activityType,
             ApprovalId = approvalId,
         }, currentUserId, cancellationToken);
         
-        if(!addActitityResult.IsSuccess)
-            return addActitityResult.MapFailure<ApprovalDTO>();
-        
-        if(!await approvalRepository.SaveChangesAsync(cancellationToken))
-            return Result<ApprovalDTO>.Failure("Failed saving Data to DB");
-        
-        return Result<ApprovalDTO>.Success(updated.ToDTO(), HttpStatusCode.NoContent);
-    }
-    
-    
-    
-    
-    private async Task<Result<string>> GenerateApprovalDescription(Guid? taskId, Guid currUserId, ApprovalTypeEnum approvalType, CancellationToken cancellationToken = default)
-    {
-        if (approvalType == ApprovalTypeEnum.Holiday)
-        {
-            var currentRequestUser = await userManager.FindByIdAsync(currUserId.ToString());
-            if(currentRequestUser is null)
-                return Result<string>.Failure("user not found", HttpStatusCode.Unauthorized);
-            
-            string result = $"{currentRequestUser.UserName} is requesting holiday";
-            return Result<string>.Success(result);
-        }
+        if(!addActivityResult.IsSuccess)
+            return addActivityResult.MapFailure<ToApproveDTO>();
 
-        if (approvalType == ApprovalTypeEnum.Task)
-        {
-            if(taskId is null)
-                return Result<string>.Failure("taskId is required", HttpStatusCode.BadRequest);
-            
-            var task = await tasksRepository.GetTaskAsync(taskId.Value, cancellationToken);
-            if(task is null)
-                return  Result<string>.Failure("task not found", HttpStatusCode.NotFound);
+        if (!await approvalRepository.SaveChangesAsync(cancellationToken))
+            return Result<ToApproveDTO>.Failure("no changes happened to DB");
 
-            string result = task.Description;
-            return Result<string>.Success(result);
-        }
-        
-        return Result<string>.Failure("not handled ApprovalType", HttpStatusCode.NotFound);
+        return Result<ToApproveDTO>.Success(updated.ToToApprovalDTO(), HttpStatusCode.NoContent);
     }
 }

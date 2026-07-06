@@ -1,8 +1,24 @@
-<header>
+<header class="flex">
+  <div
+    class="flex-0 flex border-r border-b border-outline-light items-center gap-2 cursor-pointer min-w-[clamp(150px,30vw,300px)] h-16 px-4"
+    (click)="sideBarService.toggleSideBar()"
+  >
+    <div class="w-10 h-10 bg-corporate-blue rounded-xl flex items-center justify-center">
+      <span
+        class="material-symbols-outlined text-surface-lowest"
+        style="font-variation-settings: 'FILL' 1"
+        >hub</span
+      >
+    </div>
+    <div>
+      <h1 class="text-xl font-bold text-corporate-blue tracking-tight">FlexiOps</h1>
+      <p class="text-xs font-medium text-text-secondary">Enterprise SaaS</p>
+    </div>
+  </div>
   <nav app-top-nav></nav>
 </header>
 
-<div class="flex">
+<div class="flex relative">
   <aside app-side-bar [navItems]="sideBarItems"></aside>
 
   <main class="max-w-[1800px] mx-auto">

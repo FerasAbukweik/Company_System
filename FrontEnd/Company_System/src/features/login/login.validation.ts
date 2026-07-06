@@ -3,7 +3,7 @@ import { regexPatterns } from "../../core/constants/regexPatterns";
 
 const validators = {
     email: (v: string) => ((!v || !v.trim()) && "Email is required") || (!regexPatterns.email.test(v) && "Invalid email format") || "",
-    password: (v: string) => ((!v || !v.trim()) && "Password is required") || (!regexPatterns.password.test(v) && "Weak password") || "",
+    password: (v: string) => ((!v || !v.trim()) && "Password is required") || "",
 }
 
 

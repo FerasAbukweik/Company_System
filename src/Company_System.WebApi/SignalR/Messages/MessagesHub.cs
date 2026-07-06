@@ -1,14 +1,13 @@
 using HR_System.Core.Constraints;
 using HR_System.Core.DTO.Message;
 using HR_System.Core.Interfaces.ServiceContracts;
+using HR_System.ExtensionMethods;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 
 namespace HR_System.SignalR.Messages;
 
-public class MessagesHub(ICookiesServices cookiesServices,
-    IOptions<CookieKeys> cookieKeys,
-    IMessageService messageService) : Hub<IMessagesHub>
+public class MessagesHub(IMessageService messageService) : Hub<IMessagesHub>
 {
     public override async Task OnConnectedAsync()
     {
@@ -20,10 +19,10 @@ public class MessagesHub(ICookiesServices cookiesServices,
 
     public async Task SendMessage(MessageAddDTO newMessage)
     {
-        var userIdResult = cookiesServices.GetValue<Guid>(cookieKeys.Value.AccessToken);
-        if (!userIdResult.IsSuccess) return;
+        var otherUserId = GetOtherPersonId();
+        if (otherUserId == null) return;
 
-        var addMessageResult = await messageService.AddAsync(newMessage, userIdResult.Value);
+        var addMessageResult = await messageService.AddAsync(newMessage, otherUserId.Value);
         if(!addMessageResult.IsSuccess) return;
         
         var groupName = generateGroupName();
@@ -61,20 +60,19 @@ public class MessagesHub(ICookiesServices cookiesServices,
 
     private string? generateGroupName()
     {
-        var userIdResult = cookiesServices.GetValue<Guid>(cookieKeys.Value.AccessToken);
-        if (!userIdResult.IsSuccess) return null;
+        var userIdResult = GetUserId();
+        if (userIdResult == null) return null;
 
         var otherUserId = GetOtherPersonId();
         if(otherUserId is null) return null;
+
+        if (string.Compare(userIdResult.Value.ToString(), otherUserId.Value.ToString(), StringComparison.Ordinal) > 0)
+            return $"{userIdResult.Value}-{otherUserId.Value}";
         
-        
-        if (string.Compare(userIdResult.Value.ToString(), otherUserId, StringComparison.Ordinal) > 0)
-            return $"{userIdResult.Value}-{otherUserId}";
-        
-        return $"{otherUserId}-{userIdResult.Value}";
+        return $"{otherUserId.Value}-{userIdResult.Value}";
     }
 
-    private string? GetOtherPersonId()
+    private Guid? GetOtherPersonId()
     {
         var httpContext = Context.GetHttpContext();
         if(httpContext == null)
@@ -83,6 +81,21 @@ public class MessagesHub(ICookiesServices cookiesServices,
         if (!httpContext.Request.Query.TryGetValue("userId", out var idString))
             return null;
         
-        return idString;
+        if(!Guid.TryParse(idString, out var id))
+            return null;
+        
+        return id;
+    }
+
+    private Guid? GetUserId()
+    {
+        var httpContext = Context.GetHttpContext();
+        if(httpContext == null)
+            return null;
+
+        var result = httpContext.User.GetUserId();
+        if(!result.IsSuccess) return null;
+        
+        return result.Value;
     }
 }

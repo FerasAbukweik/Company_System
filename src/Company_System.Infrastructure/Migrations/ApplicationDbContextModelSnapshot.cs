@@ -28,14 +28,16 @@ namespace HR_System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApprovalId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("TaskId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("TriggeredById")
                         .HasColumnType("uniqueidentifier");
@@ -44,10 +46,6 @@ namespace HR_System.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApprovalId");
-
-                    b.HasIndex("TaskId");
 
                     b.HasIndex("TriggeredById");
 
@@ -123,9 +121,7 @@ namespace HR_System.Infrastructure.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.HasIndex("TaskId")
-                        .IsUnique()
-                        .HasFilter("[TaskId] IS NOT NULL");
+                    b.HasIndex("TaskId");
 
                     b.HasIndex("UserRequestingId");
 
@@ -427,25 +423,11 @@ namespace HR_System.Infrastructure.Migrations
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.Activity", b =>
                 {
-                    b.HasOne("HR_System.Core.Domain.Entities.Approval", "Approval")
-                        .WithMany("Activities")
-                        .HasForeignKey("ApprovalId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("HR_System.Core.Domain.Entities.AppTask", "Task")
-                        .WithMany("Activities")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "TriggeredBy")
                         .WithMany("Activities")
                         .HasForeignKey("TriggeredById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Approval");
-
-                    b.Navigation("Task");
 
                     b.Navigation("TriggeredBy");
                 });
@@ -455,13 +437,13 @@ namespace HR_System.Infrastructure.Migrations
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Manager")
                         .WithMany("CreatedTasks")
                         .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
                         .WithMany("Tasks")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Manager");
@@ -474,18 +456,18 @@ namespace HR_System.Infrastructure.Migrations
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Manager")
                         .WithMany("ToApprove")
                         .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR_System.Core.Domain.Entities.AppTask", "Task")
-                        .WithOne("Approval")
-                        .HasForeignKey("HR_System.Core.Domain.Entities.Approval", "TaskId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany("Approvals")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "UserRequesting")
                         .WithMany("Approvals")
                         .HasForeignKey("UserRequestingId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Manager");
@@ -500,13 +482,13 @@ namespace HR_System.Infrastructure.Migrations
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Receiver");
@@ -595,14 +577,7 @@ namespace HR_System.Infrastructure.Migrations
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.AppTask", b =>
                 {
-                    b.Navigation("Activities");
-
-                    b.Navigation("Approval");
-                });
-
-            modelBuilder.Entity("HR_System.Core.Domain.Entities.Approval", b =>
-                {
-                    b.Navigation("Activities");
+                    b.Navigation("Approvals");
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>

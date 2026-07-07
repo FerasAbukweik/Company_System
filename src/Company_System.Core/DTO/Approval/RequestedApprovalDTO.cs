@@ -2,7 +2,7 @@ using HR_System.Core.Enums;
 
 namespace HR_System.Core.DTO.Approval;
 
-public class RequestedApproval
+public class RequestedApprovalDTO
 {
     public required Guid Id { get; set; }
     public required DateTime CreatedOn { get; set; }

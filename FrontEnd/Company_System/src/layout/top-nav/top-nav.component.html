@@ -58,18 +58,18 @@
       alt="Alex Rivera Headshot"
     />
 
-    @if (showUserPanel()) {
+    @if (showUserMenu()) {
       <div
         class="fixed inset-0 cursor-default"
         (click)="$event.stopPropagation(); togglePanel()"
       ></div>
 
       <div
-        class="absolute right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
+        class="absolute p-1 right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
       >
         <button
           type="button"
-          class="flex items-center gap-3 px-5 py-2 mx-1 my-1 text-left text-sm font-medium rounded-lg text-error transition-colors hover:bg-red-50 cursor-pointer"
+          class="flex items-center gap-3 px-5 py-2 text-left text-sm font-medium rounded-lg text-error transition-colors hover:bg-red-50 cursor-pointer"
           (click)="$event.stopPropagation(); logout()"
         >
           <span>Logout</span>

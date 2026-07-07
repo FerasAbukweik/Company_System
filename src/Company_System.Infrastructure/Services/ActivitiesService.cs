@@ -15,9 +15,9 @@ public class ActivitiesService(IActivityRepository activityRepository) : IActivi
         var activity = new Activity
         {
             Type = toAdd.Type,
-            TaskId = toAdd.TaskId,
-            ApprovalId = toAdd.ApprovalId,
             TriggeredById = triggeredById,
+            Title = toAdd.Title,
+            Description = toAdd.Description 
         };
 
         activityRepository.Add(activity);

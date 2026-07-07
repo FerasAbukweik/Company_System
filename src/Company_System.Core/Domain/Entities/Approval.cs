@@ -29,8 +29,6 @@ public class Approval
     public required Guid ManagerId { get; set; }
     public ApplicationUser? Manager { get; set; }
     
-    public List<Activity> Activities { get; set; } = [];
-    
     
     // functions
     public ToApproveDTO ToToApprovalDTO()
@@ -46,26 +44,26 @@ public class Approval
         {
             Id = Id,
             CreatedOn = CreatedOn,
-            RequesterName = "You",
+            RequesterName = UserRequesting?.UserName ?? "username not found",
             Body = body
         };
     }
     
     
-    public RequestedApproval ToRequestedApprovalDTO()
+    public RequestedApprovalDTO ToRequestedApprovalDTO()
     {
         string body = Type switch
         {
-            ApprovalTypeEnum.Holiday => "is requesting holiday",
-            ApprovalTypeEnum.Task => $"has completed task: {Task?.Title ?? "missing take"}",
+            ApprovalTypeEnum.Holiday => "are requesting holiday",
+            ApprovalTypeEnum.Task => $"have completed task: {Task?.Title ?? "unknown task"}",
             _ => "unhandled task type"
         };
         
-        return new RequestedApproval()
+        return new RequestedApprovalDTO()
         {
             Id = Id,
             CreatedOn = CreatedOn,
-            RequesterName = UserRequesting?.UserName ?? "username not found",
+            RequesterName = "You",
             Body = body,
             Status = Status
         };

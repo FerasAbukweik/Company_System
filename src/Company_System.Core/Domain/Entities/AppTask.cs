@@ -38,10 +38,8 @@ public class AppTask
     [Required]
     public required Guid ManagerId { get; set; }
     public ApplicationUser? Manager { get; set; }
-    
-    public Approval? Approval { get; set; }
-    
-    public List<Activity> Activities { get; set; } = [];
+
+    public List<Approval> Approvals { get; set; } = [];
     
     
     

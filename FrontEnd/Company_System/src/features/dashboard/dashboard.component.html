@@ -2,7 +2,7 @@
   <div>
     <h2 class="text-2xl font-semibold text-corporate-blue tracking-tight">Operational Overview</h2>
     <p class="text-sm text-text-secondary mt-1">
-      Welcome back, Alex. You have 4 tasks requiring immediate attention today.
+      Welcome back, {{ authService.getUserData?.userName }}.
     </p>
   </div>
 </div>
@@ -35,7 +35,10 @@
         </button>
       </div>
 
-      <div class="space-y-4 max-h-100 overflow-y-scroll">
+      <div
+        class="space-y-4 max-h-100 overflow-y-scroll"
+        [class.min-h-30]="!!showActivityStatusMenuFor()"
+      >
         @for (task of tasksService.getTasks(); track task.id) {
           <div
             class="group relative pr-18 flex gap-y-2 flex-wrap items-center justify-between p-4 bg-surface-base border border-outline-light rounded-lg hover:border-vibrant-turquoise transition-colors border-l-4"
@@ -69,7 +72,7 @@
             <div class="flex items-center gap-6 ml-14">
               <div class="text-right">
                 <p class="text-xs font-bold">
-                  {{ task.deadline | date }}
+                  {{ task.deadline | date: 'd/M/y h:m a' }}
                 </p>
                 <p class="text-xs text-text-secondary">Deadline</p>
               </div>
@@ -78,6 +81,7 @@
               }}</span>
               <button
                 class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer hover:bg-surface-low rounded-full p-2 text-text-secondary hover:text-corporate-blue transition-all"
+                (click)="ToggleShowActivityStatusMenu(task.id)"
               >
                 <span class="material-symbols-outlined"
                   ><svg
@@ -96,6 +100,14 @@
                   </svg>
                 </span>
               </button>
+              @if (showActivityStatusMenuFor() == task.id) {
+                <app-drop-down-menu
+                  class="top-13 right-4"
+                  [options]="['Completed']"
+                  (close)="showActivityStatusMenuFor.set('')"
+                  (selectOption)="updateTaskStatus(task.id, $event, task.status)"
+                />
+              }
             </div>
           </div>
         } @empty {
@@ -110,11 +122,11 @@
       </div>
     </div>
 
-    <div class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm">
-      <div class="flex gap-4 items-center mb-6">
+    <div class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm @container">
+      <div class="flex flex-wrap gap-4 @max-[530px]:justify-center items-center mb-6">
         <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">Approvals</h3>
         <div
-          class="font-bold relative isolate flex justify-around items-center text-center gap-2 text-xs mr-auto w-50 h-12 border rounded-xl border-outline-light"
+          class="min-w-42.5 font-bold relative isolate flex justify-around items-center text-center gap-2 text-xs @min-[530px]:mr-auto w-50 h-12 border rounded-xl border-outline-light"
         >
           <button
             [class]="
@@ -142,9 +154,6 @@
             [class.translate-x-full]="currApproval() == 'requested'"
           ></div>
         </div>
-        <span class="bg-error text-surface-lowest rounded-full px-2 py-0.5 text-xs font-medium">{{
-          generateApprovalCountString()
-        }}</span>
         <button class="cursor-pointer p-2 hover:bg-surface-low rounded-full transition-colors">
           <span class="material-symbols-outlined text-text-secondary"
             ><svg
@@ -166,8 +175,8 @@
         </button>
       </div>
       <div>
-        @if (currApproval() == 'toApprove' && !approvalService.getIsLoadingToApprove()) {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100">
+        @if (currApproval() == 'toApprove') {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
             @for (approval of approvalService.getToApprove(); track approval.id) {
               <div
                 class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden group"
@@ -179,9 +188,9 @@
                     </div>
                   </div>
                 </div>
-                <div class="flex flex-wrap justify-between gap-4">
-                  <p class="text-text-primary mb-4 line-clamp-2">{{ approval.body }}</p>
-                  <p class="text-sm">{{ approval.createdOn | date }}</p>
+                <div class="flex flex-wrap justify-between gap-x-4 gap-y-2 mb-4">
+                  <p class="text-text-primary line-clamp-2">{{ approval.body }}</p>
+                  <p class="text-sm">{{ approval.createdOn | date: 'd/M/y h:m a' }}</p>
                 </div>
                 <div class="flex gap-2">
                   <button
@@ -211,11 +220,11 @@
             <div appIsVisable (visible)="approvalService.loadMoreToApprove()"></div>
           </div>
         }
-        @if (currApproval() == 'requested' && !approvalService.getIsLoadingRequestedApprovals()) {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100">
+        @if (currApproval() == 'requested') {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
             @for (approval of approvalService.getRequestedApprovals(); track approval.id) {
               <div
-                class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden group"
+                class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden"
               >
                 <div class="flex justify-between items-start mb-4">
                   <div class="text-lg flex items-center gap-2">
@@ -224,12 +233,12 @@
                     </div>
                   </div>
                 </div>
-                <div class="flex flex-wrap justify-between gap-4">
-                  <p class="text-text-primary mb-4 line-clamp-2">{{ approval.body }}</p>
-                  <p class="text-sm">{{ approval.createdOn | date }}</p>
+                <div class="flex flex-wrap justify-between gap-x-4 gap-y-2 mb-4">
+                  <p class="text-text-primary line-clamp-2">{{ approval.body }}</p>
+                  <p class="text-sm">{{ approval.createdOn | date: 'd/M/y h:m a' }}</p>
                 </div>
                 <div
-                  class="text-center cursor-pointer flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold hover:opacity-90 transition-opacity"
+                  class="text-center flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold"
                 >
                   {{ toApprovalStatusString(approval.status) }}
                 </div>
@@ -312,7 +321,7 @@
                   <span class="whitespace-pre-line">{{ activity.description }}</span>
                 </p>
                 <span class="text-xs text-text-secondary mt-1 block">{{
-                  activity.createdAt | date
+                  activity.createdAt | date: 'd/M/y h:m a'
                 }}</span>
               </div>
             </div>

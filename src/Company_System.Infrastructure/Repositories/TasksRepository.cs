@@ -17,13 +17,12 @@ public class TasksRepository(ApplicationDbContext dbContext,
 
     public async Task<IReadOnlyList<AppTask>> LazyGetUserTasksAsync(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Tasks.Where(t => t.UserId == userId)
+        return await dbContext.Tasks.Where(t => (t.UserId == userId && t.Status != TaskStatusEnum.Completed))
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
-
     public async Task<AppTask?> UpdateStatusAsync(Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
         var toEdit = await dbContext.Tasks.SingleOrDefaultAsync(t => t.Id == taskId, cancellationToken);
@@ -33,13 +32,13 @@ public class TasksRepository(ApplicationDbContext dbContext,
 
         return toEdit;
     }
-
     public async Task<AppTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken = default)
     {
         var cachedValue = await cache.GetAsync<AppTask>($"Task-Id-{taskId}", cancellationToken);
         if(cachedValue != null) return cachedValue;
         
         var result = await dbContext.Tasks
+            .Include(t => t.User)
             .AsNoTracking()
             .SingleOrDefaultAsync(t => t.Id == taskId, cancellationToken);
 
@@ -47,7 +46,17 @@ public class TasksRepository(ApplicationDbContext dbContext,
 
         return result;
     }
+    public async Task<AppTask?> RemoveAsync(Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var toRemove = await dbContext.Tasks.SingleOrDefaultAsync(t => t.Id == taskId, cancellationToken);
+        if (toRemove == null) return null;
 
+        await cache.RemoveAsync($"Task-Id-{taskId}", cancellationToken);
+        
+        dbContext.Tasks.Remove(toRemove);
+
+        return toRemove;
+    }
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return (await dbContext.SaveChangesAsync(cancellationToken)) > 0;

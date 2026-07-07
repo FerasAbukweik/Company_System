@@ -10,5 +10,6 @@ public interface ITasksRepository
     Task<IReadOnlyList<AppTask>> LazyGetUserTasksAsync(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default);
     Task<AppTask?> UpdateStatusAsync(Guid taskId, TaskStatusEnum newStatus, CancellationToken cancellationToken = default);
     Task<AppTask?> GetTaskAsync(Guid taskId, CancellationToken cancellationToken = default);
+    Task<AppTask?> RemoveAsync(Guid taskId, CancellationToken cancellationToken = default);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

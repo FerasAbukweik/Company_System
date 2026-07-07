@@ -1,12 +1,10 @@
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class OrganizationHierarchyRepository(ApplicationDbContext dbContext,
-    IRedisService cache) : IOrganizationHierarchyRepository
+public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : IOrganizationHierarchyRepository
 {
     public void Add(OrganizationHierarchy toAdd)
     {
@@ -43,7 +41,6 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext,
         if (toRemove == null) return null;
         
         dbContext.OrganizationHierarchies.Remove(toRemove);
-        await cache.RemoveAsync($"OrganizationHierarchy-userId-{toRemove.UserId}", cancellationToken);
         
 
         return toRemove;
@@ -51,17 +48,10 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext,
 
     public async Task<OrganizationHierarchy?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var cachedValue = await cache.GetAsync<OrganizationHierarchy>($"OrganizationHierarchy-userId-{userId}", cancellationToken);
-        if(cachedValue != null) return cachedValue;
-        
         var actualValue = await dbContext.OrganizationHierarchies
             .Include(o => o.Parent)
-            .Include(o => o.User)
-            .Include(o => o.Children)
             .SingleOrDefaultAsync(o => o.UserId == userId, cancellationToken);
         
-        if(actualValue != null) await cache.SetAsync($"OrganizationHierarchy-userId-{userId}", actualValue, cancellationToken);
-
         return actualValue;
     }
     

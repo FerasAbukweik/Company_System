@@ -9,11 +9,13 @@ import { ActivitiesService } from '../../core/services/client/activities-service
 import { ActivityTypeEnum } from '../../core/enums/activity-type-enum';
 import { HeroIcon } from '../../core/constants/hero-icon-d';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { DropDownMenuComponent } from '../../shared/components/drop-down-menu/drop-down-menu.component';
+import { AuthService } from '../../core/services/api/Auth-api-service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, IsVisableDirective, DatePipe, LoadingComponent],
+  imports: [CommonModule, IsVisableDirective, DatePipe, LoadingComponent, DropDownMenuComponent],
   templateUrl: './dashboard.component.html',
   host: {
     class: 'text-text-primary min-h-screen font-sans p-4 block',
@@ -24,9 +26,11 @@ export class DashboardComponent {
   protected readonly tasksService = inject(TasksService);
   protected readonly approvalService = inject(ApprovalService);
   protected readonly activitiesService = inject(ActivitiesService);
+  protected readonly authService = inject(AuthService);
 
   // signals
-  protected currApproval = signal<'toApprove' | 'requested'>('toApprove');
+  currApproval = signal<'toApprove' | 'requested'>('toApprove');
+  showActivityStatusMenuFor = signal<string>('');
 
   // methods
 
@@ -45,17 +49,6 @@ export class DashboardComponent {
     if (changeTo == this.currApproval()) return;
 
     this.currApproval.set(changeTo);
-  }
-
-  // generate approval count string based on current page
-  generateApprovalCountString() {
-    if (this.currApproval() == 'requested')
-      return this.approvalService.getRequestedApprovalsCount() + ' Requested';
-
-    if (this.currApproval() == 'toApprove')
-      return this.approvalService.getToApproveCount() + ' Needs Approval';
-
-    return 'Unhandled State';
   }
 
   // get sutable activity icon ---------------------------------------------------------
@@ -98,5 +91,18 @@ export class DashboardComponent {
 
     if (this.currApproval() == 'requested') this.approvalService.loadMoreRequestedApprovals();
     if (this.currApproval() == 'toApprove') this.approvalService.loadMoreToApprove();
+  }
+
+  ToggleShowActivityStatusMenu(showForId: string) {
+    this.showActivityStatusMenuFor.update(curr => !!curr ? '' : showForId);
+  }
+
+  // on select new task status
+  updateTaskStatus(taskId: string, newStatusIdx: number, currStatus: TaskStatusEnum) {
+    this.showActivityStatusMenuFor.set('');
+
+    if (currStatus == newStatusIdx) return; // TODO show toast
+
+    this.tasksService.updateTaskStatus(taskId, newStatusIdx);
   }
 }

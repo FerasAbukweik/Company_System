@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class ApprovalController(IApprovalService approvalService,
-    ILogger<ApprovalController> logger) : ApplicationControllerBase
+    ILogger<ApprovalController> logger,
+    ITasksApprovalsService tasksApprovalsService) : ApplicationControllerBase
 {
     [HttpGet("[action]")]
     [Authorize]
@@ -26,7 +27,7 @@ public class ApprovalController(IApprovalService approvalService,
     
     [HttpGet("[action]")]
     [Authorize]
-    public async Task<ActionResult<IReadOnlyList<RequestedApproval>>> GetRequested([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyList<RequestedApprovalDTO>>> GetRequested([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
         var userIdResult = User.GetUserId();
         if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult(logger);
@@ -44,7 +45,7 @@ public class ApprovalController(IApprovalService approvalService,
         if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult(logger);
 
         Result result =
-            await approvalService.UpdateStatus(approvalId, newStatus, userIdResult.Value, cancellationToken);
+            await tasksApprovalsService.UpdateApprovalStatus(approvalId, newStatus, userIdResult.Value, cancellationToken);
         
         return result.ToActionResult(logger);
     }

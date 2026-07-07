@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class TasksController(ITasksService tasksService,
-    ILogger<TasksController> logger) : ApplicationControllerBase
+    ILogger<TasksController> logger,
+    ITasksApprovalsService tasksApprovalsService) : ApplicationControllerBase
 {
     [HttpGet]
     [Authorize]
@@ -26,13 +27,13 @@ public class TasksController(ITasksService tasksService,
 
     [HttpPut("[action]/{taskId:guid}")]
     [Authorize]
-    public async Task<IActionResult> Update([FromRoute]Guid taskId, [FromQuery] TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateStatus([FromRoute]Guid taskId, [FromQuery]TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)
             return ((Result)userId).ToActionResult(logger);
 
-        Result result = await tasksService.UpdateStatusAsync(userId.Value, taskId, newStatus, cancellationToken);
+        Result result = await tasksApprovalsService.UpdateTaskStatusAsync(userId.Value, taskId, newStatus, cancellationToken);
         return result.ToActionResult(logger);
     }
 

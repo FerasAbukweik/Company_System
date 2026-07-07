@@ -22,20 +22,6 @@ public class ActivityRepository(ApplicationDbContext dbContext) : IActivityRepos
                 // get activities which where triggered by users under curr user subtree
             .Where(a => subTreeUserIds.Contains(a.TriggeredById))
             
-                // include task to use it later for dto
-            .Include(a => a.Task)
-            
-                // include approval with its Task to use it later for dto
-            .Include(a => a.Approval)
-            .ThenInclude(a => a.Task)
-            
-                // include approval with its userRequesting to use it later for dto
-            .Include(a => a.Approval)
-            .ThenInclude(a => a.UserRequesting)
-            
-                // include approval with its manager to use it later for dto
-            .Include(a => a.Approval)
-            .ThenInclude(a => a.Manager)
                 // for lazy loading
             .OrderByDescending(a => a.CreatedAt)
             .Skip(lazyData.Taken)

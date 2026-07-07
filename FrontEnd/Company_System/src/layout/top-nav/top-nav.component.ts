@@ -23,7 +23,7 @@ export class TopNavComponent {
   private readonly activitiesService = inject(ActivitiesService);
 
   // signals
-  showUserPanel = signal<boolean>(false);
+  showUserMenu = signal<boolean>(false);
 
   // methods
 
@@ -43,6 +43,6 @@ export class TopNavComponent {
 
   // toggle show panel
   togglePanel() {
-    this.showUserPanel.update((curr) => !curr);
+    this.showUserMenu.update((curr) => !curr);
   }
 }

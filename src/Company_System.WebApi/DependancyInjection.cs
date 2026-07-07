@@ -63,6 +63,7 @@ public static class WebApiDependencyInjectionExtensionMethod
         services.AddOpenApi();
         services.AddHttpContextAccessor();
         services.AddScoped<ICookiesServices, CookiesServices>();
+        services.AddScoped<IClaimsService,ClaimsService>();
         services.AddSignalR(op => op.EnableDetailedErrors = true);
         services.Configure<CookieKeys>(configuration.GetSection("CookieKeys"));
         

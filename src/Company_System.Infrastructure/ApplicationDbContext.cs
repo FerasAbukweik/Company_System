@@ -41,32 +41,32 @@ protected override void OnModelCreating(ModelBuilder builder)
         .HasOne(t => t.User)
         .WithMany(u => u.Tasks)
         .HasForeignKey(t => t.UserId)
-        .OnDelete(DeleteBehavior.NoAction); 
+        .OnDelete(DeleteBehavior.Restrict); 
     
     builder.Entity<AppTask>()
         .HasOne(t => t.Manager)
         .WithMany(u => u.CreatedTasks)
         .HasForeignKey(t => t.ManagerId)
-        .OnDelete(DeleteBehavior.NoAction);
+        .OnDelete(DeleteBehavior.Restrict);
     
     // Approvals relations ----------------------------------------------------------------
     builder.Entity<Approval>()
         .HasOne(a => a.Task)
-        .WithOne(t => t.Approval)
-        .HasForeignKey<Approval>(a => a.TaskId)
-        .OnDelete(DeleteBehavior.Cascade);
+        .WithMany(t => t.Approvals)
+        .HasForeignKey(a => a.TaskId)
+        .OnDelete(DeleteBehavior.Restrict);
 
     builder.Entity<Approval>()
         .HasOne(a => a.UserRequesting)
         .WithMany(u => u.Approvals)
         .HasForeignKey(a => a.UserRequestingId)
-        .OnDelete(DeleteBehavior.NoAction);
+        .OnDelete(DeleteBehavior.Restrict);
     
     builder.Entity<Approval>()
         .HasOne(a => a.Manager)
         .WithMany(u => u.ToApprove)
         .HasForeignKey(a => a.ManagerId)
-        .OnDelete(DeleteBehavior.NoAction);
+        .OnDelete(DeleteBehavior.Restrict);
         
     
     // Activity relations ------------------------------------------------------------
@@ -76,31 +76,18 @@ protected override void OnModelCreating(ModelBuilder builder)
         .HasForeignKey(a => a.TriggeredById)
         .OnDelete(DeleteBehavior.Cascade);
     
-    builder.Entity<Activity>()
-        .HasOne(a => a.Task)
-        .WithMany(t => t.Activities)
-        .HasForeignKey(a => a.TaskId)
-        .OnDelete(DeleteBehavior.NoAction);
-    
-    builder.Entity<Activity>()
-        .HasOne(a => a.Approval)
-        .WithMany(a => a.Activities)
-        .HasForeignKey(a => a.ApprovalId)
-        .OnDelete(DeleteBehavior.NoAction);
-        
-        
     // Message relations ------------------------------------------------------------
     builder.Entity<Message>()
         .HasOne(m => m.Sender)
         .WithMany(s => s.SentMessages)
         .HasForeignKey(m => m.SenderId)
-        .OnDelete(DeleteBehavior.NoAction);
+        .OnDelete(DeleteBehavior.Restrict);
 
     builder.Entity<Message>()
         .HasOne(m => m.Receiver)
         .WithMany(r => r.ReceivedMessages)
         .HasForeignKey(m => m.ReceiverId)
-        .OnDelete(DeleteBehavior.NoAction);
+        .OnDelete(DeleteBehavior.Restrict);
 }
     
     

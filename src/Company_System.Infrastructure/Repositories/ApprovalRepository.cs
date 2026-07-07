@@ -11,7 +11,9 @@ public class ApprovalRepository(ApplicationDbContext dbContext) : IApprovalRepos
 {
     public async Task<Approval?> UpdateStatus(Guid approvalId, ApprovalStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
-        var toUpdate = await dbContext.Approvals.SingleOrDefaultAsync(a => a.Id == approvalId, cancellationToken);
+        var toUpdate = await dbContext.Approvals
+            .Include(a => a.Task)
+            .SingleOrDefaultAsync(a => a.Id == approvalId, cancellationToken);
         if (toUpdate == null)
             return null;
 

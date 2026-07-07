@@ -10,7 +10,7 @@ import { ActivityTypeEnum } from '../../core/enums/activity-type-enum';
 import { HeroIcon } from '../../core/constants/hero-icon-d';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { DropDownMenuComponent } from '../../shared/components/drop-down-menu/drop-down-menu.component';
-import { AuthService } from '../../core/services/api/Auth-api-service';
+import { AuthService } from '../../core/services/api/Auth-service';
 
 @Component({
   selector: 'app-dashboard',
@@ -66,20 +66,20 @@ export class DashboardComponent {
   private isActivityTypeCompleted(type: ActivityTypeEnum) {
     return (
       type == ActivityTypeEnum.ApprovalApproved ||
-      ActivityTypeEnum.TaskAdded ||
-      ActivityTypeEnum.TaskCompleted
+      type == ActivityTypeEnum.TaskAdded ||
+      type == ActivityTypeEnum.TaskCompleted
     );
   }
 
   private isActivityTypePending(type: ActivityTypeEnum) {
-    return type == ActivityTypeEnum.ApprovalPending || ActivityTypeEnum.TaskPendingApproval;
+    return type == ActivityTypeEnum.ApprovalPending || type == ActivityTypeEnum.TaskPendingApproval;
   }
 
   private isActivityTypeRejected(type: ActivityTypeEnum) {
     return (
       type == ActivityTypeEnum.ApprovalRejected ||
-      ActivityTypeEnum.MissingType ||
-      ActivityTypeEnum.TaskRejected
+      type == ActivityTypeEnum.MissingType ||
+      type == ActivityTypeEnum.TaskRejected
     );
   }
 
@@ -87,14 +87,15 @@ export class DashboardComponent {
 
   // reset approval
   resetApproval() {
-    this.approvalService.reset();
+    this.approvalService.resetRequested();
+    this.approvalService.resetToApprova();
 
     if (this.currApproval() == 'requested') this.approvalService.loadMoreRequestedApprovals();
     if (this.currApproval() == 'toApprove') this.approvalService.loadMoreToApprove();
   }
 
   ToggleShowActivityStatusMenu(showForId: string) {
-    this.showActivityStatusMenuFor.update(curr => !!curr ? '' : showForId);
+    this.showActivityStatusMenuFor.update((curr) => (!!curr ? '' : showForId));
   }
 
   // on select new task status

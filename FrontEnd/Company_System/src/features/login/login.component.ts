@@ -4,7 +4,7 @@ import { ILoginForm } from './login.model';
 import { loginValidators } from './login.validation';
 import { KeyValuePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/api/Auth-api-service';
+import { AuthService } from '../../core/services/api/Auth-service';
 import { LoginDTO } from '../../core/dto/login-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';

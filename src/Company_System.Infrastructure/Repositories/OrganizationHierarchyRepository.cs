@@ -50,6 +50,7 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
     {
         var actualValue = await dbContext.OrganizationHierarchies
             .Include(o => o.Parent)
+            .AsNoTracking()
             .SingleOrDefaultAsync(o => o.UserId == userId, cancellationToken);
         
         return actualValue;

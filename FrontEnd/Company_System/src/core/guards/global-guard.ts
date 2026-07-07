@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
-import { AuthService } from '../services/api/Auth-api-service';
+import { AuthService } from '../services/api/Auth-service';
 import { firstValueFrom } from 'rxjs';
 
 export const globalGuard: CanMatchFn = async () => {

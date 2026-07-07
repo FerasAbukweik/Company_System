@@ -21,17 +21,19 @@ public class TasksApprovalsService(
         var updatedResult = await tasksService.UpdateStatusAsync(taskId, newStatus, currentUserId, cancellationToken);
         if (!updatedResult.IsSuccess) return updatedResult;
 
-        // add approval
-        // it also does save changes
-        var addApprovalResult = await approvalService.AddAsync(new ApprovalAddDTO()
-            {
-                Type = ApprovalTypeEnum.Task,
-                TaskId = taskId
-            },
-            currentUserId, cancellationToken);
+        // if new status is completed add approval
+        if (newStatus == TaskStatusEnum.Completed)
+        {
+            var addApprovalResult = await approvalService.AddAsync(new ApprovalAddDTO()
+                {
+                    Type = ApprovalTypeEnum.Task,
+                    TaskId = taskId
+                },
+                currentUserId, cancellationToken);
 
-        if (!addApprovalResult.IsSuccess)
-            return addApprovalResult.MapFailure<TaskDTO>();
+            if (!addApprovalResult.IsSuccess)
+                return addApprovalResult.MapFailure<TaskDTO>();
+        }
 
         return updatedResult;
     }
@@ -48,12 +50,12 @@ public class TasksApprovalsService(
         if (updated.Type == ApprovalTypeEnum.Task && updated.TaskId != null && newStatus == ApprovalStatusEnum.Rejected)
         {
             // also saves changes
-            var updateTaskResult = await UpdateTaskStatusAsync(currentUserId, updated.TaskId.Value, TaskStatusEnum.Rejected, cancellationToken);
+            var updateTaskResult = await tasksService.UpdateStatusAsync(updated.TaskId.Value, TaskStatusEnum.Rejected, currentUserId, cancellationToken);
             if (!updateTaskResult.IsSuccess) return updateTaskResult.MapFailure<RequestedApprovalDTO>();
         }
 
         
-        // add activity
+        // add activity ------
         
         var updatedWithInclude = await approvalRepository.FilterAsync(a => a.Id == updated.Id,
             [a => a.Task!, a => a.UserRequesting!, a => a.Manager!],

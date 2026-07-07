@@ -174,87 +174,83 @@
           </span>
         </button>
       </div>
-      <div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
         @if (currApproval() == 'toApprove') {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
-            @for (approval of approvalService.getToApprove(); track approval.id) {
-              <div
-                class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden group"
-              >
-                <div class="flex justify-between items-start mb-4">
-                  <div class="text-lg flex items-center gap-2">
-                    <div>
-                      <p class="font-bold text-corporate-blue">{{ approval.requesterName }}</p>
-                    </div>
+          @for (approval of approvalService.getToApprove(); track approval.id) {
+            <div
+              class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden group"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div class="text-lg flex items-center gap-2">
+                  <div>
+                    <p class="font-bold text-corporate-blue">{{ approval.requesterName }}</p>
                   </div>
                 </div>
-                <div class="flex flex-wrap justify-between gap-x-4 gap-y-2 mb-4">
-                  <p class="text-text-primary line-clamp-2">{{ approval.body }}</p>
-                  <p class="text-sm">{{ approval.createdOn | date: 'd/M/y h:m a' }}</p>
-                </div>
-                <div class="flex gap-2">
-                  <button
-                    (click)="approvalService.updateStatus(approval.id, 1)"
-                    class="cursor-pointer flex-1 py-2 rounded-lg border border-outline-light text-xs font-bold hover:bg-surface-low transition-colors text-text-primary"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    (click)="approvalService.updateStatus(approval.id, 0)"
-                    class="cursor-pointer flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold hover:opacity-90 transition-opacity"
-                  >
-                    Approve
-                  </button>
-                </div>
               </div>
-            } @empty {
-              @if (!approvalService.getIsLoadingToApprove()) {
-                <div class="text-center w-full md:col-span-2 text-lg font-bold">
-                  Nothing Needs Approval
-                </div>
-              }
+              <div class="flex flex-wrap justify-between gap-x-4 gap-y-2 mb-4">
+                <p class="text-text-primary line-clamp-2">{{ approval.body }}</p>
+                <p class="text-sm">{{ approval.createdOn | date: 'd/M/y h:m a' }}</p>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  (click)="approvalService.updateStatus(approval.id, 1)"
+                  class="cursor-pointer flex-1 py-2 rounded-lg border border-outline-light text-xs font-bold hover:bg-surface-low transition-colors text-text-primary"
+                >
+                  Reject
+                </button>
+                <button
+                  (click)="approvalService.updateStatus(approval.id, 0)"
+                  class="cursor-pointer flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold hover:opacity-90 transition-opacity"
+                >
+                  Approve
+                </button>
+              </div>
+            </div>
+          } @empty {
+            @if (!approvalService.getIsLoadingToApprove()) {
+              <div class="text-center w-full md:col-span-2 text-lg font-bold">
+                Nothing Needs Approval
+              </div>
             }
-            @if (approvalService.getIsLoadingToApprove()) {
-              <app-loading class="w-full md:col-span-2" [loadingName]="'Needs Approval'" />
-            }
-            <div appIsVisable (visible)="approvalService.loadMoreToApprove()"></div>
-          </div>
+          }
+          @if (approvalService.getIsLoadingToApprove()) {
+            <app-loading class="w-full md:col-span-2" [loadingName]="'Needs Approval'" />
+          }
+          <div appIsVisable (visible)="approvalService.loadMoreToApprove()"></div>
         }
         @if (currApproval() == 'requested') {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
-            @for (approval of approvalService.getRequestedApprovals(); track approval.id) {
-              <div
-                class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden"
-              >
-                <div class="flex justify-between items-start mb-4">
-                  <div class="text-lg flex items-center gap-2">
-                    <div>
-                      <p class="font-bold text-corporate-blue">{{ approval.requesterName }}</p>
-                    </div>
+          @for (approval of approvalService.getRequestedApprovals(); track approval.id) {
+            <div
+              class="p-4 rounded-lg border border-outline-light hover:shadow-md transition-all bg-surface-lowest relative overflow-hidden"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div class="text-lg flex items-center gap-2">
+                  <div>
+                    <p class="font-bold text-corporate-blue">{{ approval.requesterName }}</p>
                   </div>
                 </div>
-                <div class="flex flex-wrap justify-between gap-x-4 gap-y-2 mb-4">
-                  <p class="text-text-primary line-clamp-2">{{ approval.body }}</p>
-                  <p class="text-sm">{{ approval.createdOn | date: 'd/M/y h:m a' }}</p>
-                </div>
-                <div
-                  class="text-center flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold"
-                >
-                  {{ toApprovalStatusString(approval.status) }}
-                </div>
               </div>
-            } @empty {
-              @if (!approvalService.getIsLoadingRequestedApprovals()) {
-                <div class="text-center w-full md:col-span-2 text-lg font-bold">
-                  No Requested Approvals
-                </div>
-              }
+              <div class="flex flex-wrap justify-between gap-x-4 gap-y-2 mb-4">
+                <p class="text-text-primary line-clamp-2">{{ approval.body }}</p>
+                <p class="text-sm">{{ approval.createdOn | date: 'd/M/y h:m a' }}</p>
+              </div>
+              <div
+                class="text-center flex-1 py-2 rounded-lg bg-corporate-blue text-surface-lowest text-xs font-bold"
+              >
+                {{ toApprovalStatusString(approval.status) }}
+              </div>
+            </div>
+          } @empty {
+            @if (!approvalService.getIsLoadingRequestedApprovals()) {
+              <div class="text-center w-full md:col-span-2 text-lg font-bold">
+                No Requested Approvals
+              </div>
             }
-            @if (approvalService.getIsLoadingRequestedApprovals()) {
-              <app-loading class="w-full md:col-span-2" [loadingName]="'Requested Approvals'" />
-            }
-            <div appIsVisable (visible)="approvalService.loadMoreRequestedApprovals()"></div>
-          </div>
+          }
+          @if (approvalService.getIsLoadingRequestedApprovals()) {
+            <app-loading class="w-full md:col-span-2" [loadingName]="'Requested Approvals'" />
+          }
+          <div appIsVisable (visible)="approvalService.loadMoreRequestedApprovals()"></div>
         }
       </div>
     </div>
@@ -289,7 +285,7 @@
         </button>
       </div>
 
-      <div class="max-h-[calc(max(70vh,500px))] overflow-y-auto">
+      <div class="max-h-[calc(min(70vh,1200px))] overflow-y-auto">
         <div
           class="flex-1 pr-1 space-y-6 relative before:absolute before:left-4.75 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-low"
         >

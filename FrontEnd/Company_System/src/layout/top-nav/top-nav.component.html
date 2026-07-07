@@ -66,7 +66,11 @@
 
       <div
         class="absolute p-1 right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
+        (click)="$event.stopPropagation()"
       >
+        <p class="px-5 py-2 text-center border-b mb-2 text-text-secondary border-outline-light">
+          {{ authService.getUserData?.userName }}
+        </p>
         <button
           type="button"
           class="flex items-center gap-3 px-5 py-2 text-left text-sm font-medium rounded-lg text-error transition-colors hover:bg-red-50 cursor-pointer"

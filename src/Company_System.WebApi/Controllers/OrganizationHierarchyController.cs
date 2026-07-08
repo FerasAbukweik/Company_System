@@ -13,7 +13,7 @@ public class OrganizationHierarchyController(IOrganizationHierarchyService hiera
 {
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<IReadOnlyList<OrganizationHierarchyDTO>>> GetChildren([FromQuery]IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildren([FromQuery]IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
     {
         var currUserIdResult = User.GetUserId();
         if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult(logger);

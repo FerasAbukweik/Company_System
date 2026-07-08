@@ -4,7 +4,7 @@ import { ILoginForm } from './login.model';
 import { loginValidators } from './login.validation';
 import { KeyValuePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/api/Auth-service';
+import { AuthApiService } from '../../core/services/api/Auth-api-service';
 import { LoginDTO } from '../../core/dto/login-dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
@@ -18,7 +18,7 @@ import { firstValueFrom } from 'rxjs';
 export class LoginComponent {
   // DI
   private readonly _router = inject(Router);
-  private readonly _authService = inject(AuthService);
+  private readonly _authService = inject(AuthApiService);
   private readonly _destroyRef = inject(DestroyRef);
 
   // protected properties

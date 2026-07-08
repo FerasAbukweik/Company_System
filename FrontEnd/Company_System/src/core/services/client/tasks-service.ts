@@ -5,6 +5,8 @@ import { TasksApiService } from '../api/tasks-api-service';
 import { TaskStatusEnum } from '../../enum/task-states-enum';
 import { ApprovalService } from './approval-service';
 import { ToastService } from './toast-service';
+import { Subject, takeUntil } from 'rxjs';
+import { TaskAddDTO } from '../../dto/task-add-dto';
 
 @Injectable({ providedIn: 'root' })
 export class TasksService {
@@ -19,6 +21,9 @@ export class TasksService {
     taken: 0,
     sectionSize: 10,
   };
+
+  // objects
+  private cancelRequest$ = new Subject<void>();
 
   // signals
   private tasks = signal<TaskDTO[]>([]);
@@ -36,6 +41,8 @@ export class TasksService {
   // methods
 
   reset() {
+    this.cancelRequest$.next();
+
     this.tasks.set([]);
     this.lazyData.taken = 0;
     this.isLoading.set(false);
@@ -46,20 +53,23 @@ export class TasksService {
     if (this.isLoading() || !this.isMoreTasksAvaiable) return;
     this.isLoading.set(true);
 
-    this.tasksApiService.lazyGetTasks(this.lazyData).subscribe({
-      next: (data) => {
-        this.tasks.update((curr) => [...curr, ...data]);
+    this.tasksApiService
+      .lazyGetTasks(this.lazyData)
+      .pipe(takeUntil(this.cancelRequest$))
+      .subscribe({
+        next: (data) => {
+          this.tasks.update((curr) => [...curr, ...data]);
 
-        this.lazyData.taken += data.length;
-        this.isMoreTasksAvaiable = data.length > 0;
-      },
-      error: () => {
-        this.toastService.error('something went wrong while loading tasks');
-      },
-      complete: () => {
-        this.isLoading.set(false);
-      },
-    });
+          this.lazyData.taken += data.length;
+          this.isMoreTasksAvaiable = data.length > 0;
+        },
+        error: () => {
+          this.toastService.error('something went wrong while loading tasks');
+        },
+        complete: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 
   updateTaskStatus(taskId: string, newStatus: TaskStatusEnum) {
@@ -84,6 +94,17 @@ export class TasksService {
       },
       complete: () => {
         this.isLoading.set(false);
+      },
+    });
+  }
+
+  addTask(taskData: TaskAddDTO) {
+    this.tasksApiService.addTask(taskData).subscribe({
+      next: () => {
+        this.toastService.success('Task Addedd Successfully');
+      },
+      error: () => {
+        this.toastService.error('failed to add task');
       },
     });
   }

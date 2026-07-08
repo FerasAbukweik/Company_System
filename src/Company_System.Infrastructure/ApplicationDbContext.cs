@@ -3,6 +3,7 @@ using HR_System.Core.Domain.Identity;
 using HR_System.Core.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HR_System.Infrastructure;
 
@@ -88,6 +89,23 @@ protected override void OnModelCreating(ModelBuilder builder)
         .WithMany(r => r.ReceivedMessages)
         .HasForeignKey(m => m.ReceiverId)
         .OnDelete(DeleteBehavior.Restrict);
+    
+    
+    
+    // return date in utc time
+    foreach (var entityType in builder.Model.GetEntityTypes())
+    {
+        foreach (var property in entityType.GetProperties())
+        {
+            if (property.ClrType == typeof(DateTime))
+            {
+                property.SetValueConverter(
+                    new ValueConverter<DateTime, DateTime>(
+                        v => v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
+            }
+        }
+    }
 }
     
     

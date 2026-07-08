@@ -1,6 +1,5 @@
-export enum PrioritiesEnum
-{
-    Low,
-    Medium,
-    High
+export enum TaskPrioritiesEnum {
+  Low,
+  Medium,
+  High,
 }

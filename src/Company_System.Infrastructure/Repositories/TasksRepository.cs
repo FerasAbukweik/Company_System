@@ -18,6 +18,7 @@ public class TasksRepository(ApplicationDbContext dbContext,
     public async Task<IReadOnlyList<AppTask>> LazyGetUserTasksAsync(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
         return await dbContext.Tasks.Where(t => (t.UserId == userId && t.Status != TaskStatusEnum.Completed))
+            .OrderByDescending(t => t.CreatedAt)
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)
             .AsNoTracking()

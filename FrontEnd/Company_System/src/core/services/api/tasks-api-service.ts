@@ -4,6 +4,7 @@ import { Urls } from '../../constants/urls';
 import { LazyDTO } from '../../dto/lazy-dto';
 import { TaskDTO } from '../../dto/task-dto';
 import { TaskStatusEnum } from '../../enum/task-states-enum';
+import { TaskAddDTO } from '../../dto/task-add-dto';
 
 @Injectable({ providedIn: 'root' })
 export class TasksApiService {
@@ -32,5 +33,9 @@ export class TasksApiService {
     params = params.append('newStatus', newStatus);
 
     return this.http.put(`${this.url}/UpdateStatus/${taskId}`, {}, { params });
+  }
+
+  public addTask(taskData: TaskAddDTO) {
+    return this.http.post(this.url + '/Add', taskData);
   }
 }

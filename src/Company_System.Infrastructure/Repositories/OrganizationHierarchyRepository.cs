@@ -1,5 +1,6 @@
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.Interfaces.RepositoryContracts;
+using HR_System.Infrastructure.extensionMethods;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
@@ -17,17 +18,32 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
         
         // layer 1
         if(parents == null || parents.Count == 0)
-            query = query.Where(o => o.ParentId == null);
+            query = query.Where(o => o.ParentId == null)
+                .Include(o => o.User);
         else
-            query = query.Where(o => o.ParentId != null && parents.Contains(o.ParentId.Value));
+            query = query.Where(o => o.ParentId != null && parents.Contains(o.ParentId.Value))
+                .Include(o => o.User);
         
         
         // 5 layers is the default section size
         query = query
             .Include(o => o.Children) // layer 2
-            .ThenInclude(c => c.Children)  // layer 3
-            .ThenInclude(c => c.Children)  // layer 4
-            .ThenInclude(c => c.Children); // layer5
+            .ThenInclude(c => c.User)
+
+            .Include(o => o.Children) // layer 3
+            .ThenInclude(c => c.Children)
+            .ThenInclude(c => c.User)
+
+            .Include(o => o.Children) // layer 4
+            .ThenInclude(c => c.Children)
+            .ThenInclude(c => c.Children)
+            .ThenInclude(c => c.User)
+
+            .Include(o => o.Children) // layer 5
+            .ThenInclude(c => c.Children)
+            .ThenInclude(c => c.Children)
+            .ThenInclude(c => c.Children)
+            .ThenInclude(c => c.User);
         
         return await query.AsNoTracking().ToListAsync(cancellationToken);
     }
@@ -55,7 +71,12 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
         
         return actualValue;
     }
-    
+
+    public async Task<IReadOnlyList<Guid>> GetParentUserIds(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.GetFatherUserIds(userId).ToListAsync(cancellationToken);
+    }
+
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return (await dbContext.SaveChangesAsync(cancellationToken)) > 0;

@@ -22,16 +22,42 @@ public class OrganizationHierarchyService(IOrganizationHierarchyRepository hiera
 
         if(!(await hierarchyRepository.SaveChangesAsync(cancellationToken)))
             return Result<OrganizationHierarchyDTO>.Failure("Failed to add organization hierarchy");
+        
+        
 
         return Result<OrganizationHierarchyDTO>.Success(toAdd_DB.ToDTO(currUserId));
     }
 
-    public async Task<Result<IReadOnlyList<OrganizationHierarchyDTO>>> GetChildrenAsync(Guid currUserId, IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildrenAsync(Guid currUserId, IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
     {
-        var children = (await hierarchyRepository.GetChildrenAsync(parents, cancellationToken))
-            .Select(h => h.ToDTO(currUserId));
+        var children = await hierarchyRepository.GetChildrenAsync(parents, cancellationToken);
+        
+        var result = new Dictionary<Guid, List<OrganizationHierarchyDTO>>();
 
-        return Result<IReadOnlyList<OrganizationHierarchyDTO>>.Success(children.ToImmutableList());
+        if (parents == null || !parents.Any())
+        {
+            result[Guid.Empty] = children.Select(c => c.ToDTO(currUserId)).ToList();
+        }
+        else
+        {
+            foreach (var parent in parents)
+            {
+                result[parent] = new List<OrganizationHierarchyDTO>();
+            }
+
+            foreach (var child in children)
+            {
+                if(child.ParentId != null)
+                    result[child.ParentId.Value].Add(child.ToDTO(currUserId));
+            }
+        }
+
+        return Result<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>.Success(
+            result.ToDictionary(
+                kvp => kvp.Key,
+                kvp => (IReadOnlyList<OrganizationHierarchyDTO>)kvp.Value.AsReadOnly()
+            )
+        );
     }
 
     public async Task<Result<OrganizationHierarchyDTO>> RemoveAsync(Guid toRemoveId, Guid currUserId, CancellationToken cancellationToken = default)
@@ -48,5 +74,12 @@ public class OrganizationHierarchyService(IOrganizationHierarchyRepository hiera
         
         
         return Result<OrganizationHierarchyDTO>.Success(removed.ToDTO(currUserId));
+    }
+
+    public async Task<Result<IReadOnlyList<Guid>>> GetParentUserIds(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var result = await hierarchyRepository.GetParentUserIds(userId, cancellationToken);
+
+        return Result<IReadOnlyList<Guid>>.Success(result);
     }
 }

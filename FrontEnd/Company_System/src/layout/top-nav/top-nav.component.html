@@ -48,12 +48,16 @@
   </button>
   <div class="h-8 w-px bg-outline-light mx-2"></div>
   <div class="flex items-center gap-2 cursor-pointer group relative" (click)="togglePanel()">
-    <div class="text-right hidden sm:block">
-      <p class="text-xs font-bold text-corporate-blue">{{ authService.getUserData?.userName }}</p>
-      <p class="text-xs text-text-secondary">{{ authService.getUserData?.role }}</p>
+    <div class="z-41 text-right hidden sm:block">
+      <p class="text-xs font-bold text-corporate-blue">
+        {{ authService.getUserData()?.userName ?? 'unknown' }}
+      </p>
+      <p class="text-xs text-text-secondary">
+        {{ authService.getUserData()?.role ?? 'unknown role' }}
+      </p>
     </div>
     <img
-      class="w-10 h-10 rounded-full border-2 border-vibrant-turquoise object-cover"
+      class="z-41 w-10 h-10 rounded-full border-2 border-vibrant-turquoise object-cover"
       src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRHfLDf5yvFB-RXlZYcVjs0JD5QW1tZHZ6GAOogBeRzpjiyaNFyCjB79MY5Mtt00Ye2kcKrVvE7tSPysSsSGtBfd5l3xz-daMezIA02TeVKH3-uV5WofKf-Ld-9dqrmLSbLpoTCB3vWFHfaeaWpj_JIuNtOMNTyNYDXg3egWpvOUWs0fbIdeowZSQl4kJbyIo52sBhT46j8Stqov2BWd-xcq3HzaMxoPASeGsWFbBlY94dAzh-GgfGb-7fDGkVRWBIm-cit0bxedQ"
       alt="Alex Rivera Headshot"
     />
@@ -65,11 +69,11 @@
       ></div>
 
       <div
-        class="absolute p-1 right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
+        class="absolute cursor-default p-1 right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
         (click)="$event.stopPropagation()"
       >
         <p class="px-5 py-2 text-center border-b mb-2 text-text-secondary border-outline-light">
-          {{ authService.getUserData?.userName }}
+          {{ authService.getUserData()?.userName }}
         </p>
         <button
           type="button"

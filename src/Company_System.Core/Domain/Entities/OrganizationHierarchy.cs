@@ -37,7 +37,8 @@ public class OrganizationHierarchy
             UserId = UserId,
             Position = Position,
             Children = Children.Select(c => c.ToDTO(currUserId)).ToList(),
-            IsCurrUser = UserId == currUserId
+            IsCurrUser = UserId == currUserId,
+            UserName = User?.UserName ?? "unknown"
         };
     }
     

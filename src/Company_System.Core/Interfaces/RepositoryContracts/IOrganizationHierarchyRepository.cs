@@ -10,4 +10,5 @@ public interface IOrganizationHierarchyRepository
     Task<OrganizationHierarchy?> RemoveAsync(Guid toRemoveId, CancellationToken cancellationToken = default);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task<OrganizationHierarchy?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Guid>> GetParentUserIds(Guid userId, CancellationToken cancellationToken = default);
 }

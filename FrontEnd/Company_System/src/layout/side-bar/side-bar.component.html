@@ -8,7 +8,7 @@
         ? 'whitespace-nowrap flex items-center gap-4 p-4 rounded-lg text-corporate-blue font-bold border-r-2 border-vibrant-turquoise bg-surface-high transition-colors mb-2'
         : 'whitespace-nowrap flex items-center gap-4 p-4 rounded-lg text-text-secondary hover:bg-surface-low transition-colors active:scale-[0.98] duration-150 mb-2'
     "
-    (click)="$event.preventDefault()"
+    (click)="$event.preventDefault(); hanleOnLinkClick()"
   >
     <span class="material-symbols-outlined"
       ><svg

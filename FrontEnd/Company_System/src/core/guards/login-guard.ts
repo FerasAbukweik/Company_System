@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
-import { AuthService } from '../services/api/Auth-service';
+import { AuthApiService } from '../services/api/Auth-api-service';
 
 export const loginGuard: CanMatchFn = () => {
-  const authService = inject(AuthService);
+  const authService = inject(AuthApiService);
   const router = inject(Router);
 
   authService.isAuthenticated().subscribe({

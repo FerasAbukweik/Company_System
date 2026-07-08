@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { TopNavComponent } from "../top-nav/top-nav.component";
-import { SideBarComponent } from "../side-bar/side-bar.component";
+import { TopNavComponent } from '../top-nav/top-nav.component';
+import { SideBarComponent } from '../side-bar/side-bar.component';
 import { RouterOutlet } from '@angular/router';
 import { ISideBarItem } from '../../core/interfaces/side-bar-model';
 import { SideBarService } from '../../core/services/client/side-bar-service';
@@ -18,5 +18,10 @@ export class MainLayoutComponent {
   protected sideBarItems: ISideBarItem[] = [
     { active: true, icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { active: false, icon: 'account_tree', label: 'Org Tree', route: '/org-tree' },
-  ]
+  ];
+
+  // getters
+  get isScreenSmall() {
+    return window.innerWidth < 1024;
+  }
 }

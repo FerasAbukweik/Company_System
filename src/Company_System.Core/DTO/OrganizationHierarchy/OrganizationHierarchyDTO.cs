@@ -10,6 +10,7 @@ public class OrganizationHierarchyDTO
     public required Guid UserId { get; set; }
     public required List<OrganizationHierarchyDTO> Children { get; set; }
     public required bool IsCurrUser { get; set; }
+    public required string UserName { get; set; }
     
     
     // override

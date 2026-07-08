@@ -1,10 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { AuthService } from '../../core/services/api/Auth-service';
-import { Router } from '@angular/router';
-import { TasksService } from '../../core/services/client/tasks-service';
-import { ApprovalService } from '../../core/services/client/approval-service';
-import { ActivitiesService } from '../../core/services/client/activities-service';
-import { ToastService } from '../../core/services/client/toast-service';
+import { AuthService } from '../../core/services/client/auth-service';
 
 @Component({
   selector: 'nav[app-top-nav]',
@@ -18,11 +13,6 @@ import { ToastService } from '../../core/services/client/toast-service';
 export class TopNavComponent {
   // DI
   protected readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly tasksService = inject(TasksService);
-  private readonly approvalsService = inject(ApprovalService);
-  private readonly activitiesService = inject(ActivitiesService);
-  private readonly toastService = inject(ToastService);
 
   // signals
   showUserMenu = signal<boolean>(false);
@@ -31,20 +21,7 @@ export class TopNavComponent {
 
   // logout
   logout() {
-    // send request to the server to remove tokens from http only cookies
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigateByUrl('/login');
-      },
-      error: () => {
-        this.toastService.error('unexpected logout error');
-      },
-    });
-
-    this.approvalsService.resetRequested();
-    this.approvalsService.resetToApprova();
-    this.tasksService.reset();
-    this.activitiesService.reset();
+    this.authService.logout();
   }
 
   // toggle show panel

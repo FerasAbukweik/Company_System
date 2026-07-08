@@ -24,10 +24,16 @@ export class SideBarComponent {
     let result =
       'max-md:absolute max-sm:h-full min-h-screen transition-all duration-300 min-w-[300px] overflow-hidden bg-surface-lowest border-r border-outline-light shadow-sm flex flex-col py-6 px-4 z-50';
 
-    if (!this.sideBarService.isSideBarOpen()) {
+    if (!this.sideBarService.getIsSideBarOpen()) {
       result += ' min-w-0! w-0! px-0! border-r-0';
     }
 
     return result;
   });
+
+  hanleOnLinkClick() {
+    if (window.innerWidth < 1024) {
+      this.sideBarService.close();
+    }
+  }
 }

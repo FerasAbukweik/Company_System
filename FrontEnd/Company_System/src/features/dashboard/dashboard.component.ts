@@ -1,21 +1,28 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
 import { TasksService } from '../../core/services/client/tasks-service';
 import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
-import { TaskStatusEnum } from '../../core/enum/task-states-enum';
 import { ApprovalService } from '../../core/services/client/approval-service';
-import { ApprovalStatusEnum } from '../../core/enums/approval-state-enum';
 import { ActivitiesService } from '../../core/services/client/activities-service';
-import { ActivityTypeEnum } from '../../core/enums/activity-type-enum';
-import { HeroIcon } from '../../core/constants/hero-icon-d';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
-import { DropDownMenuComponent } from '../../shared/components/drop-down-menu/drop-down-menu.component';
-import { AuthService } from '../../core/services/api/Auth-service';
+import { TaskCardComponent } from './components/task-card/task-card.component';
+import { TaskCardService } from './components/task-card/task-card.service';
+import { NeedsApprovalCardComponent } from './components/needs-approval-card/needs-approval-card.component';
+import { RequestedApprovalCardComponent } from './components/requested-approval-card/requested-approval-card.component';
+import { ActivityCardComponent } from './components/activity-card/activity-card.component';
+import { AuthService } from '../../core/services/client/auth-service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, IsVisableDirective, DatePipe, LoadingComponent, DropDownMenuComponent],
+  imports: [
+    IsVisableDirective,
+    LoadingComponent,
+    TaskCardComponent,
+    NeedsApprovalCardComponent,
+    RequestedApprovalCardComponent,
+    ActivityCardComponent,
+  ],
+  providers: [TaskCardService],
   templateUrl: './dashboard.component.html',
   host: {
     class: 'text-text-primary min-h-screen font-sans p-4 block',
@@ -27,22 +34,12 @@ export class DashboardComponent {
   protected readonly approvalService = inject(ApprovalService);
   protected readonly activitiesService = inject(ActivitiesService);
   protected readonly authService = inject(AuthService);
+  protected readonly taskCardService = inject(TaskCardService);
 
   // signals
   currApproval = signal<'toApprove' | 'requested'>('toApprove');
-  showActivityStatusMenuFor = signal<string>('');
 
   // methods
-
-  // convert TaskStatusEnum to string
-  getStatusString(val: TaskStatusEnum) {
-    return TaskStatusEnum[val];
-  }
-
-  // convert ApprovalStatusEnum to string
-  toApprovalStatusString(status: ApprovalStatusEnum) {
-    return ApprovalStatusEnum[status];
-  }
 
   // change approval page
   chaneApproval(changeTo: 'toApprove' | 'requested') {
@@ -51,40 +48,6 @@ export class DashboardComponent {
     this.currApproval.set(changeTo);
   }
 
-  // get sutable activity icon ---------------------------------------------------------
-
-  getActivityIcon(type: ActivityTypeEnum) {
-    if (this.isActivityTypeCompleted(type)) return HeroIcon.check_circle;
-
-    if (this.isActivityTypePending(type)) return HeroIcon.pending;
-
-    if (this.isActivityTypeRejected(type)) return HeroIcon.alert;
-
-    return HeroIcon.alert;
-  }
-
-  private isActivityTypeCompleted(type: ActivityTypeEnum) {
-    return (
-      type == ActivityTypeEnum.ApprovalApproved ||
-      type == ActivityTypeEnum.TaskAdded ||
-      type == ActivityTypeEnum.TaskCompleted
-    );
-  }
-
-  private isActivityTypePending(type: ActivityTypeEnum) {
-    return type == ActivityTypeEnum.ApprovalPending || type == ActivityTypeEnum.TaskPendingApproval;
-  }
-
-  private isActivityTypeRejected(type: ActivityTypeEnum) {
-    return (
-      type == ActivityTypeEnum.ApprovalRejected ||
-      type == ActivityTypeEnum.MissingType ||
-      type == ActivityTypeEnum.TaskRejected
-    );
-  }
-
-  // get sutable activity icon ---------------------------------------------------------
-
   // reset approval
   resetApproval() {
     this.approvalService.resetRequested();
@@ -92,18 +55,5 @@ export class DashboardComponent {
 
     if (this.currApproval() == 'requested') this.approvalService.loadMoreRequestedApprovals();
     if (this.currApproval() == 'toApprove') this.approvalService.loadMoreToApprove();
-  }
-
-  ToggleShowActivityStatusMenu(showForId: string) {
-    this.showActivityStatusMenuFor.update((curr) => (!!curr ? '' : showForId));
-  }
-
-  // on select new task status
-  updateTaskStatus(taskId: string, newStatusIdx: number, currStatus: TaskStatusEnum) {
-    this.showActivityStatusMenuFor.set('');
-
-    if (currStatus == newStatusIdx) return; // TODO show toast
-
-    this.tasksService.updateTaskStatus(taskId, newStatusIdx);
   }
 }

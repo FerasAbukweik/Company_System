@@ -2,7 +2,7 @@ import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/h
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { AuthService } from '../services/api/Auth-service';
+import { AuthApiService } from '../services/api/Auth-api-service';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -14,7 +14,7 @@ export const authInterceptor: HttpInterceptorFn = (
   });
 
   const router = inject(Router);
-  const authService = inject(AuthService);
+  const authService = inject(AuthApiService);
 
   return next(reqClone).pipe(
     catchError((err) => {

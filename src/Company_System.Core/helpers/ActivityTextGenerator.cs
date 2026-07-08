@@ -9,7 +9,12 @@ public static class ActivityTextGenerator
         => $"Task: {task.Title}";
 
     public static string GetTaskDescription(AppTask task, string currUserName)
-        => $"New Status: {task.Status}\nChanged by: {currUserName}";
+    {
+        if (task.Status == TaskStatusEnum.Pending)
+            return $"Priority: {task.Priority}\nAdded By {currUserName}";
+        
+        return $"New Status: {task.Status}\nChanged by: {currUserName}";
+    }
 
     public static string GetApprovalTitle(Approval approval)
         => approval.Type == ApprovalTypeEnum.Task ? "Task Approval" : 

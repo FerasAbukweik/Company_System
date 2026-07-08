@@ -19,7 +19,7 @@ public class AppTask
     public required string Description { get; set; }
     
     [Required]
-    public required DateTime Created { get; set; }
+    public required DateTime CreatedAt { get; set; }
     
     [Required]
     public required DateTime Deadline { get; set; }
@@ -52,7 +52,7 @@ public class AppTask
             Id = Id,
             Title = Title,
             Description = Description,
-            Created = Created,
+            Created = CreatedAt,
             Deadline = Deadline,
             Priority = Priority,
             Status = Status,
@@ -67,7 +67,7 @@ public class AppTask
     public override string ToString()
     {
         return
-            $"Id: {Id}\nTitle: {Title}\nDescription: {Description}\nCreated: {Created}" +
+            $"Id: {Id}\nTitle: {Title}\nDescription: {Description}\nCreated: {CreatedAt}" +
             $"\nDeadline: {Deadline}\nPriority:{Priority.ToString()}\nstatus: {Status}" +
             $"\nuserId: {UserId}\nmanagerId: {ManagerId}";
     }
@@ -80,7 +80,7 @@ public class AppTask
         return Id == otherTask.Id &&
                Title == otherTask.Title &&
                Description == otherTask.Description &&
-               Created == otherTask.Created &&
+               CreatedAt == otherTask.CreatedAt &&
                Deadline == otherTask.Deadline &&
                Priority == otherTask.Priority && 
                Status == otherTask.Status &&

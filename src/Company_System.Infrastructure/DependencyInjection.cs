@@ -54,7 +54,7 @@ public static class InfrastructureDependencyInjectionExtensionMethod
         services.AddScoped<IApprovalService, ApprovalService>();
         services.AddScoped<IActivitiesService, ActivitiesService>();
         services.AddScoped<IAccountService, AccountService>();
-        services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IMessagesService, MessagesService>();
         services.AddScoped<ITasksApprovalsService, TasksApprovalsService>();
         
         services.AddScoped<IRedisService, RedisService>();

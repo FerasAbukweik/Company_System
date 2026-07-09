@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace HR_System.SignalR.Messages;
 
-public class MessagesHub(IMessageService messageService) : Hub<IMessagesHub>
+public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
 {
     public override async Task OnConnectedAsync()
     {
@@ -17,18 +17,31 @@ public class MessagesHub(IMessageService messageService) : Hub<IMessagesHub>
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
     }
 
-    public async Task SendMessage(MessageAddDTO newMessage)
+    public async Task SendMessage(string content)
     {
         var otherUserId = GetOtherPersonId();
         if (otherUserId == null) return;
+        
+        var currUserId =  GetUserId();
+        if(currUserId == null) return;
 
-        var addMessageResult = await messageService.AddAsync(newMessage, otherUserId.Value);
+        MessageAddDTO toAddMessage = new MessageAddDTO()
+        {
+            Content = content,
+            ReceiverId = otherUserId.Value
+        };
+
+        var addMessageResult = await messagesService.AddAsync(toAddMessage, currUserId.Value);
         if(!addMessageResult.IsSuccess) return;
+
         
         var groupName = generateGroupName();
         if(groupName == null) return;
         
-        await Clients.Group(groupName).ReceiveMessage(addMessageResult.Value!);
+        addMessageResult.Value!.IsCurrUserSender = false;
+        await Clients.OthersInGroup(groupName).ReceiveMessage(addMessageResult.Value!);
+        addMessageResult.Value!.IsCurrUserSender = true;
+        await Clients.Caller.ReceiveMessage(addMessageResult.Value!);
     }
 
     public async Task NotifyTyping()

@@ -8,7 +8,7 @@ using HR_System.Core.Interfaces.ServiceContracts;
 
 namespace HR_System.Infrastructure.Services;
 
-public class MessageService(IMessageRepository messageRepository) : IMessageService
+public class MessagesService(IMessageRepository messageRepository) : IMessagesService
 {
     public async Task<Result<MessageDTO>> AddAsync(MessageAddDTO toAdd, Guid userId, CancellationToken cancellationToken = default)
     {

@@ -10,14 +10,14 @@ using Xunit.Abstractions;
 
 namespace HR_System.Tests.Services;
 
-public class MessageServiceTests
+public class MessagesServiceTests
 {
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
     private readonly Mock<IMessageRepository> _repositoryMock;
-    private readonly MessageService _messageService;
+    private readonly MessagesService _messagesService;
 
-    public MessageServiceTests(ITestOutputHelper output)
+    public MessagesServiceTests(ITestOutputHelper output)
     {
         _output = output;
 
@@ -27,7 +27,7 @@ public class MessageServiceTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
         _repositoryMock = new Mock<IMessageRepository>();
-        _messageService = new MessageService(_repositoryMock.Object);
+        _messagesService = new MessagesService(_repositoryMock.Object);
     }
 
     #region AddAsync
@@ -48,7 +48,7 @@ public class MessageServiceTests
         _output.WriteLine($"Expected:\nUserId : {userId}\n{toAdd.ToString()}");
 
         // Act
-        var actual = await _messageService.AddAsync(toAdd, userId);
+        var actual = await _messagesService.AddAsync(toAdd, userId);
         _output.WriteLine($"Actual:\n{actual.Value?.ToString() ?? "null"}");
 
         // Assert
@@ -79,7 +79,7 @@ public class MessageServiceTests
         _output.WriteLine("SaveChanges returns false — expecting failure and null Value");
 
         // Act
-        var actual = await _messageService.AddAsync(toAdd, userId);
+        var actual = await _messagesService.AddAsync(toAdd, userId);
         _output.WriteLine($"Actual:\nIsSuccess    : {actual.IsSuccess}\nErrorMessage : {actual.ErrorMessage}");
 
         // Assert
@@ -112,7 +112,7 @@ public class MessageServiceTests
         messages.ForEach(m => _output.WriteLine(m.ToString()));
 
         // Act
-        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        var actual = await _messagesService.LazyGetMessages(userId, lazyData);
         _output.WriteLine($"Actual:\nIsSuccess : {actual.IsSuccess}\nCount     : {actual.Value?.Count}");
 
         // Assert
@@ -142,7 +142,7 @@ public class MessageServiceTests
         messages.ForEach(m => _output.WriteLine(m.ToString()));
 
         // Act
-        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        var actual = await _messagesService.LazyGetMessages(userId, lazyData);
         _output.WriteLine($"Actual:");
         actual.Value?.ToList().ForEach(m => _output.WriteLine(m.ToString()));
 
@@ -166,7 +166,7 @@ public class MessageServiceTests
         messages.ForEach(m => _output.WriteLine(m.ToString()));
 
         // Act
-        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        var actual = await _messagesService.LazyGetMessages(userId, lazyData);
         _output.WriteLine($"Actual:");
         actual.Value?.ToList().ForEach(m => _output.WriteLine(m.ToString()));
 
@@ -188,7 +188,7 @@ public class MessageServiceTests
         _output.WriteLine($"Expected:\nUserId : {userId}\nCount  : 0");
 
         // Act
-        var actual = await _messageService.LazyGetMessages(userId, lazyData);
+        var actual = await _messagesService.LazyGetMessages(userId, lazyData);
         _output.WriteLine($"Actual:\nIsSuccess : {actual.IsSuccess}\nCount     : {actual.Value?.Count}");
 
         // Assert

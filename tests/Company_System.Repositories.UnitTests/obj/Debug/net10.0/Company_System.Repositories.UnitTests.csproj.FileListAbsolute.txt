@@ -358,3 +358,4 @@
 /home/firas/RiderProjects/Company_System/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.pdb
 /home/firas/RiderProjects/Company_System/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/Company_System.Repositories.UnitTests.genruntimeconfig.cache
 /home/firas/RiderProjects/Company_System/tests/Company_System.Repositories.UnitTests/obj/Debug/net10.0/ref/Company_System.Repositories.UnitTests.dll
+/home/firas/RiderProjects/Company_System/tests/Company_System.Repositories.UnitTests/bin/Debug/net10.0/CloudinaryDotNet.dll

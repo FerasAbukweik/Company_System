@@ -52,7 +52,16 @@
       interval: 5s
       timeout: 3s
       retries: 5
-
+      
+  angular:
+    container_name: angular
+    build:
+      context: ./FrontEnd/Company_System
+      dockerfile: Dockerfile
+    ports:
+      - "4200:443"
+    volumes:
+      - ./FrontEnd/Company_System/ssl:/etc/nginx/ssl:ro
 volumes:
   sqlserver_data:
   redis_data:

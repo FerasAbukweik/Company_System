@@ -1,0 +1,30 @@
+@if (!message().isCurrUserSender) {
+  <!-- Recipient Message -->
+  <div class="flex items-start gap-2 max-w-[85%]">
+    <img
+      class="w-8 h-8 rounded-full mt-1"
+      data-alt="Profile picture of a professional woman"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVWeQNLfdO2TP1kvQzQ8-HZQbmmTf1ErORfJn5ZOsdOzzULO45srBCkznoq0YtY9lT4EXxQWBpcEm160J2r_L4u6NkBD-ozdUrblvxmw4l4RbKNgUSB_SyaS2Uul_yJprZBaSXEqRj6W92WpAmcG7jMwlWTXkQ2OvsB8U8r0GMyC8G9uBva8j2LRl2x4-CKPQmZx-vAJLhndVT3qWJVD7ZuUHAW3qWd87_e6xo1YdpsSIy5SMa33OvMoZUbt6qXm-0vaeEuNQB7uo"
+    />
+    <div>
+      <div
+        class="bg-surface-low p-2 text-text-primary rounded-xl rounded-tl-none border border-outline-light/30"
+      >
+        <p class="text-body-md">{{ message().content }}</p>
+      </div>
+      <span class="mt-1 ml-2 text-[10px] text-outline-strong mt-xs block px-xs">{{
+        message().createdAt | date: 'hh:mm a'
+      }}</span>
+    </div>
+  </div>
+} @else {
+  <!-- User Message -->
+  <div class="flex flex-col items-end gap-sm ml-auto max-w-[85%]">
+    <div class="p-2 bg-vibrant-turquoise text-surface-lowest rounded-xl rounded-tr-none shadow-sm">
+      <p class="text-body-md">{{ message().content }}</p>
+    </div>
+    <span class="mr-2 mt-1 text-[10px] text-outline-strong mt-xs block px-xs">{{
+      message().createdAt | date: 'hh:mm a'
+    }}</span>
+  </div>
+}

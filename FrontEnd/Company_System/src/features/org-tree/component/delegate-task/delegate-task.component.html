@@ -1,0 +1,104 @@
+<div
+  [class.translate-x-0!]="delegateTaskService.getIsShowDelegateTask()"
+  class="fixed inset-y-0 translate-x-full right-0 w-112.5 bg-surface-lowest z-51 transition-transform duration-300 border-l border-outline-light flex flex-col"
+>
+  <div class="p-6 border-b border-outline-light flex justify-between items-center bg-surface-low">
+    <div>
+      <h3 class="text-xl font-bold text-corporate-blue">Delegate Task</h3>
+      <p class="text-sm text-text-secondary">
+        Assign directive to {{ delegateTaskService.getNode()?.userName ?? 'unknown' }}
+      </p>
+    </div>
+    <button
+      class="flex items-center justify-center rounded-3xl px-4 py-2 cursor-pointer hover:bg-surface-dim transition-colors"
+      (click)="delegateTaskService.close()"
+    >
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="p-6 grow overflow-y-auto custom-scrollbar">
+    <form [formGroup]="form" class="flex flex-col gap-6 h-full" (ngSubmit)="onSubmit()">
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-vibrant-turquoise uppercase tracking-wider"
+          >Task Title</label
+        >
+        <input
+          name="title"
+          [formControl]="form.controls.title"
+          class="w-full border border-outline-light rounded-lg p-3 focus:border-vibrant-turquoise outline-none"
+          [class.border-error!]="isError(form.controls.title)"
+          [class.border-2!]="isError(form.controls.title)"
+          placeholder="e.g., Q4 Resource Allocation Audit"
+          type="text"
+        />
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-vibrant-turquoise uppercase tracking-wider"
+          >Description</label
+        >
+        <textarea
+          name="description"
+          [formControl]="form.controls.description"
+          class="w-full border border-outline-light rounded-lg p-3 focus:border-vibrant-turquoise outline-none transition-all"
+          placeholder="Detail the scope and expected outcomes..."
+          rows="4"
+          [class.border-error!]="isError(form.controls.description)"
+          [class.border-2!]="isError(form.controls.description)"
+        ></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-vibrant-turquoise uppercase tracking-wider"
+            >Deadline</label
+          >
+          <input
+            [formControl]="form.controls.deadline"
+            [min]="todayStr"
+            name="deadline"
+            class="w-full border border-outline-light rounded-lg p-3 focus:border-vibrant-turquoise outline-none transition-all"
+            type="date"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-vibrant-turquoise uppercase tracking-wider"
+            >Priority</label
+          >
+          <div class="flex gap-1">
+            @for (priority of prioritiesList; track priority; let idx = $index) {
+              <button
+                type="button"
+                (click)="selectedPriority.set(idx)"
+                [class]="
+                  selectedPriority() === idx
+                    ? 'border-vibrant-turquoise text-vibrant-turquoise bg-surface-low'
+                    : 'border-outline-light text-text-secondary'
+                "
+                class="flex-1 py-2 border rounded text-xs font-bold transition-colors"
+              >
+                {{ priority }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-auto pt-4 border-t border-outline-light bg-surface-base flex gap-4">
+        <button
+          class="cursor-pointer flex-1 py-3 font-bold text-vibrant-turquoise border border-vibrant-turquoise rounded-lg hover:bg-surface-low transition-all"
+          (click)="delegateTaskService.close()"
+        >
+          Cancel
+        </button>
+        <button
+          class="cursor-pointer flex-1 py-3 font-bold bg-vibrant-turquoise text-corporate-blue rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
+          type="submit"
+        >
+          <span class="material-symbols-outlined text-sm">send</span>
+          Assign Task
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

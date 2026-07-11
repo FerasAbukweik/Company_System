@@ -1,0 +1,391 @@
+2026-07-07 04:34:39.456 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-07-07 04:34:40.145 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.163 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.223 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.232 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.233 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.234 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.609 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.612 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.613 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.613 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.616 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.617 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.630 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.631 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.631 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.635 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.641 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.642 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:34:40.690 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-07-07 04:34:40.691 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-07-07 04:34:40.997 +03:00 [DBG] The property 'Activity.ApprovalId' was created in shadow state because there are no eligible CLR members with a matching name.
+2026-07-07 04:34:41.208 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-07-07 04:34:43.510 +03:00 [DBG] 'ApplicationDbContext' disposed.
+2026-07-07 04:35:01.212 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-07-07 04:35:01.884 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:01.904 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:01.971 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:01.980 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:01.981 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:01.981 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.361 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.364 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.364 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.365 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.367 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.368 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.378 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.379 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.380 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.382 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.388 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.390 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 04:35:02.436 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-07-07 04:35:02.437 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-07-07 04:35:02.749 +03:00 [DBG] The property 'Activity.ApprovalId' was created in shadow state because there are no eligible CLR members with a matching name.
+2026-07-07 04:35:02.949 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-07-07 04:35:03.345 +03:00 [DBG] Creating DbConnection.
+2026-07-07 04:35:03.384 +03:00 [DBG] Created DbConnection. (33ms).
+2026-07-07 04:35:03.388 +03:00 [DBG] Migrating using database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:03.397 +03:00 [DBG] Opening connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:03.853 +03:00 [DBG] Opened connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:03.863 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:03.875 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (8ms).
+2026-07-07 04:35:03.878 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (18ms).
+2026-07-07 04:35:03.891 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 04:35:03.935 +03:00 [INF] Executed DbCommand (46ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 04:35:03.939 +03:00 [DBG] Closing connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:03.956 +03:00 [DBG] Closed connection to database 'HR_System' on server 'localhost,1433' (9ms).
+2026-07-07 04:35:03.957 +03:00 [DBG] Opening connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:03.959 +03:00 [DBG] Opened connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:03.961 +03:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-07-07 04:35:03.965 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-07-07 04:35:03.966 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 04:35:03.966 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 04:35:03.968 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2026-07-07 04:35:04.036 +03:00 [INF] Executed DbCommand (69ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2026-07-07 04:35:04.164 +03:00 [DBG] Beginning transaction with isolation level 'Unspecified'.
+2026-07-07 04:35:04.177 +03:00 [DBG] Began transaction with isolation level 'ReadCommitted'.
+2026-07-07 04:35:04.180 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.180 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.183 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (2ms).
+2026-07-07 04:35:04.183 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2026-07-07 04:35:04.193 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2026-07-07 04:35:04.197 +03:00 [DBG] Committing transaction.
+2026-07-07 04:35:04.204 +03:00 [DBG] Committed transaction.
+2026-07-07 04:35:04.208 +03:00 [DBG] Disposing transaction.
+2026-07-07 04:35:04.212 +03:00 [DBG] Beginning transaction with isolation level 'Unspecified'.
+2026-07-07 04:35:04.213 +03:00 [DBG] Began transaction with isolation level 'ReadCommitted'.
+2026-07-07 04:35:04.217 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.218 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.218 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.219 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 04:35:04.220 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 04:35:04.222 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-07-07 04:35:04.222 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 04:35:04.223 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 04:35:04.223 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-07-07 04:35:04.226 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-07-07 04:35:04.230 +03:00 [DBG] Creating DbCommand for 'ExecuteReader'.
+2026-07-07 04:35:04.230 +03:00 [DBG] Created DbCommand for 'ExecuteReader' (0ms).
+2026-07-07 04:35:04.231 +03:00 [DBG] Initialized DbCommand for 'ExecuteReader' (0ms).
+2026-07-07 04:35:04.232 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-07-07 04:35:04.254 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-07-07 04:35:04.262 +03:00 [DBG] Closing data reader to 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:04.265 +03:00 [DBG] A data reader for 'HR_System' on server 'localhost,1433' is being disposed after spending 6ms reading results.
+2026-07-07 04:35:04.280 +03:00 [INF] Applying migration '20260707013443_change task-approval relation from 1-1 to 1-many'.
+2026-07-07 04:35:04.356 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.357 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.357 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.358 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] DROP CONSTRAINT [FK_Approvals_Tasks_TaskId];
+2026-07-07 04:35:04.371 +03:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] DROP CONSTRAINT [FK_Approvals_Tasks_TaskId];
+2026-07-07 04:35:04.371 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.372 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.372 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.373 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DROP INDEX [IX_Approvals_TaskId] ON [Approvals];
+2026-07-07 04:35:04.382 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DROP INDEX [IX_Approvals_TaskId] ON [Approvals];
+2026-07-07 04:35:04.382 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.383 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.383 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.384 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_Approvals_TaskId] ON [Approvals] ([TaskId]);
+2026-07-07 04:35:04.433 +03:00 [INF] Executed DbCommand (50ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_Approvals_TaskId] ON [Approvals] ([TaskId]);
+2026-07-07 04:35:04.434 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.434 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.434 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.435 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] ADD CONSTRAINT [FK_Approvals_Tasks_TaskId] FOREIGN KEY ([TaskId]) REFERENCES [Tasks] ([Id]) ON DELETE SET NULL;
+2026-07-07 04:35:04.457 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] ADD CONSTRAINT [FK_Approvals_Tasks_TaskId] FOREIGN KEY ([TaskId]) REFERENCES [Tasks] ([Id]) ON DELETE SET NULL;
+2026-07-07 04:35:04.457 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 04:35:04.458 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.458 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 04:35:04.459 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260707013443_change task-approval relation from 1-1 to 1-many', N'10.0.9');
+2026-07-07 04:35:04.466 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260707013443_change task-approval relation from 1-1 to 1-many', N'10.0.9');
+2026-07-07 04:35:04.467 +03:00 [DBG] Committing transaction.
+2026-07-07 04:35:04.472 +03:00 [DBG] Committed transaction.
+2026-07-07 04:35:04.472 +03:00 [DBG] Disposing transaction.
+2026-07-07 04:35:04.473 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-07-07 04:35:04.474 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 04:35:04.474 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 04:35:04.475 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+2026-07-07 04:35:04.479 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+2026-07-07 04:35:04.480 +03:00 [DBG] Closing connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:04.481 +03:00 [DBG] Closed connection to database 'HR_System' on server 'localhost,1433' (1ms).
+2026-07-07 04:35:04.484 +03:00 [DBG] 'ApplicationDbContext' disposed.
+2026-07-07 04:35:04.489 +03:00 [DBG] Disposing connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 04:35:04.491 +03:00 [DBG] Disposed connection to database '' on server '' (2ms).
+2026-07-07 08:24:32.846 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-07-07 08:24:33.541 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:33.563 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:33.631 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:33.643 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:33.644 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:33.645 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.031 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.034 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.034 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.035 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.037 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.038 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.048 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.049 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.049 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.052 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.058 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.059 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:34.104 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-07-07 08:24:34.105 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-07-07 08:24:34.621 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-07-07 08:24:37.016 +03:00 [DBG] 'ApplicationDbContext' disposed.
+2026-07-07 08:24:58.442 +03:00 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2026-07-07 08:24:59.153 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.174 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.254 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.266 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.267 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.267 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.649 +03:00 [DBG] No relationship from 'AppTask' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'User'} that could be matched with the properties on the other entity type - {'CreatedTasks', 'Tasks'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.651 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.652 +03:00 [DBG] No relationship from 'ApplicationUser' to 'AppTask' has been configured by convention because there are multiple properties on one entity type - {'CreatedTasks', 'Tasks'} that could be matched with the properties on the other entity type - {'Manager', 'User'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.653 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.655 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.656 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.667 +03:00 [DBG] No relationship from 'Approval' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Manager', 'UserRequesting'} that could be matched with the properties on the other entity type - {'Approvals', 'ToApprove'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.668 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Approval' has been configured by convention because there are multiple properties on one entity type - {'Approvals', 'ToApprove'} that could be matched with the properties on the other entity type - {'Manager', 'UserRequesting'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.669 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.672 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.678 +03:00 [DBG] No relationship from 'Message' to 'ApplicationUser' has been configured by convention because there are multiple properties on one entity type - {'Receiver', 'Sender'} that could be matched with the properties on the other entity type - {'ReceivedMessages', 'SentMessages'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.679 +03:00 [DBG] No relationship from 'ApplicationUser' to 'Message' has been configured by convention because there are multiple properties on one entity type - {'ReceivedMessages', 'SentMessages'} that could be matched with the properties on the other entity type - {'Receiver', 'Sender'}. This message can be disregarded if explicit configuration has been specified in 'OnModelCreating'.
+2026-07-07 08:24:59.725 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+2026-07-07 08:24:59.726 +03:00 [DBG] The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+2026-07-07 08:25:00.241 +03:00 [DBG] Entity Framework Core 10.0.9 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.9' with options: EngineType=SqlServer 
+2026-07-07 08:25:00.622 +03:00 [DBG] Creating DbConnection.
+2026-07-07 08:25:00.663 +03:00 [DBG] Created DbConnection. (34ms).
+2026-07-07 08:25:00.671 +03:00 [DBG] Migrating using database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:00.680 +03:00 [DBG] Opening connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.119 +03:00 [DBG] Opened connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.130 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.143 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (8ms).
+2026-07-07 08:25:01.146 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (19ms).
+2026-07-07 08:25:01.160 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 08:25:01.204 +03:00 [INF] Executed DbCommand (48ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 08:25:01.208 +03:00 [DBG] Closing connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.224 +03:00 [DBG] Closed connection to database 'HR_System' on server 'localhost,1433' (9ms).
+2026-07-07 08:25:01.224 +03:00 [DBG] Opening connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.226 +03:00 [DBG] Opened connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.229 +03:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-07-07 08:25:01.233 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-07-07 08:25:01.234 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 08:25:01.234 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (1ms).
+2026-07-07 08:25:01.235 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2026-07-07 08:25:01.285 +03:00 [INF] Executed DbCommand (49ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+2026-07-07 08:25:01.416 +03:00 [DBG] Beginning transaction with isolation level 'Unspecified'.
+2026-07-07 08:25:01.432 +03:00 [DBG] Began transaction with isolation level 'ReadCommitted'.
+2026-07-07 08:25:01.434 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.435 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.437 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (2ms).
+2026-07-07 08:25:01.438 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2026-07-07 08:25:01.446 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+2026-07-07 08:25:01.450 +03:00 [DBG] Committing transaction.
+2026-07-07 08:25:01.458 +03:00 [DBG] Committed transaction.
+2026-07-07 08:25:01.461 +03:00 [DBG] Disposing transaction.
+2026-07-07 08:25:01.465 +03:00 [DBG] Beginning transaction with isolation level 'Unspecified'.
+2026-07-07 08:25:01.466 +03:00 [DBG] Began transaction with isolation level 'ReadCommitted'.
+2026-07-07 08:25:01.468 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.469 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.481 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.481 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 08:25:01.483 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-07-07 08:25:01.484 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-07-07 08:25:01.485 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 08:25:01.485 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 08:25:01.485 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-07-07 08:25:01.488 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-07-07 08:25:01.492 +03:00 [DBG] Creating DbCommand for 'ExecuteReader'.
+2026-07-07 08:25:01.492 +03:00 [DBG] Created DbCommand for 'ExecuteReader' (0ms).
+2026-07-07 08:25:01.492 +03:00 [DBG] Initialized DbCommand for 'ExecuteReader' (0ms).
+2026-07-07 08:25:01.493 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-07-07 08:25:01.507 +03:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-07-07 08:25:01.513 +03:00 [DBG] Closing data reader to 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.516 +03:00 [DBG] A data reader for 'HR_System' on server 'localhost,1433' is being disposed after spending 5ms reading results.
+2026-07-07 08:25:01.528 +03:00 [INF] Applying migration '20260707052436_remove activities from approval entity'.
+2026-07-07 08:25:01.585 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.586 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.586 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.586 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Activities] DROP CONSTRAINT [FK_Activities_Approvals_ApprovalId];
+2026-07-07 08:25:01.600 +03:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Activities] DROP CONSTRAINT [FK_Activities_Approvals_ApprovalId];
+2026-07-07 08:25:01.601 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.601 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.601 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.602 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] DROP CONSTRAINT [FK_Approvals_Tasks_TaskId];
+2026-07-07 08:25:01.605 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] DROP CONSTRAINT [FK_Approvals_Tasks_TaskId];
+2026-07-07 08:25:01.606 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.606 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.606 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.607 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DROP INDEX [IX_Activities_ApprovalId] ON [Activities];
+2026-07-07 08:25:01.616 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DROP INDEX [IX_Activities_ApprovalId] ON [Activities];
+2026-07-07 08:25:01.616 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.617 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.617 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.617 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @var nvarchar(max);
+SELECT @var = QUOTENAME([d].[name])
+FROM [sys].[default_constraints] [d]
+INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+WHERE ([d].[parent_object_id] = OBJECT_ID(N'[Activities]') AND [c].[name] = N'ApprovalId');
+IF @var IS NOT NULL EXEC(N'ALTER TABLE [Activities] DROP CONSTRAINT ' + @var + ';');
+ALTER TABLE [Activities] DROP COLUMN [ApprovalId];
+2026-07-07 08:25:01.734 +03:00 [INF] Executed DbCommand (92ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @var nvarchar(max);
+SELECT @var = QUOTENAME([d].[name])
+FROM [sys].[default_constraints] [d]
+INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+WHERE ([d].[parent_object_id] = OBJECT_ID(N'[Activities]') AND [c].[name] = N'ApprovalId');
+IF @var IS NOT NULL EXEC(N'ALTER TABLE [Activities] DROP CONSTRAINT ' + @var + ';');
+ALTER TABLE [Activities] DROP COLUMN [ApprovalId];
+2026-07-07 08:25:01.735 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.735 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.736 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.736 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] ADD CONSTRAINT [FK_Approvals_Tasks_TaskId] FOREIGN KEY ([TaskId]) REFERENCES [Tasks] ([Id]) ON DELETE NO ACTION;
+2026-07-07 08:25:01.758 +03:00 [INF] Executed DbCommand (21ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Approvals] ADD CONSTRAINT [FK_Approvals_Tasks_TaskId] FOREIGN KEY ([TaskId]) REFERENCES [Tasks] ([Id]) ON DELETE NO ACTION;
+2026-07-07 08:25:01.759 +03:00 [DBG] Creating DbCommand for 'ExecuteNonQuery'.
+2026-07-07 08:25:01.759 +03:00 [DBG] Created DbCommand for 'ExecuteNonQuery' (0ms).
+2026-07-07 08:25:01.760 +03:00 [DBG] Initialized DbCommand for 'ExecuteNonQuery' (1ms).
+2026-07-07 08:25:01.760 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260707052436_remove activities from approval entity', N'10.0.9');
+2026-07-07 08:25:01.768 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260707052436_remove activities from approval entity', N'10.0.9');
+2026-07-07 08:25:01.768 +03:00 [DBG] Committing transaction.
+2026-07-07 08:25:01.773 +03:00 [DBG] Committed transaction.
+2026-07-07 08:25:01.773 +03:00 [DBG] Disposing transaction.
+2026-07-07 08:25:01.774 +03:00 [DBG] Creating DbCommand for 'ExecuteScalar'.
+2026-07-07 08:25:01.775 +03:00 [DBG] Created DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 08:25:01.775 +03:00 [DBG] Initialized DbCommand for 'ExecuteScalar' (0ms).
+2026-07-07 08:25:01.775 +03:00 [DBG] Executing DbCommand [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+2026-07-07 08:25:01.782 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+2026-07-07 08:25:01.782 +03:00 [DBG] Closing connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.784 +03:00 [DBG] Closed connection to database 'HR_System' on server 'localhost,1433' (1ms).
+2026-07-07 08:25:01.787 +03:00 [DBG] 'ApplicationDbContext' disposed.
+2026-07-07 08:25:01.791 +03:00 [DBG] Disposing connection to database 'HR_System' on server 'localhost,1433'.
+2026-07-07 08:25:01.793 +03:00 [DBG] Disposed connection to database '' on server '' (2ms).

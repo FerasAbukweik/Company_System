@@ -1,0 +1,29 @@
+<div
+  class="absolute -left-12 top-4 flex items-center justify-center border-4 border-surface-lowest z-10"
+>
+  <span class="material-symbols-outlined text-[20px]"
+    ><svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="size-8"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        [attr.d]="getActivityIcon(activity().type)"
+      />
+    </svg>
+  </span>
+</div>
+<div class="bg-surface-base p-4 rounded-lg border border-outline-light">
+  <p class="text-sm text-text-primary">
+    <span class="font-bold">{{ activity().title }}<br /></span>
+    <span class="whitespace-pre-line">{{ activity().description }}</span>
+  </p>
+  <span class="text-xs text-text-secondary mt-1 block">{{
+    activity().createdAt | date: 'd/M/y h:m a'
+  }}</span>
+</div>

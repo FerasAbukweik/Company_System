@@ -1,0 +1,41 @@
+<div
+  aria-live="polite"
+  aria-atomic="false"
+  class="pointer-events-none fixed top-6 right-6 z-9999 flex w-90 flex-col gap-3"
+>
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      role="alert"
+      class="pointer-events-auto relative flex overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-lg transition-all duration-300 ease-out animate-toast-in hover:-translate-y-1 transition-all"
+      [class.animate-toast-out]="toast.removing"
+    >
+      <!-- Left Strip -->
+      <div class="w-1 shrink-0" [style.background]="stripColor(toast.type)"></div>
+
+      <div class="flex min-w-0 flex-1 items-start gap-3 px-3 py-3.5">
+        <i
+          [class]="'ti ' + icon(toast.type)"
+          [style.color]="stripColor(toast.type)"
+          class="mt-0.5 shrink-0 text-[22px]"
+        ></i>
+
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium text-text-primary">
+            {{ toast.title || defaultTitle(toast.type) }}
+          </p>
+
+          <p class="mt-1 wrap-break-word text-[13px] text-text-secondary">
+            {{ toast.message }}
+          </p>
+        </div>
+
+        <button
+          (click)="toastService.remove(toast.id)"
+          class="rounded p-1 text-outline-strong transition-colors duration-200 hover:bg-surface-low hover:text-text-primary"
+        >
+          <i class="ti ti-x text-lg"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>

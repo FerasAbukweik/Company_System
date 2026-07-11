@@ -1,0 +1,114 @@
+<div
+  [class.translate-x-0!]="chatPanelService.getIsVisable()"
+  class="fixed inset-y-0 w-112.5 bg-surface-lowest z-51 transition-transform translate-x-full duration-300 border-l border-outline-light flex flex-col top-0 right-0 h-full shadow-16px chat-slide-in"
+  id="chatPanel"
+>
+  <!-- Chat Header -->
+  <div
+    class="px-4 py-2 border-b border-outline-light flex items-center justify-between bg-surface-lowest"
+  >
+    <div class="flex items-center gap-2">
+      <div class="relative">
+        <img
+          class="w-10 h-10 rounded-full border-2 border-surface-high"
+          data-alt="A sharp, professional headshot of Sarah Chen, a tech leader with a kind smile, dark hair, and a business suit."
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQSz2kabdY4yGffjjgJFPb3VIgxQfx84E7yg0FAeiS6DY9Y5IMqNlg705OqulSMybyeIhg3OWLYgTNEpuDbFS2Mf09GVg-jDQxg6bqxKSEW-c8O3p6yncooJdvvJpzApQq-8X9QOn6j2HnoNDMRCqT4PrdWYJ1mwIoj_6ZQPWVuBZaKr97o2y876wgLTbGUxbzOwBonIFsOdoPUVpZl_txbORnAP26592k-L7KH1CJT9CpshZfWaGKBrXNFkZSOGtNdSwbQvHYiqA"
+        />
+        <div
+          class="absolute bottom-0 right-0 w-3 h-3 bg-vibrant-turquoise border-2 border-surface-lowest rounded-full"
+        ></div>
+      </div>
+      <div>
+        <h4 class="font-bold text-corporate-blue">
+          {{ chatPanelService.getNode()?.userName ?? 'unknown' }}
+        </h4>
+        <p class="text-vibrant-turquoise font-medium">
+          {{ getPositionString(chatPanelService.getNode()?.position ?? null) }}
+        </p>
+      </div>
+    </div>
+    <div class="flex gap-xs">
+      <button
+        class="cursor-pointer hover:bg-surface-low p-2 rounded-full text-text-secondary material-symbols-outlined text-[20px]"
+        (click)="chatPanelService.close()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Message History -->
+
+  <div
+    #messagesDiv
+    class="flex-1 overflow-y-auto flex flex-col gap-6 py-8 px-4 scrollbar-hide bg-surface-base"
+  >
+    <div
+      appIsVisable
+      (visible)="messagesService.loadMoreMessages(chatPanelService.getNode()?.userId ?? '')"
+    ></div>
+
+    @if (messagesService.getIsLoading()) {
+      <app-loading [loadingName]="'More Messages'" />
+    }
+
+    @for (message of messagesService.messages(); track message.id) {
+      <app-message-card [message]="message" />
+    } @empty {
+      @if (!messagesService.getIsLoading()) {
+        <div class="w-full text-center text-xl font-bold text-outline-light">
+          ---- No Messages ----
+        </div>
+      }
+    }
+
+    <!-- Typing indicator -->
+    <div
+      class="flex items-center gap-sm p-sm transition-opacity duration-300"
+      [ngClass]="isTyping() ? 'opacity-100' : 'opacity-0'"
+      id="typing"
+    >
+      <div class="flex gap-1">
+        <div class="w-1.5 h-1.5 bg-outline-strong rounded-full animate-bounce"></div>
+        <div
+          class="w-1.5 h-1.5 bg-outline-strong rounded-full animate-bounce [animation-delay:0.2s]"
+        ></div>
+        <div
+          class="w-1.5 h-1.5 bg-outline-strong rounded-full animate-bounce [animation-delay:0.4s]"
+        ></div>
+      </div>
+      <span class="text-label-md text-outline-strong italic">Sarah is typing...</span>
+    </div>
+  </div>
+
+  <!-- Message Message Input Box -->
+  <div class="p-2 bg-surface-lowest border-t border-outline-light">
+    <div
+      class="flex items-end gap-2 bg-surface-low rounded-xl p-xs border border-outline-light/50 focus-within:border-vibrant-turquoise focus-within:ring-2 focus-within:ring-vibrant-turquoise/10 transition-all"
+    >
+      <textarea
+        [(ngModel)]="messageContent"
+        (keydown.enter)="$event.preventDefault(); handleSendMessage()"
+        (input)="handleTyping()"
+        class="flex-1 field-sizing-content min-h-14 bg-transparent border-none outline-none text-body-md p-2 resize-none scrollbar-hide max-h-40 text-text-primary placeholder:text-outline-strong"
+        placeholder="Write a message..."
+      >
+      </textarea>
+      <button
+        (click)="handleSendMessage()"
+        class="cursor-pointer p-2 mb-2 mr-2 bg-vibrant-turquoise text-surface-lowest rounded-lg hover:opacity-90 active:scale-95 transition-all"
+      >
+        <span class="material-symbols-outlined">send</span>
+      </button>
+    </div>
+  </div>
+</div>

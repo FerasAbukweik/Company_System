@@ -1,0 +1,65 @@
+<div class="flex items-center gap-4">
+  <div class="w-10 h-10 rounded-lg bg-surface-low flex items-center justify-center">
+    <span class="material-symbols-outlined text-corporate-blue"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+        />
+      </svg>
+    </span>
+  </div>
+  <div>
+    <h4 class="text-sm font-bold text-corporate-blue">{{ task().title }}</h4>
+    <p class="text-xs text-text-secondary mt-0.5">
+      {{ getStatusString(task().status) }} •
+      <span class="font-bold">Priority {{ getPriorityName(task().priority) }}</span>
+    </p>
+  </div>
+</div>
+<div class="flex items-center gap-6 ml-14">
+  <div class="text-right">
+    <p class="text-xs font-bold">
+      {{ task().deadline | date: 'd/M/y h:m a' }}
+    </p>
+    <p class="text-xs text-text-secondary">Deadline</p>
+  </div>
+  <span class="px-3 py-1 rounded-full text-xs font-bold">{{ getStatusString(task().status) }}</span>
+  <button
+    class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer hover:bg-surface-low rounded-full p-2 text-text-secondary hover:text-corporate-blue transition-all"
+    (click)="taskCardService.toggleShowActivityStatusMenu(task().id)"
+  >
+    <span class="material-symbols-outlined"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+        />
+      </svg>
+    </span>
+  </button>
+  @if (taskCardService.IsStatusMenuShownFor(task().id)) {
+    <app-drop-down-menu
+      class="top-13 right-4"
+      [options]="['Completed', 'show desctiption']"
+      (close)="taskCardService.closeStatusMenu()"
+      (selectOption)="handleChooseMenuOption(task().id, $event)"
+    />
+  }
+</div>

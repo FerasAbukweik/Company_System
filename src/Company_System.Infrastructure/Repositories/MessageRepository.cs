@@ -12,10 +12,13 @@ public class MessageRepository(ApplicationDbContext dbContext) : IMessageReposit
         dbContext.Messages.Add(message);
     }
 
-    public async Task<IReadOnlyList<Message>> LazyGetMessages(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Message>> LazyGetMessages(Guid userId,Guid otherUserId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
         return await dbContext.Messages
-            .Where(m => (m.SenderId == userId || m.ReceiverId == userId))
+            .Where(m => 
+                (m.SenderId == userId || m.SenderId == otherUserId) &&
+                (m.ReceiverId == userId || m.ReceiverId == otherUserId))
+            
             .OrderByDescending(m => m.CreatedAt)
             .Skip(lazyData.Taken)
             .Take(lazyData.SectionSize)

@@ -11,7 +11,7 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
 {
     public override async Task OnConnectedAsync()
     {
-        var groupName = generateGroupName();
+        var groupName = GenerateGroupName();
         if(groupName == null) return;
         
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
@@ -35,7 +35,7 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
         if(!addMessageResult.IsSuccess) return;
 
         
-        var groupName = generateGroupName();
+        var groupName = GenerateGroupName();
         if(groupName == null) return;
         
         addMessageResult.Value!.IsCurrUserSender = false;
@@ -46,7 +46,7 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
 
     public async Task NotifyTyping()
     {
-        var groupName = generateGroupName();
+        var groupName = GenerateGroupName();
         if(groupName == null) return;
         
         await Clients.OthersInGroup(groupName).NotifyTyping();
@@ -54,7 +54,7 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
 
     public async Task NotifyStoppedTyping()
     {
-        var groupName = generateGroupName();
+        var groupName = GenerateGroupName();
         if(groupName == null) return;
         
         await Clients.OthersInGroup(groupName).NotifyStoppedTyping();
@@ -71,7 +71,7 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
     
     // helper methods
 
-    private string? generateGroupName()
+    private string? GenerateGroupName()
     {
         var userIdResult = GetUserId();
         if (userIdResult == null) return null;

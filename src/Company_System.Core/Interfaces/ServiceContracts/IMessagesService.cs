@@ -7,6 +7,6 @@ namespace HR_System.Core.Interfaces.ServiceContracts;
 public interface IMessagesService
 {
     Task<Result<MessageDTO>> AddAsync(MessageAddDTO toAdd, Guid userId, CancellationToken cancellationToken = default);
-    Task<Result<IReadOnlyList<MessageDTO>>> LazyGetMessages(Guid userId, LazyDTO lazyData,
+    Task<Result<IReadOnlyList<MessageDTO>>> LazyGetMessages(Guid userId,Guid otherUserId, LazyDTO lazyData,
         CancellationToken cancellationToken = default);
 }

@@ -8,18 +8,14 @@ export class IsVisableDirective implements OnDestroy {
   private readonly host = inject(ElementRef);
 
   // private
-  private observer!:IntersectionObserver;
+  private observer!: IntersectionObserver;
 
   // output
   visible = output<void>();
 
-  ngOnInit(){
+  ngOnInit() {
     this.observer = new IntersectionObserver(([entry]) => {
-      if(entry.isIntersecting)
-        this.visible.emit();
-    },{
-      root: null,
-      threshold: 0.1
+      if (entry.isIntersecting) this.visible.emit();
     });
 
     this.observer.observe(this.host.nativeElement);

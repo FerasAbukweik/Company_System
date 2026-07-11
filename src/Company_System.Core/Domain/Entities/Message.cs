@@ -36,11 +36,18 @@ public class Message
             Id = Id,
             Content = Content,
             CreatedAt = CreatedAt,
-            IsCurrUserSender = SenderId == currUserId
+            IsCurrUserSender = SenderId == currUserId,
+            GroupName = GenerateGroupName()
         };
     }
     
-    
+    private string GenerateGroupName()
+    {
+        if (string.Compare(SenderId.ToString(), ReceiverId.ToString(), StringComparison.Ordinal) > 0)
+            return $"{SenderId}-{ReceiverId}";
+        
+        return $"{ReceiverId}-{SenderId}";
+    }
     
     // override
 

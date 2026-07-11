@@ -26,9 +26,9 @@ public class MessagesService(IMessageRepository messageRepository) : IMessagesSe
         return Result<MessageDTO>.Success(toAdd_DB.ToDTO(userId));
     }
 
-    public async Task<Result<IReadOnlyList<MessageDTO>>> LazyGetMessages(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<MessageDTO>>> LazyGetMessages(Guid userId,Guid otherUserId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
-        var messages = await messageRepository.LazyGetMessages(userId, lazyData, cancellationToken);
+        var messages = await messageRepository.LazyGetMessages(userId,otherUserId, lazyData, cancellationToken);
 
         return Result<IReadOnlyList<MessageDTO>>.Success(messages.Select(m => m.ToDTO(userId)).ToImmutableList());
     }

@@ -1,4 +1,5 @@
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.OrganizationHierarchy;
 
 namespace HR_System.Core.Interfaces.RepositoryContracts;
@@ -11,4 +12,5 @@ public interface IOrganizationHierarchyRepository
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task<OrganizationHierarchy?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Guid>> GetParentUserIds(Guid userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<UserNameDTO>> GetUserNames(LazyDTO lazyData, CancellationToken cancellationToken = default);
 }

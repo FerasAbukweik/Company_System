@@ -11,8 +11,9 @@ public class OrganizationHierarchyDTO
     public required List<OrganizationHierarchyDTO> Children { get; set; }
     public required bool IsCurrUser { get; set; }
     public required string UserName { get; set; }
-    
-    
+    public required string UserImageUrl { get; set; }
+
+
     // override
 
     override public string ToString()
@@ -22,6 +23,7 @@ public class OrganizationHierarchyDTO
             sb.Append($"Child: {child.ToString()}\n");
 
         return
-            $"Id: {Id}\nPosition: {Position.ToString()}\nUserId: {UserId}\nChildren: {sb.ToString()}\nIsCurrUser: {IsCurrUser}\n";
+            $"Id: {Id}\nPosition: {Position.ToString()}\nUserId: {UserId}\n" +
+            $"Children: {sb.ToString()}\nIsCurrUser: {IsCurrUser}\nUserImageUrl: {UserImageUrl}";
     }
 }

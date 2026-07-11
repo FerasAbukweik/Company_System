@@ -7,6 +7,6 @@ public interface IMessageRepository
 {
     void Add(Message message, CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyList<Message>> LazyGetMessages(Guid userId, LazyDTO lazyData, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Message>> LazyGetMessages(Guid userId,Guid otherUserId, LazyDTO lazyData, CancellationToken cancellationToken = default);
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.Auth;
+using HR_System.Core.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace HR_System.Core.Domain.Identity;
@@ -13,8 +15,27 @@ public class ApplicationUser : IdentityUser<Guid>
     [Required]
     [Column(TypeName =  "nvarchar(100)")]
     public required string FullName { get; set; }
-
     
+    [Required]
+    public required PositionsEnum Position { get; set; }
+
+    [Column(TypeName ="nvarchar(150)")]
+    public string? PublicImageId { get; set; }
+    
+    [Column(TypeName ="nvarchar(150)")]
+    public string? ImageUrl { get; set; }
+
+    public UserDTO ToUserDTO()
+    {
+        return new UserDTO()
+        {
+            Position = Position.ToString(),
+            UserId = Id.ToString(),
+            UserName = UserName ?? "unknown",
+            UserImageUrl = ImageUrl ?? "unknown",
+        };
+    }
+
     // relations
     [JsonIgnore]
     public List<RefreshToken> RefreshTokens { get; set; } = [];

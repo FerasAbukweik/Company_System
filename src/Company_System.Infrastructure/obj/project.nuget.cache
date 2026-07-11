@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "zrDqanMVsKI=",
+  "dgSpecHash": "pSOu5/ZLevI=",
   "success": true,
   "projectFilePath": "/home/firas/RiderProjects/Company_System/src/Company_System.Infrastructure/Company_System.Infrastructure.csproj",
   "expectedPackageFiles": [
     "/home/firas/.nuget/packages/azure.core/1.47.1/azure.core.1.47.1.nupkg.sha512",
     "/home/firas/.nuget/packages/azure.identity/1.14.2/azure.identity.1.14.2.nupkg.sha512",
+    "/home/firas/.nuget/packages/cloudinarydotnet/1.29.2/cloudinarydotnet.1.29.2.nupkg.sha512",
     "/home/firas/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/home/firas/.nuget/packages/microsoft.aspnetcore.cryptography.internal/10.0.9/microsoft.aspnetcore.cryptography.internal.10.0.9.nupkg.sha512",
     "/home/firas/.nuget/packages/microsoft.aspnetcore.cryptography.keyderivation/10.0.9/microsoft.aspnetcore.cryptography.keyderivation.10.0.9.nupkg.sha512",

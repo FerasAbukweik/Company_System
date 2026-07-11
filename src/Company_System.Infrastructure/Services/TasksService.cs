@@ -64,6 +64,9 @@ public class TasksService(ITasksRepository tasksRepository,
         if(!(updated.UserId == currentUserId || updated.ManagerId == currentUserId))
             return  Result<TaskDTO>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
         
+        if((newStatus == TaskStatusEnum.Rejected || newStatus == TaskStatusEnum.Pending) && currentUserId != updated.ManagerId)
+            return  Result<TaskDTO>.Failure("Unauthorized", HttpStatusCode.Unauthorized);
+        
         if(!await tasksRepository.SaveChangesAsync(cancellationToken))
             return Result<TaskDTO>.Failure("Failed to save updated task to DB");
 

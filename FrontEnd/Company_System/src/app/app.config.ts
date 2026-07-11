@@ -4,6 +4,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from '../core/interceptors/auth-interceptor';
+import { contentTypeInterceptor } from '../core/interceptors/content-type-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -13,6 +14,6 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding()
     ),
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(withInterceptors([contentTypeInterceptor, authInterceptor]))
   ]
 };

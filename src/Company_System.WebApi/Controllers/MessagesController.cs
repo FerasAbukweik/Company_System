@@ -13,12 +13,12 @@ public class MessagesController(IMessagesService messagesService,
 {
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<IReadOnlyList<MessageDTO>>> LazyGetMessages([FromQuery]LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyList<MessageDTO>>> LazyGetMessages([FromQuery]LazyDTO lazyData,[FromQuery]Guid otherUserId, CancellationToken cancellationToken = default)
     {
         var currUserIdResult = User.GetUserId();
         if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult(logger);
         
-        var result = await messagesService.LazyGetMessages(currUserIdResult.Value!, lazyData, cancellationToken);
+        var result = await messagesService.LazyGetMessages(currUserIdResult.Value!,otherUserId, lazyData, cancellationToken);
         return result.ToActionResult(logger);
     }
 }

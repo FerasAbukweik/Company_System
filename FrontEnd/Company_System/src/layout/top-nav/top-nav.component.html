@@ -53,12 +53,13 @@
         {{ authService.getUserData()?.userName ?? 'unknown' }}
       </p>
       <p class="text-xs text-text-secondary">
-        {{ authService.getUserData()?.role ?? 'unknown role' }}
+        {{ authService.getUserData()?.position ?? 'unknown position' }}
       </p>
     </div>
     <img
       class="z-41 w-10 h-10 rounded-full border-2 border-vibrant-turquoise object-cover"
-      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRHfLDf5yvFB-RXlZYcVjs0JD5QW1tZHZ6GAOogBeRzpjiyaNFyCjB79MY5Mtt00Ye2kcKrVvE7tSPysSsSGtBfd5l3xz-daMezIA02TeVKH3-uV5WofKf-Ld-9dqrmLSbLpoTCB3vWFHfaeaWpj_JIuNtOMNTyNYDXg3egWpvOUWs0fbIdeowZSQl4kJbyIo52sBhT46j8Stqov2BWd-xcq3HzaMxoPASeGsWFbBlY94dAzh-GgfGb-7fDGkVRWBIm-cit0bxedQ"
+      [src]="authService.getUserData()?.userImageUrl"
+      (error)="$event.target.src = 'user_vector.jpg'"
       alt="Alex Rivera Headshot"
     />
 

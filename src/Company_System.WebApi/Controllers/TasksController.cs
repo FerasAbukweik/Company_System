@@ -27,6 +27,7 @@ public class TasksController(ITasksService tasksService,
 
     [HttpPut("[action]/{taskId:guid}")]
     [Authorize]
+    [Transactional]
     public async Task<IActionResult> UpdateStatus([FromRoute]Guid taskId, [FromQuery]TaskStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
@@ -39,6 +40,7 @@ public class TasksController(ITasksService tasksService,
 
     [HttpPost("[action]")]
     [Authorize]
+    [Transactional]
     public async Task<IActionResult> Add(TaskAddDTO toTaskAdd, CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();

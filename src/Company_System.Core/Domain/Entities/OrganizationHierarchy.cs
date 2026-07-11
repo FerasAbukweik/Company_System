@@ -9,9 +9,6 @@ public class OrganizationHierarchy
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     
-    [Required]
-    public required PositionsEnum Position { get; set; }
-    
     
     
     // relations
@@ -35,10 +32,11 @@ public class OrganizationHierarchy
         {
             Id = Id,
             UserId = UserId,
-            Position = Position,
             Children = Children.Select(c => c.ToDTO(currUserId)).ToList(),
             IsCurrUser = UserId == currUserId,
-            UserName = User?.UserName ?? "unknown"
+            UserName = User?.UserName ?? "unknown",
+            Position = User?.Position ?? PositionsEnum.unknown,
+            UserImageUrl = User?.ImageUrl ?? "Missing Photo",
         };
     }
     
@@ -48,7 +46,7 @@ public class OrganizationHierarchy
 
     public override string ToString()
     {
-        return $"Id {Id}\n Position: {Position.ToString()}\nUserId: {UserId}\nParentId: {ParentId}\n";
+        return $"Id {Id}\nUserId: {UserId}\nParentId: {ParentId}\n";
     }
 
     public override bool Equals(object? obj)
@@ -57,7 +55,6 @@ public class OrganizationHierarchy
             return false;
         
         return other.Id == Id &&
-               other.Position == Position &&
                other.UserId == UserId &&
                other.ParentId == ParentId;
     }

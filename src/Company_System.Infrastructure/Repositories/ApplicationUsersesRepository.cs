@@ -32,15 +32,5 @@ public class ApplicationUsersesRepository(ApplicationDbContext dbContext) : IApp
             .Where(checks).ToListAsync(cancellationToken);
     }
 
-    public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        return await dbContext.Database.BeginTransactionAsync(cancellationToken);
-    }
-
-    public IExecutionStrategy GenerateStrategy()
-    {
-        return dbContext.Database.CreateExecutionStrategy();
-    }
-
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default) =>  (await dbContext.SaveChangesAsync(cancellationToken)) > 0;
 }

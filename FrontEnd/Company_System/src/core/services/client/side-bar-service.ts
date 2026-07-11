@@ -11,6 +11,11 @@ export class SideBarService {
   }
 
   // methods
+
+  reset() {
+    this.isSideBarOpen.set(window.innerWidth >= 1024);
+  }
+
   toggleSideBar() {
     this.isSideBarOpen.update((curr) => !curr);
   }

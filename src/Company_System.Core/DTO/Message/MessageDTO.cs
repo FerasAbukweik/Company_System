@@ -6,12 +6,12 @@ public class MessageDTO
     public required string Content { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required bool IsCurrUserSender { get; set; }
-    
+    public required string GroupName { get; set; }
     
     // override
 
     public override string ToString()
     {
-        return $"Id: {Id}\nContent: {Content}\nCreatedAt: {CreatedAt}\nIsCurrUserSender: {IsCurrUserSender}\n";
+        return $"Id: {Id}\nContent: {Content}\nCreatedAt: {CreatedAt}\nIsCurrUserSender: {IsCurrUserSender}\nGroupName: {GroupName}";
     }
 }

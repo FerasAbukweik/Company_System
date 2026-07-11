@@ -1,10 +1,16 @@
-<div class="mb-6 flex justify-between items-end">
+<div class="mb-6 flex justify-between items-center">
   <div>
     <h2 class="text-2xl font-semibold text-corporate-blue tracking-tight">Operational Overview</h2>
     <p class="text-sm text-text-secondary mt-1">
       Welcome back, {{ authService.getUserData()?.userName }}.
     </p>
   </div>
+  <button
+    class="bg-corporate-blue text-white px-2 py-3 rounded-xl font-bold text-sm cursor-pointer hover:opacity-95 border border-outline-light"
+    (click)="approvalService.requestHoliday()"
+  >
+    Request Holiday
+  </button>
 </div>
 
 <div class="grid grid-cols-12 gap-6">
@@ -41,10 +47,10 @@
 
       <div
         class="space-y-4 max-h-100 overflow-y-scroll"
-        [class.min-h-30]="taskCardService.getIsStatusMenuShown"
+        [class.min-h-40]="taskCardService.getIsStatusMenuShown"
       >
         @for (task of tasksService.getTasks(); track task.id) {
-          <app-task-card [task]="task" />
+          <app-task-card [task]="task" (showTaskDesctiption)="showTaskDescription.set($event)" />
         } @empty {
           @if (!tasksService.getIsLoading()) {
             <div class="text-center w-full text-lg font-bold">No Tasks Currently</div>
@@ -204,4 +210,40 @@
     class="fixed inset-0 z-40"
     (click)="$event.stopPropagation(); taskCardService.closeStatusMenu()"
   ></div>
+}
+
+@if (showTaskDescription()) {
+  <div
+    class="fixed p-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-85/100 h-85/100 max-w-100 max-h-100 border-outline-light border-2 rounded-xl z-50 bg-surface-base flex flex-col"
+  >
+    <div
+      class="flex items-center pb-4 min-h-16 relative shrink-0 after:w-full after:absolute after:h-0.5 after:bg-outline-light after:bottom-0"
+    >
+      <span class="text-xl font-bold text-text-secondary">
+        {{ showTaskDescription()?.title ?? 'unknown' }} Description
+      </span>
+      <button
+        class="absolute right-2 top-2 hover:bg-surface-low cursor-pointer rounded-full p-2"
+        (click)="showTaskDescription.set(null)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <textarea
+      class="flex-1 w-full resize-none text-lg overflow-x-hidden overflow-y-auto wrap-break-word outline-none bg-transparent pt-4"
+      placeholder="Enter description..."
+      >{{ showTaskDescription()?.description ?? 'description not found' }}</textarea>
+  </div>
+
+  <div class="z-40 fixed inset-0" (click)="hideTaskDescription()"></div>
 }

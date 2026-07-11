@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using HR_System.Core.common;
 using HR_System.Core.DTO.Auth;
 using HR_System.Core.Enums;
@@ -16,19 +15,14 @@ public class AuthController(IAccountService accountService,
 {
     [HttpPost("[action]")]
     [Authorize]
-    public ActionResult<AuthDTO> IsAuthenticated()
+    public IActionResult IsAuthenticated()
     {
-        var role = User.FindFirstValue(ClaimTypes.Role);
-        return Ok(new AuthDTO()
-        {
-            UserName = User.Identity?.Name ?? "Identity is null",
-            Role = role ?? "role is null"
-        });
+        return Ok();
     }
     
     [HttpPost("[action]")]
     [Authorize(Roles = nameof(RolesEnum.Admin))]
-    public ActionResult<AuthDTO> IsAdmin()
+    public ActionResult<UserDTO> IsAdmin()
     {
         return Ok();
     }
@@ -42,26 +36,18 @@ public class AuthController(IAccountService accountService,
         return Ok();
     }
 
-    [AllowAnonymous] // only for testing
+    [AllowAnonymous]
     [HttpPost("[action]")]
-    public async Task<IActionResult> Signup(AccountCreateDTO toAccountCreate, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<UserDTO>> Login(LoginDTO loginData, CancellationToken cancellationToken = default)
     {
-        Result result = await accountService.CreateAccountAsync(toAccountCreate, cancellationToken);
+        var result = await accountService.LoginAsync(loginData, cancellationToken);
 
         return result.ToActionResult(logger);
     }
 
     [AllowAnonymous]
     [HttpPost("[action]")]
-    public async Task<IActionResult> Login(LoginDTO loginData, CancellationToken cancellationToken = default)
-    {
-        Result result = await accountService.LoginAsync(loginData, cancellationToken);
-
-        return result.ToActionResult(logger);
-    }
-
-    [AllowAnonymous]
-    [HttpPost("[action]")]
+    [Transactional]
     public async Task<IActionResult> UpdateTokens(CancellationToken cancellationToken = default)
     {
         Result result = await tokenService.UpdateUserTokensAsync(cancellationToken);

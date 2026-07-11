@@ -5,14 +5,10 @@ namespace HR_System.Core.DTO.OrganizationHierarchy;
 
 public class OrganizationHierarchyAddDTO
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    
-    [Required]
-    public required PositionsEnum Position { get; set; }
-    
     [Required]
     public required Guid UserId { get; set; }
     
+    [Required]
     public required Guid ParentId { get; set; }
     
     
@@ -20,6 +16,6 @@ public class OrganizationHierarchyAddDTO
 
     override public string ToString()
     {
-        return $"Id: {Id}\nPosition: {Position.ToString()}\nUserId: {UserId}\nParentId: {ParentId}\n";
+        return $"UserId: {UserId}\nParentId: {ParentId}\n";
     }
 }

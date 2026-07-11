@@ -1,25 +1,20 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ILoginForm } from './login.model';
-import { loginValidators } from './login.validation';
+import { customValidator } from '../../core/validators/custom-validator';
 import { KeyValuePipe, NgClass } from '@angular/common';
-import { Router } from '@angular/router';
-import { AuthApiService } from '../../core/services/api/Auth-api-service';
 import { LoginDTO } from '../../core/dto/login-dto';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../core/services/client/auth-service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, NgClass, KeyValuePipe],
+  imports: [ReactiveFormsModule, NgClass],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
   // DI
-  private readonly _router = inject(Router);
-  private readonly _authService = inject(AuthApiService);
-  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _authService = inject(AuthService);
 
   // protected properties
 
@@ -27,45 +22,41 @@ export class LoginComponent {
   protected loginForm = new FormGroup<ILoginForm>({
     email: new FormControl('', {
       nonNullable: true,
-      validators: [loginValidators.email],
+      validators: [customValidator.email],
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [loginValidators.password],
+      validators: [customValidator.loginPassword],
     }),
   });
 
   // signals
   protected isPasswordVisible = signal<boolean>(false);
-
-  protected errors = signal({
-    email: '',
-    password: '',
-    server: '',
-  });
+  protected serverError = signal<string>('');
 
   // methods
 
   // check if controle have error
   isError(controlName: keyof ILoginForm) {
     let control = this.loginForm.controls[controlName];
-    return control.invalid && control.touched && control.dirty;
+    return control.invalid && control.touched;
   }
 
   // updateErrors errors
-  updateError(type: keyof ILoginForm) {
-    // if error add the error
-    if (this.isError(type)) {
-      const error = Object.keys(this.loginForm.controls[type].errors!)[0] || '';
-      this.errors.update((curr) => ({ ...curr, [type]: error }));
-    }
-    // if no error remove the error
-    else {
-      this.errors.update((curr) => ({ ...curr, [type]: '' }));
-    }
+  getError(type: keyof ILoginForm) {
+    if (!this.isError(type)) return '';
 
-    // remove server error if any
-    this.errors.update((curr) => ({ ...curr, server: '' }));
+    return Object.keys(this.loginForm.controls[type].errors!)[0] || '';
+  }
+
+  getErrors() {
+    let errors: string[] = [];
+
+    Object.keys(this.loginForm.controls).forEach((key) => {
+      errors.push(this.getError(key as keyof ILoginForm));
+    });
+
+    return errors;
   }
 
   // toggle passowrd
@@ -75,25 +66,25 @@ export class LoginComponent {
 
   // on submit
   async onSubmit() {
-    // if any error stop
-    if (Object.values(this.errors()).some((error) => !!error)) return;
+    // to show errors for user
+    this.loginForm.markAllAsTouched();
+
+    // if form is invalid stop
+    if (this.loginForm.invalid) return;
 
     const loginData: LoginDTO = {
       email: this.loginForm.controls.email.value,
       password: this.loginForm.controls.password.value,
     };
 
-    // try to login
-
-    try {
-      await firstValueFrom(this._authService.login(loginData));
-
-      this._router.navigateByUrl('/dashboard');
-    } catch (err: any) {
-      this.errors.update((curr) => ({
-        ...curr,
-        server: err.error || err.error.message || 'Server Error',
-      }));
-    }
+    // login
+    this._authService.login(loginData).subscribe({
+      next: () => {
+        this.serverError.set('');
+      },
+      error: (err) => {
+        this.serverError.set(err.error || err.error.message || 'unexpected error');
+      },
+    });
   }
 }

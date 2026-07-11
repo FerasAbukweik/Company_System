@@ -39,6 +39,7 @@ public class ApprovalController(IApprovalService approvalService,
 
     [HttpPut("[action]/{approvalId:guid}")]
     [Authorize]
+    [Transactional]
     public async Task<IActionResult> UpdateStatus([FromRoute]Guid approvalId, [FromQuery] ApprovalStatusEnum newStatus, CancellationToken cancellationToken = default)
     {
         var userIdResult = User.GetUserId();
@@ -52,12 +53,13 @@ public class ApprovalController(IApprovalService approvalService,
 
     [HttpPost("[action]")]
     [Authorize]
-    public async Task<IActionResult> Add([FromBody] ApprovalAddDTO toAddData, CancellationToken cancellationToken = default)
+    [Transactional]
+    public async Task<IActionResult> RequestHoliday(CancellationToken cancellationToken = default)
     {
         var userIdResult = User.GetUserId();
         if (!userIdResult.IsSuccess) return ((Result)userIdResult).ToActionResult(logger);
         
-        Result result = await approvalService.AddAsync(toAddData, userIdResult.Value, cancellationToken);
+        Result result = await approvalService.RequestHoliday(userIdResult.Value, cancellationToken);
         
         return result.ToActionResult(logger);
     }

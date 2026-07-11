@@ -6,5 +6,6 @@ public enum PositionsEnum
     HR,
     Manager,
     Programmer,
-    Employee
+    Employee,
+    unknown
 }

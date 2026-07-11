@@ -62,11 +62,10 @@ export class TasksService {
 
           this.lazyData.taken += data.length;
           this.isMoreTasksAvaiable = data.length > 0;
+          this.isLoading.set(false);
         },
         error: () => {
           this.toastService.error('something went wrong while loading tasks');
-        },
-        complete: () => {
           this.isLoading.set(false);
         },
       });
@@ -86,14 +85,13 @@ export class TasksService {
         this.toastService.success('task updated successfully');
 
         this.approvalService.resetRequested();
+        this.isLoading.set(false);
       },
       error: () => {
         this.tasks.set(oldTasks);
 
-        this.toastService.error('something went wrong while updating task');
-      },
-      complete: () => {
         this.isLoading.set(false);
+        this.toastService.error('something went wrong while updating task');
       },
     });
   }

@@ -356,3 +356,4 @@
 /home/firas/RiderProjects/Company_System/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.pdb
 /home/firas/RiderProjects/Company_System/src/Company_System.WebApi/obj/Debug/net10.0/Company_System.WebApi.genruntimeconfig.cache
 /home/firas/RiderProjects/Company_System/src/Company_System.WebApi/obj/Debug/net10.0/ref/Company_System.WebApi.dll
+/home/firas/RiderProjects/Company_System/src/Company_System.WebApi/bin/Debug/net10.0/CloudinaryDotNet.dll

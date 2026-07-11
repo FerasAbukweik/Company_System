@@ -1,4 +1,6 @@
 using HR_System.Core.Domain.Entities;
+using HR_System.Core.DTO.LazyLoading;
+using HR_System.Core.DTO.OrganizationHierarchy;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Infrastructure.extensionMethods;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +49,6 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
         
         return await query.AsNoTracking().ToListAsync(cancellationToken);
     }
-
     public async Task<OrganizationHierarchy?> RemoveAsync(Guid toRemoveId, CancellationToken cancellationToken = default)
     {
         var toRemove = await dbContext.OrganizationHierarchies
@@ -61,7 +62,6 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
 
         return toRemove;
     }
-
     public async Task<OrganizationHierarchy?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var actualValue = await dbContext.OrganizationHierarchies
@@ -71,12 +71,21 @@ public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : I
         
         return actualValue;
     }
-
     public async Task<IReadOnlyList<Guid>> GetParentUserIds(Guid userId, CancellationToken cancellationToken = default)
     {
         return await dbContext.GetFatherUserIds(userId).ToListAsync(cancellationToken);
     }
-
+    public async Task<IReadOnlyList<UserNameDTO>> GetUserNames(LazyDTO lazyData, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.OrganizationHierarchies
+            .Skip(lazyData.Taken)
+            .Take(lazyData.SectionSize)
+            .Select(oh => new UserNameDTO()
+        {
+            TreeId = oh.Id,
+            UserName = oh.User!.UserName!
+        }).ToListAsync(cancellationToken);
+    }
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return (await dbContext.SaveChangesAsync(cancellationToken)) > 0;

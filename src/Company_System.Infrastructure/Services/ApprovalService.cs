@@ -51,20 +51,14 @@ public class ApprovalService(IApprovalRepository approvalRepository,
         return  Result<RequestedApprovalDTO>.Success(updated.ToRequestedApprovalDTO());
     }
 
-    public async Task<Result<ToApproveDTO>> AddAsync(ApprovalAddDTO toAddApproval, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<ToApproveDTO>> AddAsync(ApprovalAddDTO toAddApproval, Guid currUserId, Guid managerUserId, CancellationToken cancellationToken = default)
     {
-        var userHierarchy = await hierarchyRepository.GetByUserIdAsync(userId, cancellationToken);
-        if(userHierarchy is null)
-            return Result<ToApproveDTO>.Failure("User not found in organization hierarchy", HttpStatusCode.BadRequest);
-        if (userHierarchy.Parent is null)
-            return Result<ToApproveDTO>.Failure("missing parent in userHierarchy", HttpStatusCode.BadRequest);
-        
         var toAdd = new Approval()
         {
-            ManagerId = userHierarchy.Parent.UserId,
+            ManagerId = managerUserId,
             Type = toAddApproval.Type,
             TaskId = toAddApproval.TaskId,
-            UserRequestingId = userId,
+            UserRequestingId = currUserId,
         };
         
         // add to DB
@@ -88,7 +82,7 @@ public class ApprovalService(IApprovalRepository approvalRepository,
             Type = ActivityTypeEnum.ApprovalPending,
             Title = ActivityTextGenerator.GetApprovalTitle(toAddWithInclude[0]),
             Description = ActivityTextGenerator.GetApprovalDescription(toAddWithInclude[0]),
-        }, userId, cancellationToken);
+        }, currUserId, cancellationToken);
         
         if(!addActivityResult.IsSuccess)
             return addActivityResult.MapFailure<ToApproveDTO>();
@@ -97,5 +91,21 @@ public class ApprovalService(IApprovalRepository approvalRepository,
 
         return Result<ToApproveDTO>.Success(toAdd.ToToApprovalDTO());
     }
-    
+
+    public async Task<Result<ToApproveDTO>> RequestHoliday(Guid currUserId, CancellationToken cancellationToken = default)
+    {
+        var userHierarchy = await hierarchyRepository.GetByUserIdAsync(currUserId, cancellationToken);
+        if(userHierarchy is null)
+            return Result<ToApproveDTO>.Failure("User not found in organization hierarchy", HttpStatusCode.BadRequest);
+        if (userHierarchy.Parent is null)
+            return Result<ToApproveDTO>.Failure("missing parent in userHierarchy", HttpStatusCode.BadRequest);
+
+        return await AddAsync(new ApprovalAddDTO()
+            {
+                Type = ApprovalTypeEnum.Holiday
+            },
+            currUserId,
+            userHierarchy.Parent.UserId,
+            cancellationToken);
+    }
 }

@@ -10,7 +10,6 @@ export const authInterceptor: HttpInterceptorFn = (
 ) => {
   const reqClone = req.clone({
     withCredentials: true,
-    headers: req.headers.set('Content-Type', 'application/json'),
   });
 
   const router = inject(Router);

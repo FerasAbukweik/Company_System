@@ -56,6 +56,8 @@ public static class InfrastructureDependencyInjectionExtensionMethod
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IMessagesService, MessagesService>();
         services.AddScoped<ITasksApprovalsService, TasksApprovalsService>();
+        services.AddScoped<IAccountOrgHierarchyService, AccountOrgHierarchyService>();
+        services.AddScoped<IImageService, ImageService>();
         
         services.AddScoped<IRedisService, RedisService>();
         services.AddHostedRemoveExpiredRefreshTokens();

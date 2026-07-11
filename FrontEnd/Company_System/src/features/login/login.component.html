@@ -103,8 +103,6 @@
                 }"
                 [formControl]="loginForm.controls.email"
                 placeholder="name@company.com"
-                (ngModelChange)="updateError('email')"
-                (blur)="updateError('email')"
               />
             </div>
           </div>
@@ -142,8 +140,6 @@
                 [formControl]="loginForm.controls.password"
                 placeholder="••••••••"
                 [type]="isPasswordVisible() ? 'text' : 'password'"
-                (ngModelChange)="updateError('password')"
-                (blur)="updateError('password')"
               />
               <button
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-outline-strong hover:text-text-primary transition-colors cursor-pointer"
@@ -193,8 +189,8 @@
           </div>
 
           <div class="space-y-1">
-            @for (error of errors() | keyvalue; track $index) {
-              <p class="text-error text-sm font-bold p-0 m-0">{{ error.value }}</p>
+            @for (error of [...getErrors(), serverError()]; track $index) {
+              <p class="text-error text-sm font-bold p-0 m-0">{{ error }}</p>
             }
           </div>
 

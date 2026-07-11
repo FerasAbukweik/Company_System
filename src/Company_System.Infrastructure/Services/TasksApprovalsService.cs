@@ -27,9 +27,11 @@ public class TasksApprovalsService(
             var addApprovalResult = await approvalService.AddAsync(new ApprovalAddDTO()
                 {
                     Type = ApprovalTypeEnum.Task,
-                    TaskId = taskId
+                    TaskId = taskId,
                 },
-                currentUserId, cancellationToken);
+                currentUserId,
+                updatedResult.Value!.ManagerId,
+                cancellationToken);
 
             if (!addApprovalResult.IsSuccess)
                 return addApprovalResult.MapFailure<TaskDTO>();

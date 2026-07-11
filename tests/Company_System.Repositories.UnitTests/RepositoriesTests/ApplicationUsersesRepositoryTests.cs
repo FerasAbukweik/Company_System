@@ -133,21 +133,6 @@ public class ApplicationUsersesRepositoryTests : IDisposable
 
     #endregion
 
-    #region BeginTransactionAsync
-
-    [Fact]
-    public async Task BeginTransactionAsync_ShouldReturnTransaction()
-    {
-        // Act
-        var actual = await _applicationUsersRepository.BeginTransactionAsync();
-        _output.WriteLine($"Transaction: {actual?.GetType().Name ?? "null"}");
-
-        // Assert
-        actual.Should().NotBeNull();
-    }
-
-    #endregion
-
     #region SaveChangesAsync
 
     [Fact]

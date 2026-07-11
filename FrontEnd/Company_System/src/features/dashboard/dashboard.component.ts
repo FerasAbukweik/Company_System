@@ -10,6 +10,7 @@ import { NeedsApprovalCardComponent } from './components/needs-approval-card/nee
 import { RequestedApprovalCardComponent } from './components/requested-approval-card/requested-approval-card.component';
 import { ActivityCardComponent } from './components/activity-card/activity-card.component';
 import { AuthService } from '../../core/services/client/auth-service';
+import { TaskDTO } from '../../core/dto/task-dto';
 
 @Component({
   selector: 'app-dashboard',
@@ -38,6 +39,7 @@ export class DashboardComponent {
 
   // signals
   currApproval = signal<'toApprove' | 'requested'>('toApprove');
+  showTaskDescription = signal<TaskDTO | null>(null);
 
   // methods
 
@@ -55,5 +57,9 @@ export class DashboardComponent {
 
     if (this.currApproval() == 'requested') this.approvalService.loadMoreRequestedApprovals();
     if (this.currApproval() == 'toApprove') this.approvalService.loadMoreToApprove();
+  }
+
+  hideTaskDescription() {
+    this.showTaskDescription.set(null);
   }
 }

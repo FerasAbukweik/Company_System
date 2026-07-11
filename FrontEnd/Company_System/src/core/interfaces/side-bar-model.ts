@@ -1,6 +1,5 @@
-export interface ISideBarItem{
-    active: boolean;
-    icon: string;
-    label: string;
-    route: string;
+export interface ISideBarItem {
+  icon: string;
+  label: string;
+  route: string;
 }

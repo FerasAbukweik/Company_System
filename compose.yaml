@@ -59,7 +59,7 @@
       context: ./FrontEnd/Company_System
       dockerfile: Dockerfile
     ports:
-      - "4200:443"
+      - "4000:443"
     volumes:
       - ./FrontEnd/Company_System/ssl:/etc/nginx/ssl:ro
 volumes:

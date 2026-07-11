@@ -1,413 +1,418 @@
-/*using AutoFixture;
-using FluentAssertions;
-using HR_System.Core.Domain.Entities;
-using HR_System.Core.Domain.Identity;
-using HR_System.Core.DTO.LazyLoading;
-using HR_System.Core.Enums;
-using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Infrastructure;
-using HR_System.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Xunit.Abstractions;
-
-namespace TestProject1.RepositoriesTests;
-
-public class TasksRepositoryTests : IDisposable
-{
-    private readonly ITasksRepository _tasksRepository;
-    private readonly ApplicationDbContext _dbContext;
-    private readonly ITestOutputHelper _output;
-    private readonly IFixture _fixture;
-
-    private readonly Guid _userId = Guid.NewGuid();
-    private readonly Guid _managerId = Guid.NewGuid();
-
-    public TasksRepositoryTests(ITestOutputHelper output)
-    {
-        _output = output;
-
-        _fixture = new Fixture();
-        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-            .ForEach(b => _fixture.Behaviors.Remove(b));
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-        var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        _dbContext = new ApplicationDbContext(dbOptions);
-        _tasksRepository = new TasksRepository(_dbContext);
-    }
-
-    #region Add
-
-    [Fact]
-    public async Task Add_ValidTask_ShouldPersistAfterSave()
-    {
-        // Arrange
-        var task = CreateTask();
-        _output.WriteLine($"Adding Task: {task.Id} | {task.Title}");
-
-        // Act
-        _tasksRepository.Add(task);
-        await _tasksRepository.SaveChangesAsync();
-
-        // Assert
-        var actual = await _tasksRepository.GetTaskAsync(task.Id);
-        _output.WriteLine($"Actual Id   : {actual?.Id}");
-        _output.WriteLine($"Actual Title: {actual?.Title}");
-
-        actual.Should().NotBeNull();
-        actual!.Id.Should().Be(task.Id);
-    }
-
-    [Fact]
-    public async Task Add_MultipleTasks_ShouldPersistAll()
-    {
-        // Arrange
-        var tasks = CreateMany(3, userId: _userId);
-        _output.WriteLine($"Expected Count: {tasks.Count}");
-        tasks.ForEach(t => _output.WriteLine($"  Task: {t.Id} | {t.Title}"));
-
-        // Act
-        foreach (var task in tasks)
-            _tasksRepository.Add(task);
-        await _tasksRepository.SaveChangesAsync();
-
-        // Assert
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, new LazyDTO { Taken = 0, SectionSize = 10 });
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        actual.Should().HaveCount(tasks.Count);
-    }
-
-    #endregion
-
-    #region LazyGetUserTasksAsync
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_UserWithTasks_ShouldReturnOnlyUserTasks()
-    {
-        // Arrange
-        var userTasks = CreateMany(3, userId: _userId);
-        var otherTasks = CreateMany(3); // random userIds
-        await SeedAsync([.. userTasks, .. otherTasks]);
-
-        _output.WriteLine($"UserId        : {_userId}");
-        _output.WriteLine($"Expected Count: {userTasks.Count}");
-        userTasks.ForEach(t => _output.WriteLine($"  Expected: {t.Id} | UserId: {t.UserId}"));
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, new LazyDTO { Taken = 0, SectionSize = 10 });
-        _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(t => _output.WriteLine($"  Actual: {t.Id} | UserId: {t.UserId}"));
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Should().HaveCount(userTasks.Count);
-        actual.Should().OnlyContain(t => t.UserId == _userId);
-    }
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_ShouldSkipCorrectly()
-    {
-        // Arrange
-        var tasks = CreateMany(5, userId: _userId);
-        await SeedAsync([.. tasks]);
-
-        var lazyData = new LazyDTO { Taken = 2, SectionSize = 10 };
-        _output.WriteLine($"Total Seeded: {tasks.Count}");
-        _output.WriteLine($"Taken (skip): {lazyData.Taken}");
-        _output.WriteLine($"Expected Count: {tasks.Count - lazyData.Taken}");
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, lazyData);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().HaveCount(tasks.Count - lazyData.Taken);
-    }
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_ShouldTakeCorrectly()
-    {
-        // Arrange
-        var tasks = CreateMany(10, userId: _userId);
-        await SeedAsync([.. tasks]);
-
-        var lazyData = new LazyDTO { Taken = 0, SectionSize = 4 };
-        _output.WriteLine($"Total Seeded: {tasks.Count}");
-        _output.WriteLine($"SectionSize : {lazyData.SectionSize}");
-        _output.WriteLine($"Expected Count: {lazyData.SectionSize}");
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, lazyData);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().HaveCount(lazyData.SectionSize);
-    }
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_SkipAndTake_ShouldReturnCorrectPage()
-    {
-        // Arrange
-        var tasks = CreateMany(10, userId: _userId);
-        await SeedAsync([.. tasks]);
-
-        var lazyData = new LazyDTO { Taken = 3, SectionSize = 4 };
-        _output.WriteLine($"Total Seeded : {tasks.Count}");
-        _output.WriteLine($"Taken (skip) : {lazyData.Taken}");
-        _output.WriteLine($"SectionSize  : {lazyData.SectionSize}");
-        _output.WriteLine($"Expected Count: {lazyData.SectionSize}");
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, lazyData);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().HaveCount(lazyData.SectionSize);
-        actual.Should().OnlyContain(t => t.UserId == _userId);
-    }
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_UserWithNoTasks_ShouldReturnEmpty()
-    {
-        // Arrange
-        var otherTasks = CreateMany(3);
-        await SeedAsync([.. otherTasks]);
-
-        _output.WriteLine($"UserId        : {_userId}");
-        _output.WriteLine("Expected Count: 0");
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, new LazyDTO { Taken = 0, SectionSize = 10 });
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_SkipMoreThanExists_ShouldReturnEmpty()
-    {
-        // Arrange
-        var tasks = CreateMany(3, userId: _userId);
-        await SeedAsync([.. tasks]);
-
-        var lazyData = new LazyDTO { Taken = 10, SectionSize = 5 };
-        _output.WriteLine($"Total Seeded: {tasks.Count}");
-        _output.WriteLine($"Taken (skip): {lazyData.Taken}");
-        _output.WriteLine("Expected Count: 0");
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, lazyData);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task LazyGetUserTasksAsync_ShouldReturnReadOnlyList()
-    {
-        // Arrange
-        var task = CreateTask(userId: _userId);
-        await SeedAsync(task);
-
-        // Act
-        var actual = await _tasksRepository.LazyGetUserTasksAsync(_userId, new LazyDTO { Taken = 0, SectionSize = 10 });
-        _output.WriteLine($"Actual Type: {actual.GetType().Name}");
-
-        // Assert
-        actual.Should().BeAssignableTo<IReadOnlyList<AppTask>>();
-    }
-
-    #endregion
-
-    #region GetTaskAsync
-
-    [Fact]
-    public async Task GetTaskAsync_ExistingTask_ShouldReturnTask()
-    {
-        // Arrange
-        var task = CreateTask();
-        await SeedAsync(task);
-
-        _output.WriteLine($"Expected Id   : {task.Id}");
-        _output.WriteLine($"Expected Title: {task.Title}");
-
-        // Act
-        var actual = await _tasksRepository.GetTaskAsync(task.Id);
-        _output.WriteLine($"Actual Id   : {actual?.Id}");
-        _output.WriteLine($"Actual Title: {actual?.Title}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual!.Id.Should().Be(task.Id);
-    }
-
-    [Fact]
-    public async Task GetTaskAsync_NonExistentTask_ShouldReturnNull()
-    {
-        // Arrange
-        var nonExistentId = Guid.NewGuid();
-        _output.WriteLine($"Non-existent Task Id: {nonExistentId}");
-
-        // Act
-        var actual = await _tasksRepository.GetTaskAsync(nonExistentId);
-        _output.WriteLine($"Actual: {actual?.ToString() ?? "null"}");
-
-        // Assert
-        actual.Should().BeNull();
-    }
-
-    #endregion
-
-    #region UpdateStatusAsync
-
-    [Fact]
-    public async Task UpdateStatusAsync_ValidTask_ShouldReturnTaskWithNewStatus()
-    {
-        // Arrange
-        var task = CreateTask(status: TaskStatusEnum.Pending);
-        await SeedAsync(task);
-        var newStatus = TaskStatusEnum.Pending;
-
-        _output.WriteLine($"Task Id        : {task.Id}");
-        _output.WriteLine($"Initial Status : {task.Status}");
-        _output.WriteLine($"Expected Status: {newStatus}");
-
-        // Act
-        var actual = await _tasksRepository.UpdateStatusAsync(task.Id, newStatus);
-        _output.WriteLine($"Actual Status: {actual?.Status}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual!.Status.Should().Be(newStatus);
-    }
-
-    [Fact]
-    public async Task UpdateStatusAsync_ValidTask_ShouldPersistAfterSave()
-    {
-        // Arrange
-        var task = CreateTask(status: TaskStatusEnum.Pending);
-        await SeedAsync(task);
-        var newStatus = TaskStatusEnum.Pending;
-
-        _output.WriteLine($"Task Id        : {task.Id}");
-        _output.WriteLine($"Expected Status: {newStatus}");
-
-        // Act
-        await _tasksRepository.UpdateStatusAsync(task.Id, newStatus);
-        await _tasksRepository.SaveChangesAsync();
-
-        // Assert — re-fetch via GetTaskAsync
-        var actual = await _tasksRepository.GetTaskAsync(task.Id);
-        _output.WriteLine($"Actual Status (persisted): {actual?.Status}");
-
-        actual.Should().NotBeNull();
-        actual!.Status.Should().Be(newStatus);
-    }
-
-    [Fact]
-    public async Task UpdateStatusAsync_NonExistentTask_ShouldReturnNull()
-    {
-        // Arrange
-        var nonExistentId = Guid.NewGuid();
-        _output.WriteLine($"Non-existent Task Id: {nonExistentId}");
-
-        // Act
-        var actual = await _tasksRepository.UpdateStatusAsync(nonExistentId, TaskStatusEnum.Pending);
-        _output.WriteLine($"Actual: {actual?.ToString() ?? "null"}");
-
-        // Assert
-        actual.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task UpdateStatusAsync_ShouldNotAffectOtherTasks()
-    {
-        // Arrange
-        var task1 = CreateTask(userId: _userId, status: TaskStatusEnum.Pending);
-        var task2 = CreateTask(userId: _userId, status: TaskStatusEnum.Pending);
-        await SeedAsync(task1, task2);
-
-        _output.WriteLine($"Updating Task1: {task1.Id} → Pending");
-        _output.WriteLine($"Task2 should stay Pending: {task2.Id}");
-
-        // Act
-        await _tasksRepository.UpdateStatusAsync(task1.Id, TaskStatusEnum.Pending);
-        await _tasksRepository.SaveChangesAsync();
-
-        // Assert
-        var actual = await _tasksRepository.GetTaskAsync(task2.Id);
-        _output.WriteLine($"Task2 Expected: {TaskStatusEnum.Pending}");
-        _output.WriteLine($"Task2 Actual  : {actual?.Status}");
-
-        actual!.Status.Should().Be(TaskStatusEnum.Pending);
-    }
-
-    #endregion
-
-    #region SaveChangesAsync
-
-    [Fact]
-    public async Task SaveChangesAsync_WithPendingChanges_ShouldReturnTrue()
-    {
-        // Arrange
-        var task = CreateTask();
-        _tasksRepository.Add(task);
-        _output.WriteLine($"Added Task: {task.Id}");
-
-        // Act
-        var actual = await _tasksRepository.SaveChangesAsync();
-        _output.WriteLine($"Expected: true | Actual: {actual}");
-
-        // Assert
-        actual.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task SaveChangesAsync_WithNoChanges_ShouldReturnFalse()
-    {
-        // Arrange
-        _output.WriteLine("No changes made");
-
-        // Act
-        var actual = await _tasksRepository.SaveChangesAsync();
-        _output.WriteLine($"Expected: false | Actual: {actual}");
-
-        // Assert
-        actual.Should().BeFalse();
-    }
-
-    #endregion
-
-    #region Helpers
-
-    private AppTask CreateTask(Guid? userId = null, TaskStatusEnum? status = null) =>
-        _fixture.Build<AppTask>()
-            .With(t => t.UserId, userId ?? Guid.NewGuid())
-            .With(t => t.User, null as ApplicationUser)
-            .With(t => t.ManagerId, _managerId)
-            .With(t => t.Manager, null as ApplicationUser)
-            .With(t => t.Status, status ?? _fixture.Create<TaskStatusEnum>())
-            .Create();
-
-    private List<AppTask> CreateMany(int count, Guid? userId = null, TaskStatusEnum? status = null) =>
-        Enumerable.Range(0, count)
-            .Select(_ => CreateTask(userId, status))
-            .ToList();
-
-    private async Task SeedAsync(params AppTask[] tasks)
-    {
-        await _dbContext.Tasks.AddRangeAsync(tasks);
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public void Dispose() => _dbContext.Dispose();
-
-    #endregion
-}*/
+using AutoFixture;
+   using FluentAssertions;
+   using HR_System.Core.Domain.Entities;
+   using HR_System.Core.Domain.Identity;
+   using HR_System.Core.DTO.LazyLoading;
+   using HR_System.Core.Enums;
+   using HR_System.Core.Interfaces.RepositoryContracts;
+   using HR_System.Core.Interfaces.ServiceContracts;
+   using HR_System.Infrastructure;
+   using HR_System.Infrastructure.Repositories;
+   using Microsoft.EntityFrameworkCore;
+   using Moq;
+   using Xunit.Abstractions;
+   
+   namespace TestProject1.RepositoriesTests;
+   
+   public class TasksRepositoryTests : IDisposable
+   {
+       private readonly ITasksRepository _tasksRepository;
+       private readonly ApplicationDbContext _dbContext;
+       private readonly Mock<IRedisService> _cacheMock;
+       private readonly ITestOutputHelper _output;
+       private readonly IFixture _fixture;
+   
+       public TasksRepositoryTests(ITestOutputHelper output)
+       {
+           _output = output;
+   
+           _fixture = new Fixture();
+           _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+               .ForEach(b => _fixture.Behaviors.Remove(b));
+           _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+   
+           var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+               .UseInMemoryDatabase(Guid.NewGuid().ToString())
+               .Options;
+           _dbContext = new ApplicationDbContext(dbOptions);
+   
+           // IRedisService is an external dependency (cache), not part of this
+           // repository's own logic, so it's mocked rather than exercised for real.
+           _cacheMock = new Mock<IRedisService>();
+   
+           _tasksRepository = new TasksRepository(_dbContext, _cacheMock.Object);
+       }
+   
+       private AppTask CreateTask(
+           Guid? userId = null,
+           Guid? managerId = null,
+           TaskStatusEnum? status = null,
+           DateTime? createdAt = null)
+       {
+           return _fixture.Build<AppTask>()
+               .With(t => t.UserId, userId ?? Guid.NewGuid())
+               .With(t => t.ManagerId, managerId ?? Guid.NewGuid())
+               .With(t => t.Status, status ?? TaskStatusEnum.Pending)
+               .With(t => t.CreatedAt, createdAt ?? DateTime.UtcNow)
+               .Without(t => t.User)
+               .Without(t => t.Manager)
+               .Without(t => t.Approvals)
+               .Create();
+       }
+   
+       private ApplicationUser CreateUser(string? userName = null)
+       {
+           return _fixture.Build<ApplicationUser>()
+               .With(u => u.UserName, userName ?? $"user_{Guid.NewGuid():N}")
+               .Without(u => u.RefreshTokens)
+               .Without(u => u.Tasks)
+               .Without(u => u.CreatedTasks)
+               .Without(u => u.Approvals)
+               .Without(u => u.ToApprove)
+               .Without(u => u.Activities)
+               .Without(u => u.OrganizationHierarchy)
+               .Without(u => u.SentMessages)
+               .Without(u => u.ReceivedMessages)
+               .Create();
+       }
+   
+       #region Add
+   
+       [Fact]
+       public void Add_ShouldTrackEntityAsAdded()
+       {
+           // Arrange
+           var task = CreateTask();
+   
+           // Act
+           _tasksRepository.Add(task);
+   
+           // Assert
+           _dbContext.Entry(task).State.Should().Be(EntityState.Added);
+           _dbContext.Tasks.Local.Should().Contain(task);
+       }
+   
+       [Fact]
+       public void Add_ShouldNotPersistToDatabase_BeforeSaveChangesIsCalled()
+       {
+           // Arrange
+           var task = CreateTask();
+   
+           // Act
+           _tasksRepository.Add(task);
+   
+           // Assert
+           _dbContext.Tasks.AsNoTracking().Any(t => t.Id == task.Id).Should().BeFalse();
+       }
+   
+       #endregion
+   
+       #region LazyGetUserTasksAsync
+   
+       [Fact]
+       public async Task LazyGetUserTasksAsync_ShouldReturnOnlyTasksForGivenUser()
+       {
+           // Arrange
+           var userId = Guid.NewGuid();
+           var otherUserId = Guid.NewGuid();
+   
+           var userTask = CreateTask(userId: userId);
+           var otherUserTask = CreateTask(userId: otherUserId);
+   
+           _dbContext.Tasks.AddRange(userTask, otherUserTask);
+           await _dbContext.SaveChangesAsync();
+   
+           var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+   
+           // Act
+           var result = await _tasksRepository.LazyGetUserTasksAsync(userId, lazyData);
+   
+           // Assert
+           result.Should().ContainSingle(t => t.Id == userTask.Id);
+           result.Should().NotContain(t => t.Id == otherUserTask.Id);
+       }
+   
+       [Fact]
+       public async Task LazyGetUserTasksAsync_ShouldExcludeCompletedTasks()
+       {
+           // Arrange
+           var userId = Guid.NewGuid();
+   
+           var pendingTask = CreateTask(userId: userId, status: TaskStatusEnum.Pending);
+           var completedTask = CreateTask(userId: userId, status: TaskStatusEnum.Completed);
+   
+           _dbContext.Tasks.AddRange(pendingTask, completedTask);
+           await _dbContext.SaveChangesAsync();
+   
+           var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+   
+           // Act
+           var result = await _tasksRepository.LazyGetUserTasksAsync(userId, lazyData);
+   
+           // Assert
+           result.Should().ContainSingle(t => t.Id == pendingTask.Id);
+           result.Should().NotContain(t => t.Id == completedTask.Id);
+       }
+   
+       [Fact]
+       public async Task LazyGetUserTasksAsync_ShouldReturnTasksOrderedByCreatedAtDescending()
+       {
+           // Arrange
+           var userId = Guid.NewGuid();
+   
+           var oldest = CreateTask(userId: userId, createdAt: DateTime.UtcNow.AddDays(-2));
+           var middle = CreateTask(userId: userId, createdAt: DateTime.UtcNow.AddDays(-1));
+           var newest = CreateTask(userId: userId, createdAt: DateTime.UtcNow);
+   
+           _dbContext.Tasks.AddRange(oldest, middle, newest);
+           await _dbContext.SaveChangesAsync();
+   
+           var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+   
+           // Act
+           var result = await _tasksRepository.LazyGetUserTasksAsync(userId, lazyData);
+   
+           // Assert
+           result.Select(t => t.Id).Should().ContainInOrder(newest.Id, middle.Id, oldest.Id);
+       }
+   
+       [Fact]
+       public async Task LazyGetUserTasksAsync_ShouldRespectSkipAndTake()
+       {
+           // Arrange
+           var userId = Guid.NewGuid();
+   
+           var tasks = Enumerable.Range(0, 5)
+               .Select(i => CreateTask(userId: userId, createdAt: DateTime.UtcNow.AddMinutes(-i)))
+               .ToList();
+   
+           _dbContext.Tasks.AddRange(tasks);
+           await _dbContext.SaveChangesAsync();
+   
+           var lazyData = new LazyDTO { Taken = 1, SectionSize = 2 };
+   
+           // Act
+           var result = await _tasksRepository.LazyGetUserTasksAsync(userId, lazyData);
+   
+           // Assert — sorted desc by CreatedAt: [0,1,2,3,4] -> skip 1, take 2 -> [1,2]
+           result.Should().HaveCount(2);
+           result.Select(t => t.Id).Should().ContainInOrder(tasks[1].Id, tasks[2].Id);
+       }
+   
+       [Fact]
+       public async Task LazyGetUserTasksAsync_ShouldReturnEmptyList_WhenUserHasNoMatchingTasks()
+       {
+           // Arrange
+           var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+   
+           // Act
+           var result = await _tasksRepository.LazyGetUserTasksAsync(Guid.NewGuid(), lazyData);
+   
+           // Assert
+           result.Should().BeEmpty();
+       }
+   
+       #endregion
+   
+       #region UpdateStatusAsync
+   
+       [Fact]
+       public async Task UpdateStatusAsync_ShouldUpdateStatus_WhenTaskExists()
+       {
+           // Arrange
+           var task = CreateTask(status: TaskStatusEnum.Pending);
+           _dbContext.Tasks.Add(task);
+           await _dbContext.SaveChangesAsync();
+   
+           // Act
+           var result = await _tasksRepository.UpdateStatusAsync(task.Id, TaskStatusEnum.Completed);
+   
+           // Assert
+           result.Should().NotBeNull();
+           result!.Status.Should().Be(TaskStatusEnum.Completed);
+       }
+   
+       [Fact]
+       public async Task UpdateStatusAsync_ShouldPersistUpdatedStatus_AfterSaveChanges()
+       {
+           // Arrange
+           var task = CreateTask(status: TaskStatusEnum.Pending);
+           _dbContext.Tasks.Add(task);
+           await _dbContext.SaveChangesAsync();
+   
+           // Act
+           await _tasksRepository.UpdateStatusAsync(task.Id, TaskStatusEnum.Completed);
+           await _dbContext.SaveChangesAsync();
+           _dbContext.ChangeTracker.Clear();
+   
+           // Assert
+           var fromDb = await _dbContext.Tasks.SingleAsync(t => t.Id == task.Id);
+           fromDb.Status.Should().Be(TaskStatusEnum.Completed);
+       }
+   
+       [Fact]
+       public async Task UpdateStatusAsync_ShouldReturnNull_WhenTaskDoesNotExist()
+       {
+           // Act
+           var result = await _tasksRepository.UpdateStatusAsync(Guid.NewGuid(), TaskStatusEnum.Completed);
+   
+           // Assert
+           result.Should().BeNull();
+       }
+   
+       #endregion
+   
+       #region GetTaskAsync
+   
+       [Fact]
+       public async Task GetTaskAsync_ShouldReturnCachedTask_WhenPresentInCache()
+       {
+           // Arrange
+           var task = CreateTask();
+           var cacheKey = $"Task-Id-{task.Id}";
+   
+           _cacheMock
+               .Setup(c => c.GetAsync<AppTask>(cacheKey, It.IsAny<CancellationToken>()))
+               .ReturnsAsync(task);
+   
+           // Act
+           var result = await _tasksRepository.GetTaskAsync(task.Id);
+   
+           // Assert
+           result.Should().Be(task);
+           _cacheMock.Verify(
+               c => c.SetAsync(It.IsAny<string>(), It.IsAny<AppTask?>(), It.IsAny<CancellationToken>()),
+               Times.Never);
+       }
+       
+   
+       [Fact]
+       public async Task GetTaskAsync_ShouldIncludeUserNavigationProperty()
+       {
+           // Arrange
+           var user = CreateUser("task_owner");
+           _dbContext.Users.Add(user);
+   
+           var task = CreateTask(userId: user.Id);
+           _dbContext.Tasks.Add(task);
+           await _dbContext.SaveChangesAsync();
+           _dbContext.ChangeTracker.Clear();
+   
+           var cacheKey = $"Task-Id-{task.Id}";
+           _cacheMock
+               .Setup(c => c.GetAsync<AppTask>(cacheKey, It.IsAny<CancellationToken>()))
+               .ReturnsAsync((AppTask?)null);
+   
+           // Act
+           var result = await _tasksRepository.GetTaskAsync(task.Id);
+   
+           // Assert
+           result.Should().NotBeNull();
+           result!.User.Should().NotBeNull();
+           result.User!.UserName.Should().Be("task_owner");
+       }
+   
+       [Fact]
+       public async Task GetTaskAsync_ShouldReturnNull_WhenTaskNotInCacheOrDb()
+       {
+           // Arrange
+           var taskId = Guid.NewGuid();
+           var cacheKey = $"Task-Id-{taskId}";
+   
+           _cacheMock
+               .Setup(c => c.GetAsync<AppTask>(cacheKey, It.IsAny<CancellationToken>()))
+               .ReturnsAsync((AppTask?)null);
+   
+           // Act
+           var result = await _tasksRepository.GetTaskAsync(taskId);
+   
+           // Assert
+           result.Should().BeNull();
+           _cacheMock.Verify(
+               c => c.SetAsync(It.IsAny<string>(), It.IsAny<AppTask?>(), It.IsAny<CancellationToken>()),
+               Times.Never);
+       }
+   
+       #endregion
+   
+       #region RemoveAsync
+   
+       [Fact]
+       public async Task RemoveAsync_ShouldMarkTaskAsRemovedAndClearCache_WhenTaskExists()
+       {
+           // Arrange
+           var task = CreateTask();
+           _dbContext.Tasks.Add(task);
+           await _dbContext.SaveChangesAsync();
+           _dbContext.ChangeTracker.Clear();
+   
+           // Act
+           var result = await _tasksRepository.RemoveAsync(task.Id);
+   
+           // Assert
+           result.Should().NotBeNull();
+           result!.Id.Should().Be(task.Id);
+           _dbContext.Entry(result).State.Should().Be(EntityState.Deleted);
+   
+           _cacheMock.Verify(c => c.RemoveAsync($"Task-Id-{task.Id}", It.IsAny<CancellationToken>()), Times.Once);
+       }
+   
+       [Fact]
+       public async Task RemoveAsync_ShouldPersistRemoval_AfterSaveChanges()
+       {
+           // Arrange
+           var task = CreateTask();
+           _dbContext.Tasks.Add(task);
+           await _dbContext.SaveChangesAsync();
+           _dbContext.ChangeTracker.Clear();
+   
+           // Act
+           await _tasksRepository.RemoveAsync(task.Id);
+           await _dbContext.SaveChangesAsync();
+   
+           // Assert
+           (await _dbContext.Tasks.AnyAsync(t => t.Id == task.Id)).Should().BeFalse();
+       }
+   
+       [Fact]
+       public async Task RemoveAsync_ShouldReturnNull_WhenTaskDoesNotExist()
+       {
+           // Act
+           var result = await _tasksRepository.RemoveAsync(Guid.NewGuid());
+   
+           // Assert
+           result.Should().BeNull();
+           _cacheMock.Verify(c => c.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+       }
+   
+       #endregion
+   
+       #region SaveChangesAsync
+   
+       [Fact]
+       public async Task SaveChangesAsync_ShouldReturnTrue_WhenThereArePendingChanges()
+       {
+           // Arrange
+           _dbContext.Tasks.Add(CreateTask());
+   
+           // Act
+           var result = await _tasksRepository.SaveChangesAsync();
+   
+           // Assert
+           result.Should().BeTrue();
+       }
+   
+       [Fact]
+       public async Task SaveChangesAsync_ShouldReturnFalse_WhenThereAreNoPendingChanges()
+       {
+           // Act
+           var result = await _tasksRepository.SaveChangesAsync();
+   
+           // Assert
+           result.Should().BeFalse();
+       }
+   
+       #endregion
+   
+       public void Dispose() => _dbContext.Dispose();
+   }

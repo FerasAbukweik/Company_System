@@ -6,7 +6,12 @@ export const globalGuard: CanMatchFn = async () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (await authService.isAuthenticated()) return true;
+  if (await authService.isAuthenticated()) {
+    // update is admin
+    authService.isAdmin();
+    
+    return true;
+  }
 
   router.navigateByUrl('/login');
   return false;

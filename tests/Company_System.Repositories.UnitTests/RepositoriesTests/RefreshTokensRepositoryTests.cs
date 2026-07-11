@@ -13,11 +13,11 @@ namespace TestProject1.RepositoriesTests;
 
 public class RefreshTokensRepositoryTests : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly IRefreshTokensRepository _refreshTokensRepository;
-    private readonly IFixture _fixture;
     private readonly ApplicationDbContext _dbContext;
-    private readonly Mock<IRedisService> _redisMock;
+    private readonly Mock<IRedisService> _cacheMock;
+    private readonly ITestOutputHelper _output;
+    private readonly IFixture _fixture;
 
     public RefreshTokensRepositoryTests(ITestOutputHelper output)
     {
@@ -31,129 +31,179 @@ public class RefreshTokensRepositoryTests : IDisposable
         var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-
         _dbContext = new ApplicationDbContext(dbOptions);
-        
-        _redisMock = new Mock<IRedisService>();
 
-        
-        _redisMock
-            .Setup(t => t.GetAsync<RefreshToken>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(null as RefreshToken);
-        _redisMock
-            .Setup(t => t.SetAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        // IRedisService is an external dependency (cache), not part of this
+        // repository's own logic, so it's mocked rather than exercised for real.
+        _cacheMock = new Mock<IRedisService>();
 
-        _refreshTokensRepository = new RefreshTokensRepository(_dbContext, _redisMock.Object);
+        _refreshTokensRepository = new RefreshTokensRepository(_dbContext, _cacheMock.Object);
     }
 
-    #region FindRefreshTokenByRefreshTokenStringAsync
-
-    [Fact]
-    public async Task FindRefreshTokenByRefreshTokenStringAsync_TokenInDb_ShouldReturnToken()
+    private RefreshToken CreateToken(Guid userId, DateTime expires, string? tokenValue = null)
     {
-        // Arrange
-        var token = CreateToken();
-        await SeedAsync(token);
-
-        _output.WriteLine($"Expected Token: {token.Token}");
-
-        // Act
-        var actual = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(token.Token);
-        _output.WriteLine($"Actual Token: {actual?.Token}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEquivalentTo(token);
-
-        // Verify cache was checked then set
-        _redisMock.Verify(t =>
-            t.GetAsync<RefreshToken>(token.Token, It.IsAny<CancellationToken>()), Times.Once);
-        _redisMock.Verify(t =>
-            t.SetAsync(token.Token, It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
+        return _fixture.Build<RefreshToken>()
+            .With(t => t.UserId, userId)
+            .With(t => t.Expires, expires)
+            .With(t => t.Token, tokenValue ?? Guid.NewGuid().ToString("N"))
+            .Without(t => t.User)
+            .Create();
     }
-
-    [Fact]
-    public async Task FindRefreshTokenByRefreshTokenStringAsync_TokenInCache_ShouldReturnCachedToken()
-    {
-        // Arrange
-        var token = CreateToken();
-
-        // Override default — cache returns the token
-        _redisMock
-            .Setup(t => t.GetAsync<RefreshToken>(token.Token, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(token);
-
-        _output.WriteLine($"Expected Token: {token.Token}");
-
-        // Act
-        var actual = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(token.Token);
-        _output.WriteLine($"Actual Token: {actual?.Token}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEquivalentTo(token);
-
-        // Verify DB was never hit and cache was never set
-        _redisMock.Verify(t =>
-            t.SetAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task FindRefreshTokenByRefreshTokenStringAsync_TokenNotFound_ShouldReturnNull()
-    {
-        // Arrange
-        var nonExistentToken = _fixture.Create<string>();
-        _output.WriteLine($"Searching for: {nonExistentToken}");
-
-        // Act
-        var actual = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(nonExistentToken);
-        _output.WriteLine($"Actual: {actual?.ToString() ?? "null"}");
-
-        // Assert
-        actual.Should().BeNull();
-    }
-
-    #endregion
 
     #region AddAsync
 
     [Fact]
-    public async Task AddAsync_ValidToken_ShouldPersistAfterSave()
+    public void AddAsync_ShouldTrackEntityAsAdded()
     {
         // Arrange
-        var token = CreateToken();
-        _output.WriteLine($"Adding Token: {token.Token}");
+        var token = CreateToken(Guid.NewGuid(), DateTime.UtcNow.AddDays(1));
 
         // Act
         _refreshTokensRepository.AddAsync(token);
-        await _refreshTokensRepository.SaveChangesAsync();
 
         // Assert
-        var actual = await _refreshTokensRepository
-            .FindRefreshTokenByRefreshTokenStringAsync(token.Token);
-
-        _output.WriteLine($"Actual Token: {actual?.Token}");
-        actual.Should().NotBeNull();
-        actual.Should().BeEquivalentTo(token);
+        _dbContext.Entry(token).State.Should().Be(EntityState.Added);
+        _dbContext.RefreshTokens.Local.Should().Contain(token);
     }
 
     [Fact]
-    public async Task AddAsync_WithoutSaving_ShouldNotPersist()
+    public void AddAsync_ShouldNotPersistToDatabase_BeforeSaveChangesIsCalled()
     {
         // Arrange
-        var token = CreateToken();
-        _output.WriteLine($"Adding Token without saving: {token.Token}");
+        var token = CreateToken(Guid.NewGuid(), DateTime.UtcNow.AddDays(1));
 
-        // Act — skip SaveChangesAsync intentionally
+        // Act
         _refreshTokensRepository.AddAsync(token);
 
         // Assert
-        var actual = await _refreshTokensRepository
-            .FindRefreshTokenByRefreshTokenStringAsync(token.Token);
+        _dbContext.RefreshTokens.AsNoTracking().Any(t => t.Id == token.Id).Should().BeFalse();
+    }
 
-        _output.WriteLine($"Actual: {actual?.ToString() ?? "null"}");
-        actual.Should().BeNull();
+    #endregion
+
+    #region RemoveExpiredRefreshTokensAsync
+
+    // Not unit-testable as written: this method calls ExecuteDeleteAsync, which is
+    // not supported by EF Core's InMemory provider (it throws InvalidOperationException
+    // at runtime). Covering this requires an integration test against a real relational
+    // provider (e.g. SQL Server, or SQLite in-memory as a lighter-weight alternative).
+    [Fact(Skip = "Uses ExecuteDeleteAsync, which is not supported by UseInMemoryDatabase. Needs an integration test against a real relational provider.")]
+    public Task RemoveExpiredRefreshTokensAsync_RequiresRelationalProvider()
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region FindRefreshTokenByRefreshTokenStringAsync
+
+    [Fact]
+    public async Task FindRefreshTokenByRefreshTokenStringAsync_ShouldReturnCachedToken_WhenPresentInCache()
+    {
+        // Arrange
+        var tokenString = "cached-token";
+        var cachedToken = CreateToken(Guid.NewGuid(), DateTime.UtcNow.AddDays(1), tokenString);
+
+        _cacheMock
+            .Setup(c => c.GetAsync<RefreshToken>(tokenString, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cachedToken);
+
+        // Act
+        var result = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(tokenString);
+
+        // Assert
+        result.Should().Be(cachedToken);
+        _cacheMock.Verify(
+            c => c.SetAsync(It.IsAny<string>(), It.IsAny<RefreshToken?>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task FindRefreshTokenByRefreshTokenStringAsync_ShouldQueryDbAndCacheResult_WhenNotInCache()
+    {
+        // Arrange
+        var tokenString = "db-token";
+        var dbToken = CreateToken(Guid.NewGuid(), DateTime.UtcNow.AddDays(1), tokenString);
+        _dbContext.RefreshTokens.Add(dbToken);
+        await _dbContext.SaveChangesAsync();
+
+        _cacheMock
+            .Setup(c => c.GetAsync<RefreshToken>(tokenString, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((RefreshToken?)null);
+
+        // Act
+        var result = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(tokenString);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(dbToken.Id);
+
+        _cacheMock.Verify(
+            c => c.SetAsync(tokenString, It.Is<RefreshToken?>(t => t != null && t.Id == dbToken.Id), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task FindRefreshTokenByRefreshTokenStringAsync_ShouldReturnNull_WhenTokenNotInCacheOrDb()
+    {
+        // Arrange
+        var tokenString = "missing-token";
+
+        _cacheMock
+            .Setup(c => c.GetAsync<RefreshToken>(tokenString, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((RefreshToken?)null);
+
+        // Act
+        var result = await _refreshTokensRepository.FindRefreshTokenByRefreshTokenStringAsync(tokenString);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    #endregion
+
+    #region RemoveRefreshTokenByRefreshTokenString
+
+    [Fact]
+    public async Task RemoveRefreshTokenByRefreshTokenString_ShouldRemoveTokenAndCacheEntry_WhenTokenExists()
+    {
+        // Arrange
+        var tokenString = "to-remove";
+        var dbToken = CreateToken(Guid.NewGuid(), DateTime.UtcNow.AddDays(1), tokenString);
+        _dbContext.RefreshTokens.Add(dbToken);
+        await _dbContext.SaveChangesAsync();
+
+        _cacheMock
+            .Setup(c => c.GetAsync<RefreshToken>(tokenString, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((RefreshToken?)null);
+
+        // Act
+        var result = await _refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(tokenString);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(dbToken.Id);
+        _dbContext.Entry(dbToken).State.Should().Be(EntityState.Deleted);
+
+        _cacheMock.Verify(c => c.RemoveAsync(tokenString, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RemoveRefreshTokenByRefreshTokenString_ShouldReturnNull_WhenTokenDoesNotExist()
+    {
+        // Arrange
+        var tokenString = "nonexistent-token";
+
+        _cacheMock
+            .Setup(c => c.GetAsync<RefreshToken>(tokenString, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((RefreshToken?)null);
+
+        // Act
+        var result = await _refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(tokenString);
+
+        // Assert
+        result.Should().BeNull();
+        _cacheMock.Verify(c => c.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     #endregion
@@ -161,59 +211,29 @@ public class RefreshTokensRepositoryTests : IDisposable
     #region SaveChangesAsync
 
     [Fact]
-    public async Task SaveChangesAsync_WithPendingChanges_ShouldReturnTrue()
+    public async Task SaveChangesAsync_ShouldReturnTrue_WhenThereArePendingChanges()
     {
         // Arrange
-        var token = CreateToken();
-        _refreshTokensRepository.AddAsync(token);
-        _output.WriteLine($"Added Token: {token.Token}");
+        _dbContext.RefreshTokens.Add(CreateToken(Guid.NewGuid(), DateTime.UtcNow.AddDays(1)));
 
         // Act
-        var actual = await _refreshTokensRepository.SaveChangesAsync();
-        _output.WriteLine($"Expected: true | Actual: {actual}");
+        var result = await _refreshTokensRepository.SaveChangesAsync();
 
         // Assert
-        actual.Should().BeTrue();
+        result.Should().BeTrue();
     }
 
     [Fact]
-    public async Task SaveChangesAsync_WithNoChanges_ShouldReturnFalse()
+    public async Task SaveChangesAsync_ShouldReturnFalse_WhenThereAreNoPendingChanges()
     {
-        // Arrange
-        _output.WriteLine("No changes made");
-
         // Act
-        var actual = await _refreshTokensRepository.SaveChangesAsync();
-        _output.WriteLine($"Expected: false | Actual: {actual}");
+        var result = await _refreshTokensRepository.SaveChangesAsync();
 
         // Assert
-        actual.Should().BeFalse();
+        result.Should().BeFalse();
     }
 
     #endregion
-
-    #region Helpers
-
-    private RefreshToken CreateToken(bool? expired = null) =>
-        _fixture.Build<RefreshToken>()
-            .With(t => t.Expires, expired == true
-                ? DateTime.UtcNow.AddMinutes(-10)  // already expired
-                : DateTime.UtcNow.AddMinutes(60))  // valid
-            .Without(t => t.User)
-            .Create();
-
-    private List<RefreshToken> CreateMany(int count, bool? expired = null) =>
-        Enumerable.Range(0, count)
-            .Select(_ => CreateToken(expired))
-            .ToList();
-
-    private async Task SeedAsync(params RefreshToken[] tokens)
-    {
-        await _dbContext.RefreshTokens.AddRangeAsync(tokens);
-        await _dbContext.SaveChangesAsync();
-    }
 
     public void Dispose() => _dbContext.Dispose();
-
-    #endregion
 }

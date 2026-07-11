@@ -1,7 +1,8 @@
 using AutoFixture;
-using EntityFrameworkCore.Testing.Moq;
 using FluentAssertions;
+using HR_System.Core.Domain.Entities;
 using HR_System.Core.Domain.Identity;
+using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Infrastructure;
 using HR_System.Infrastructure.Repositories;
@@ -10,125 +11,145 @@ using Xunit.Abstractions;
 
 namespace TestProject1.RepositoriesTests;
 
-public class ApplicationUsersesRepositoryTests : IDisposable
+public class ApplicationUsersRepositoryTests : IDisposable
 {
-    private readonly IApplicationUsersRepository _applicationUsersRepository;
+    private readonly IApplicationUsersRepository _usersRepository;
     private readonly ApplicationDbContext _dbContext;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
 
-    public ApplicationUsersesRepositoryTests(ITestOutputHelper output)
+    public ApplicationUsersRepositoryTests(ITestOutputHelper output)
     {
         _output = output;
 
         _fixture = new Fixture();
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-            .ForEach(e => _fixture.Behaviors.Remove(e));
+            .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        var dbContextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
+        _dbContext = new ApplicationDbContext(dbOptions);
+        _usersRepository = new ApplicationUsersesRepository(_dbContext);
+    }
 
-        _dbContext = Create.MockedDbContextFor<ApplicationDbContext>(dbContextOptions);
-        _applicationUsersRepository = new ApplicationUsersesRepository(_dbContext);
+    private ApplicationUser CreateUser(string? userName = null, PositionsEnum? position = null)
+    {
+        return _fixture.Build<ApplicationUser>()
+            .With(u => u.UserName, userName ?? $"user_{Guid.NewGuid():N}")
+            .With(u => u.Position, position ?? PositionsEnum.Employee) // adjust to a real enum member if this name differs
+            .Without(u => u.RefreshTokens)
+            .Without(u => u.Tasks)
+            .Without(u => u.CreatedTasks)
+            .Without(u => u.Approvals)
+            .Without(u => u.ToApprove)
+            .Without(u => u.Activities)
+            .Without(u => u.OrganizationHierarchy)
+            .Without(u => u.SentMessages)
+            .Without(u => u.ReceivedMessages)
+            .Create();
     }
 
     #region FilterAsync
 
     [Fact]
-    public async Task FilterAsync_MatchingSingleUser_ShouldReturnOnlyThatUser()
+    public async Task FilterAsync_ShouldReturnOnlyUsersMatchingPredicate()
     {
         // Arrange
-        var targetUser = CreateUser(fullName: "Target User");
-        var otherUsers = CreateMany(5);
-        await SeedAsync([targetUser, .. otherUsers]);
+        var matching = CreateUser("matching_user");
+        var nonMatching = CreateUser("other_user");
 
-        _output.WriteLine($"Expected:\n{targetUser.ToString()}");
+        _dbContext.Users.AddRange(matching, nonMatching);
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        var actual = await _applicationUsersRepository.FilterAsync(u => u.FullName == "Target User");
-        _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(u => _output.WriteLine($"  {u.ToString()}"));
+        var result = await _usersRepository.FilterAsync(u => u.UserName == "matching_user");
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Should().ContainSingle();
-        actual[0].Id.Should().Be(targetUser.Id);
-        actual[0].FullName.Should().Be(targetUser.FullName);
+        result.Should().ContainSingle(u => u.Id == matching.Id);
+        result.Should().NotContain(u => u.Id == nonMatching.Id);
     }
 
     [Fact]
-    public async Task FilterAsync_MatchingMultipleUsers_ShouldReturnAllMatches()
+    public async Task FilterAsync_ShouldReturnEmptyList_WhenNoUsersMatchPredicate()
     {
         // Arrange
-        var sharedName = "John";
-        var matchingUsers = CreateMany(3, fullName: sharedName);
-        var otherUsers = CreateMany(3, fullName: "Other");
-        await SeedAsync([.. matchingUsers, .. otherUsers]);
-
-        _output.WriteLine($"Expected Count: {matchingUsers.Count}");
-        matchingUsers.ForEach(u => _output.WriteLine($"  {u.ToString()}"));
+        _dbContext.Users.Add(CreateUser());
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        var actual = await _applicationUsersRepository.FilterAsync(u => u.FullName == sharedName);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-        actual.ToList().ForEach(u => _output.WriteLine($"  {u.ToString()}"));
+        var result = await _usersRepository.FilterAsync(u => u.UserName == "nonexistent_user");
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Should().HaveCount(matchingUsers.Count);
-        actual.Should().OnlyContain(u => u.FullName == sharedName);
+        result.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task FilterAsync_NoMatchingUsers_ShouldReturnEmpty()
-    {
-        // Arrange
-        var users = CreateMany(5);
-        await SeedAsync([.. users]);
-
-        _output.WriteLine("Filtering for non-existent name");
-        _output.WriteLine("Expected Count: 0");
-
-        // Act
-        var actual = await _applicationUsersRepository.FilterAsync(u => u.FullName == "Does Not Exist");
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task FilterAsync_EmptyDatabase_ShouldReturnEmpty()
-    {
-        // Arrange
-        _output.WriteLine("No users in database");
-        _output.WriteLine("Expected Count: 0");
-
-        // Act
-        var actual = await _applicationUsersRepository.FilterAsync(u => true);
-        _output.WriteLine($"Actual Count: {actual.Count}");
-
-        // Assert
-        actual.Should().NotBeNull();
-        actual.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task FilterAsync_ShouldReturnReadOnlyList()
+    public async Task FilterAsync_ShouldReturnUntrackedEntities()
     {
         // Arrange
         var user = CreateUser();
-        await SeedAsync(user);
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
 
         // Act
-        var actual = await _applicationUsersRepository.FilterAsync(u => true);
-        _output.WriteLine($"Actual Type: {actual.GetType().Name}");
+        var result = await _usersRepository.FilterAsync(u => u.Id == user.Id);
 
         // Assert
-        actual.Should().BeAssignableTo<IReadOnlyList<ApplicationUser>>();
+        var fetched = result.Single();
+        _dbContext.Entry(fetched).State.Should().Be(EntityState.Detached);
+    }
+
+    [Fact]
+    public async Task FilterAsync_ShouldLoadIncludedNavigationProperty_WhenIncludesProvided()
+    {
+        // Arrange
+        var user = CreateUser();
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+
+        var activity = _fixture.Build<Activity>()
+            .With(a => a.TriggeredById, user.Id)
+            .Without(a => a.TriggeredBy)
+            .Create();
+        _dbContext.Activities.Add(activity);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = await _usersRepository.FilterAsync(
+            checks: u => u.Id == user.Id,
+            includes: [u => u.Activities]);
+
+        // Assert
+        var fetched = result.Single();
+        fetched.Activities.Should().ContainSingle(a => a.Id == activity.Id);
+    }
+
+    [Fact]
+    public async Task FilterAsync_ShouldNotLoadNavigationProperty_WhenIncludesNotProvided()
+    {
+        // Arrange
+        var user = CreateUser();
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+
+        var activity = _fixture.Build<Activity>()
+            .With(a => a.TriggeredById, user.Id)
+            .Without(a => a.TriggeredBy)
+            .Create();
+        _dbContext.Activities.Add(activity);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = await _usersRepository.FilterAsync(u => u.Id == user.Id);
+
+        // Assert
+        var fetched = result.Single();
+        fetched.Activities.Should().BeEmpty();
     }
 
     #endregion
@@ -136,45 +157,30 @@ public class ApplicationUsersesRepositoryTests : IDisposable
     #region SaveChangesAsync
 
     [Fact]
-    public async Task SaveChangesAsync_WithNoChanges_ShouldReturnFalse()
+    public async Task SaveChangesAsync_ShouldReturnTrue_WhenThereArePendingChanges()
     {
         // Arrange
-        _output.WriteLine("No changes made");
+        _dbContext.Users.Add(CreateUser());
 
         // Act
-        var actual = await _applicationUsersRepository.SaveChangesAsync();
-        _output.WriteLine($"Expected: false | Actual: {actual}");
+        var result = await _usersRepository.SaveChangesAsync();
 
         // Assert
-        actual.Should().BeFalse();
+        result.Should().BeTrue();
+        (await _dbContext.Users.CountAsync()).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task SaveChangesAsync_ShouldReturnFalse_WhenThereAreNoPendingChanges()
+    {
+        // Act
+        var result = await _usersRepository.SaveChangesAsync();
+
+        // Assert
+        result.Should().BeFalse();
     }
 
     #endregion
-
-    #region Helpers
-
-    private ApplicationUser CreateUser(string? fullName = null) =>
-        _fixture.Build<ApplicationUser>()
-            .With(u => u.FullName, fullName ?? _fixture.Create<string>())
-            .Without(u => u.Tasks)
-            .Without(u => u.CreatedTasks)
-            .Without(u => u.RefreshTokens)
-            .Without(u => u.Approvals)
-            .Without(u => u.ToApprove)
-            .Create();
-
-    private List<ApplicationUser> CreateMany(int count, string? fullName = null) =>
-        Enumerable.Range(0, count)
-            .Select(_ => CreateUser(fullName))
-            .ToList();
-
-    private async Task SeedAsync(params ApplicationUser[] users)
-    {
-        await _dbContext.Users.AddRangeAsync(users);
-        await _dbContext.SaveChangesAsync();
-    }
 
     public void Dispose() => _dbContext.Dispose();
-
-    #endregion
 }

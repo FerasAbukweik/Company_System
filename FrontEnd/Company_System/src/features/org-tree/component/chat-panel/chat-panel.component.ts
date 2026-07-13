@@ -41,6 +41,7 @@ export class ChatPanelComponent implements OnInit {
 
   // constructor
   constructor() {
+    // manage page scroll
     let firstCheck = true;
     let secondCheck = true;
 
@@ -49,12 +50,15 @@ export class ChatPanelComponent implements OnInit {
       .subscribe({
         next: (isLoading) => {
           if (!isLoading) {
+            // if first time finished loading dont do anything (the initial value)
             if (firstCheck) firstCheck = false;
             else {
+              // if second time (first time fitching messages) scroll to bottom
               if (secondCheck) {
                 this.scrollToBottom();
                 secondCheck = false;
               } else {
+                // else stay in place
                 this.stayInPlace();
               }
             }
@@ -62,11 +66,21 @@ export class ChatPanelComponent implements OnInit {
         },
       });
 
+    // when receive a message scroll to bottom
     this.messageHubService.onMessageReceived$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.scrollToBottom();
       },
     });
+
+    // clear text input after closing / opening chat panel
+    toObservable(this.chatPanelService.getIsVisable)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.messageContent = '';
+        },
+      });
   }
 
   // methods

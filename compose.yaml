@@ -18,6 +18,7 @@
       - CloudinarySettings__CloudName=${CloudName}
       - CloudinarySettings__ApiKey=${ApiKey}
       - CloudinarySettings__ApiSecret=${ApiSecret}
+      - Serilog__WriteTo__2__Args__serverUrl=http://company-system-seq:80
     volumes:
       - ./https:/https:ro
     depends_on:
@@ -25,6 +26,8 @@
         condition: service_healthy
       company-system-redis:
         condition: service_healthy
+      company-system-seq:
+        condition: service_started
 
   company-system-sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -55,7 +58,18 @@
       interval: 5s
       timeout: 3s
       retries: 5
-      
+  
+  company-system-seq:
+    image: datalust/seq:latest
+    container_name: Company_system.seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=Feras@123
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
   angular:
     container_name: angular
     build:
@@ -65,6 +79,8 @@
       - "4000:443"
     volumes:
       - ./FrontEnd/Company_System/ssl:/etc/nginx/ssl:ro
+
 volumes:
   sqlserver_data:
   redis_data:
+  seq_data:

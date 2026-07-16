@@ -10,6 +10,7 @@ using System.Net;
    using HR_System.Core.Interfaces.RepositoryContracts;
    using HR_System.Core.Interfaces.ServiceContracts;
    using HR_System.Infrastructure.Services;
+   using Microsoft.Extensions.Logging.Abstractions;
    using Moq;
    using Xunit.Abstractions;
    
@@ -45,7 +46,8 @@ using System.Net;
                _tasksRepositoryMock.Object,
                _activitiesServiceMock.Object,
                _claimsServiceMock.Object,
-               _hierarchyServiceMock.Object);
+               _hierarchyServiceMock.Object,
+               NullLogger<TasksService>.Instance);
        }
    
        private TaskAddDTO CreateTaskAddDto(Guid? userId = null)

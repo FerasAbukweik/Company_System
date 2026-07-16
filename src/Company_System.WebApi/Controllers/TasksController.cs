@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class TasksController(ITasksService tasksService,
-    ILogger<TasksController> logger,
     ITasksApprovalsService tasksApprovalsService) : ApplicationControllerBase
 {
     [HttpGet]
@@ -19,10 +18,10 @@ public class TasksController(ITasksService tasksService,
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)
-            return ((Result)userId).ToActionResult(logger);
+            return ((Result)userId).ToActionResult();
 
         var userTasks = await tasksService.LazyGetUserTasksAsync(userId.Value, lazyData, cancellationToken);
-        return userTasks.ToActionResult(logger);
+        return userTasks.ToActionResult();
     }
 
     [HttpPut("[action]/{taskId:guid}")]
@@ -32,10 +31,10 @@ public class TasksController(ITasksService tasksService,
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)
-            return ((Result)userId).ToActionResult(logger);
+            return ((Result)userId).ToActionResult();
 
         Result result = await tasksApprovalsService.UpdateTaskStatusAsync(userId.Value, taskId, newStatus, cancellationToken);
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 
     [HttpPost("[action]")]
@@ -45,9 +44,9 @@ public class TasksController(ITasksService tasksService,
     {
         var userId = User.GetUserId();
         if (!userId.IsSuccess)
-            return ((Result)userId).ToActionResult(logger);
+            return ((Result)userId).ToActionResult();
         
         Result result = await tasksService.AddAsync(toTaskAdd,userId.Value, cancellationToken);
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 }

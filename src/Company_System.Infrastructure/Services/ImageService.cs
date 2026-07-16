@@ -3,14 +3,19 @@ using CloudinaryDotNet.Actions;
 using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace HR_System.Infrastructure.Services;
 
-public class ImageService : IImageService
+public class ImageService: IImageService
 {
     private readonly Cloudinary _cloudinary;
-    public ImageService(IConfiguration configuration)
+    private readonly ILogger<ImageService> _logger;
+    public ImageService(IConfiguration configuration,
+        ILogger<ImageService> logger)
     {
+        _logger = logger;
+        
         var account = new Account(
             configuration["CloudinarySettings:CloudName"], 
             configuration["CloudinarySettings:ApiKey"],
@@ -31,13 +36,39 @@ public class ImageService : IImageService
             Folder = "Company_System"
         };
         
-        return await _cloudinary.UploadAsync(uploadParams);
+        var result = await _cloudinary.UploadAsync(uploadParams);
+
+        if (result.Error != null)
+        {
+            _logger.LogError("{serviceName}.{methodName} failed uploading image\nErrors: {errors}",
+                nameof(ImageService), nameof(Upload), result.Error.Message);
+        }
+        else
+        {
+            _logger.LogError("{serviceName}.{methodName} image was uploaded with publicId of {publicId}",
+                nameof(ImageService), nameof(Upload), result.PublicId);
+        }
+
+        return result;
     }
 
-    public async Task<DeletionResult> Delete(string globalId)
+    public async Task<DeletionResult> Delete(string publicId)
     {
-        var deletionParams = new DeletionParams(globalId);
+        var deletionParams = new DeletionParams(publicId);
 
-        return await _cloudinary.DestroyAsync(deletionParams);
+        var result = await _cloudinary.DestroyAsync(deletionParams);
+
+        if (result.Error != null)
+        {
+            _logger.LogError("{serviceName}.{methodName} failed deleting image\nErrors: {errors}",
+                nameof(ImageService), nameof(Delete), result.Error.Message);
+        }
+        else
+        {
+            _logger.LogError("{serviceName}.{methodName} image with public id of {publicId} was deleted",
+                nameof(ImageService), nameof(Delete), publicId);
+        }
+        
+        return result;
     }
 }

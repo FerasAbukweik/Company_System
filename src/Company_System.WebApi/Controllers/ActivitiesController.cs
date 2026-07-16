@@ -8,17 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HR_System.Controllers;
 
-public class ActivitiesController(IActivitiesService activityService,
-    ILogger<ActivitiesController> logger) : ApplicationControllerBase
+public class ActivitiesController(IActivitiesService activityService) : ApplicationControllerBase
 {
     [HttpGet]
     [Authorize]
     public async Task<ActionResult<IReadOnlyList<ActivityDTO>>> LazyGet([FromQuery] LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
         var getCurrUserId = User.GetUserId();
-        if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult(logger); 
+        if (!getCurrUserId.IsSuccess) return ((Result)getCurrUserId).ToActionResult(); 
         
         var result = await activityService.LazyGetAllSortedAsync(lazyData, getCurrUserId.Value, cancellationToken);
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 }

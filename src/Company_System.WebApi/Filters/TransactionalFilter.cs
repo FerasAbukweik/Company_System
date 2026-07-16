@@ -1,5 +1,7 @@
 using HR_System.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 public class TransactionalAttribute : ActionFilterAttribute
@@ -18,11 +20,11 @@ public class TransactionalAttribute : ActionFilterAttribute
             {
                 var executedContext = await next();
 
-                if (executedContext.Exception == null)
-                    await transaction.CommitAsync();
+                if (executedContext.Exception != null || IsFailureResult(executedContext.Result))
+                    await transaction.RollbackAsync();
                 
                 else
-                    await transaction.RollbackAsync();
+                    await transaction.CommitAsync();
             }
             catch (Exception)
             {
@@ -30,5 +32,26 @@ public class TransactionalAttribute : ActionFilterAttribute
                 throw;
             }
         });
+    }
+    
+    
+    private static bool IsFailureResult(IActionResult? result)
+    {
+        if (result == null) return false;
+
+        // Handles standard status-bearing results like BadRequestObjectResult, ObjectResult, etc.
+        if (result is IStatusCodeActionResult statusCodeResult)
+        {
+            var statusCode = statusCodeResult.StatusCode;
+            return statusCode.HasValue && statusCode.Value >= 400;
+        }
+
+        // Fallback for custom ObjectResults that don't implement the interface directly
+        if (result is ObjectResult objectResult)
+        {
+            return objectResult.StatusCode.HasValue && objectResult.StatusCode.Value >= 400;
+        }
+
+        return false;
     }
 }

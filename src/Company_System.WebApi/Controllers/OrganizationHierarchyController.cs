@@ -10,8 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class OrganizationHierarchyController(
-    IOrganizationHierarchyService hierarchyService,
-    ILogger<OrganizationHierarchyController> logger
+    IOrganizationHierarchyService hierarchyService
     ) : ApplicationControllerBase
 {
     [HttpGet]
@@ -19,11 +18,11 @@ public class OrganizationHierarchyController(
     public async Task<ActionResult<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildren([FromQuery]IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
     {
         var currUserIdResult = User.GetUserId();
-        if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult(logger);
+        if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult();
         
         
         var result = await hierarchyService.GetChildrenAsync(currUserIdResult.Value, parents, cancellationToken);
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 
     [HttpGet("[action]")]
@@ -33,6 +32,6 @@ public class OrganizationHierarchyController(
     {
         var result = await hierarchyService.GetUserNames(lazyData, cancellationToken);
 
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 }

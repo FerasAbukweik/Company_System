@@ -21,7 +21,7 @@
 <div class="flex relative">
   <aside app-side-bar [navItems]="sideBarItems()"></aside>
 
-  <main class="max-w-[1800px] w-full mx-auto relative">
+  <main class="max-w-[1800px] w-full mx-auto overflow-scroll relative">
     @if (sideBarService.getIsSideBarOpen() && isScreenSmall) {
       <div class="absolute inset-0 z-1" (click)="sideBarService.close()"></div>
     }

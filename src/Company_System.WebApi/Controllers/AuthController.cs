@@ -9,8 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class AuthController(IAccountService accountService,
-    ILogger<AuthController> logger,
-    ITokenService tokenService,
+    ITokensService tokensService,
     ICookiesServices cookiesServices) : ApplicationControllerBase
 {
     [HttpPost("[action]")]
@@ -42,7 +41,7 @@ public class AuthController(IAccountService accountService,
     {
         var result = await accountService.LoginAsync(loginData, cancellationToken);
 
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 
     [AllowAnonymous]
@@ -50,8 +49,8 @@ public class AuthController(IAccountService accountService,
     [Transactional]
     public async Task<IActionResult> UpdateTokens(CancellationToken cancellationToken = default)
     {
-        Result result = await tokenService.UpdateUserTokensAsync(cancellationToken);
+        Result result = await tokensService.UpdateUserTokensAsync(cancellationToken);
 
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 }

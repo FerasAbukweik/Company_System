@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace HR_System.Controllers;
 
 public class AccountController(
-    IAccountOrgHierarchyService accountOrgHierarchyService,
-    ILogger<AccountController> logger) : ApplicationControllerBase
+    IAccountOrgHierarchyService accountOrgHierarchyService
+    ) : ApplicationControllerBase
 {
     [HttpPost("[action]")]
     [Authorize(Roles = nameof(RolesEnum.Admin))]
@@ -20,6 +20,6 @@ public class AccountController(
     {
         Result result = await accountOrgHierarchyService.AddEmployee(toCreate, cancellationToken);
 
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 }

@@ -5,10 +5,13 @@ using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Message;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
+using Microsoft.Extensions.Logging;
 
 namespace HR_System.Infrastructure.Services;
 
-public class MessagesService(IMessageRepository messageRepository) : IMessagesService
+public class MessagesService(
+    IMessageRepository messageRepository,
+    ILogger<MessagesService> logger) : IMessagesService
 {
     public async Task<Result<MessageDTO>> AddAsync(MessageAddDTO toAdd, Guid userId, CancellationToken cancellationToken = default)
     {
@@ -18,11 +21,18 @@ public class MessagesService(IMessageRepository messageRepository) : IMessagesSe
             ReceiverId = toAdd.ReceiverId,
             SenderId = userId,
         };
-        messageRepository.Add(toAdd_DB);
+        messageRepository.Add(toAdd_DB, cancellationToken);
 
         if (!(await messageRepository.SaveChangesAsync(cancellationToken)))
+        {
+            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
+                nameof(MessagesService), nameof(AddAsync));
             return Result<MessageDTO>.Failure("Failed to save changes to DB");
-
+        }
+        
+        logger.LogError("{serviceName}.{methodName} message with id of {messageId} was added",
+            nameof(MessagesService), nameof(AddAsync), toAdd_DB.Id);
+        
         return Result<MessageDTO>.Success(toAdd_DB.ToDTO(userId));
     }
 

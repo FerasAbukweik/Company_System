@@ -9,6 +9,7 @@ using AutoFixture;
    using HR_System.Core.Interfaces.RepositoryContracts;
    using HR_System.Core.Interfaces.ServiceContracts;
    using HR_System.Infrastructure.Services;
+   using Microsoft.Extensions.Logging.Abstractions;
    using Moq;
    using Xunit.Abstractions;
    
@@ -39,7 +40,8 @@ using AutoFixture;
            _approvalService = new ApprovalService(
                _approvalRepositoryMock.Object,
                _activitiesServiceMock.Object,
-               _hierarchyRepositoryMock.Object);
+               _hierarchyRepositoryMock.Object,
+               NullLogger<ApprovalService>.Instance);
        }
    
        private Approval CreateApproval(

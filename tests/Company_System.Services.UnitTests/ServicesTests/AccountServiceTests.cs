@@ -11,6 +11,7 @@ using AutoFixture;
    using HR_System.Infrastructure.Services;
    using Microsoft.AspNetCore.Identity;
    using Microsoft.Extensions.Logging;
+   using Microsoft.Extensions.Logging.Abstractions;
    using Moq;
    using Xunit.Abstractions;
    
@@ -22,8 +23,7 @@ using AutoFixture;
        private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
        private readonly Mock<IApplicationUsersRepository> _usersRepositoryMock;
        private readonly Mock<ICookiesServices> _cookiesServicesMock;
-       private readonly Mock<ILogger<AccountService>> _loggerMock;
-       private readonly Mock<ITokenService> _tokenServiceMock;
+       private readonly Mock<ITokensService> _tokenServiceMock;
        private readonly ITestOutputHelper _output;
        private readonly IFixture _fixture;
    
@@ -42,14 +42,13 @@ using AutoFixture;
    
            _usersRepositoryMock = new Mock<IApplicationUsersRepository>();
            _cookiesServicesMock = new Mock<ICookiesServices>();
-           _loggerMock = new Mock<ILogger<AccountService>>();
-           _tokenServiceMock = new Mock<ITokenService>();
+           _tokenServiceMock = new Mock<ITokensService>();
    
            _accountService = new AccountService(
                _userManagerMock.Object,
                _usersRepositoryMock.Object,
                _cookiesServicesMock.Object,
-               _loggerMock.Object,
+               NullLogger<AccountService>.Instance,
                _tokenServiceMock.Object);
        }
    

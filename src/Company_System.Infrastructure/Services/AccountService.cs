@@ -3,7 +3,6 @@ using HR_System.Core.common;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Account;
 using HR_System.Core.DTO.Auth;
-using HR_System.Core.DTO.Token;
 using HR_System.Core.Enums;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
@@ -16,7 +15,7 @@ public class AccountService(UserManager<ApplicationUser> userManager,
     IApplicationUsersRepository usersRepository,
     ICookiesServices cookiesServices,
     ILogger<AccountService> logger,
-    ITokenService tokenService) : IAccountService
+    ITokensService tokensService) : IAccountService
 {
     
     public async Task<Result<ApplicationUser>> CreateAccountAsync(
@@ -26,12 +25,20 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         CancellationToken cancellationToken = default)
     {
         if (toCreateData.Position == PositionsEnum.unknown)
+        {
+            logger.LogWarning("{serviceName}.{methodName} -- cannt add user with position of unknown",
+                nameof(AccountService), nameof(CreateAccountAsync));
             return Result<ApplicationUser>.Failure("Cannt Add user with unknown position", HttpStatusCode.BadRequest);
+        }
         
         // check if user already exists
         var doesUsesExist = await DoesUserExist(toCreateData, cancellationToken);
         if (doesUsesExist.IsSuccess)
+        {
+            logger.LogInformation("{serviceName}.{methodName} -- failed creating account because another user uses the same data\nErrors: {errors}",
+                nameof(AccountService), nameof(CreateAccountAsync), doesUsesExist.Value);
             return Result<ApplicationUser>.Failure(doesUsesExist.Value!, HttpStatusCode.Conflict); // return fields used in other users
+        }
 
         // Add user to DB
         var toAddUser = new ApplicationUser()
@@ -46,20 +53,66 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         };
         var createUserResult = await userManager.CreateAsync(toAddUser, toCreateData.Password);
         if (!createUserResult.Succeeded)
-            return Result<ApplicationUser>.Failure(string.Join(" | ", createUserResult.Errors.Select(e => e.Description)));
+        {
+            var errorsString = createUserResult.Errors.Select(e => e.Description);
+            logger.LogError("{serviceName}.{methodName} -- failed adding user to database\nErrors: {errors}",
+                nameof(AccountService), nameof(CreateAccountAsync), errorsString);
+            return Result<ApplicationUser>.Failure(string.Join(" | ", errorsString));
+        }
         
         // add user to his role
         var addUserToRoleResult = await userManager.AddToRoleAsync(toAddUser, toCreateData.Position == PositionsEnum.CEO ? 
             nameof(RolesEnum.Admin) : nameof(RolesEnum.Employee));
-        
-        if (!addUserToRoleResult.Succeeded)
-            return Result<ApplicationUser>.Failure(string.Join(" | ", addUserToRoleResult.Errors.Select(e => e.Description)));
 
-        logger.LogInformation($"User Created At: {DateTime.UtcNow}\n\nUser:\n{toAddUser.ToString()}");
+        if (!addUserToRoleResult.Succeeded)
+        {
+            var errorsString = addUserToRoleResult.Errors.Select(e => e.Description);
+            logger.LogError("{serviceName}.{methodName} -- failed adding user to role\nErrors: {errors}",
+                nameof(AccountService), nameof(CreateAccountAsync), errorsString);
+            return Result<ApplicationUser>.Failure(string.Join(" | ", errorsString));
+        }
+
+        logger.LogInformation("{serviceName}.{methodName} -- User with UserId: {userId} username: {username} was created",
+            nameof(AccountService), nameof(CreateAccountAsync), toAddUser.Id, toAddUser.UserName);
         
         return Result<ApplicationUser>.Success(toAddUser);
         
     }
+    
+    public async Task<Result<UserDTO>> LoginAsync(LoginDTO loginData, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByEmailAsync(loginData.Email);
+        if (user is null)
+        {
+            logger.LogWarning("{serviceName}.{methodName} -- failed to login because user doesnt exist",
+                nameof(AccountService), nameof(LoginAsync));
+            return Result<UserDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
+        }
+        
+        var isPasswordCorrect = await userManager.CheckPasswordAsync(user, loginData.Password);
+        if (!isPasswordCorrect)
+        {
+            logger.LogWarning("{serviceName}.{methodName} -- failed to login for user {username} because wrong password",
+                nameof(AccountService), nameof(LoginAsync), user.UserName);
+            return Result<UserDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
+        }
+
+        var generateTokensResult = await tokensService.GenerateNewTokensAsync(user, cancellationToken);
+        if (!generateTokensResult.IsSuccess)
+            return generateTokensResult.MapFailure<UserDTO>();
+
+        var addTokensToCookiesResult = cookiesServices.AddTokens(generateTokensResult.Value!);
+        if (!addTokensToCookiesResult.IsSuccess)
+            return addTokensToCookiesResult.MapFailure<UserDTO>();
+        
+        logger.LogInformation("{serviceName}.{methodName} -- user with id {userId} successfully logged in",
+            nameof(AccountService), nameof(LoginAsync), user.Id);
+        
+        return Result<UserDTO>.Success(user.ToUserDTO());
+    }
+    
+    
+    
     private async Task<Result<string>> DoesUserExist(UserCreateDTO toUserCreate, CancellationToken cancellationToken = default)
     {
         // check if user already Exists
@@ -86,9 +139,9 @@ public class AccountService(UserManager<ApplicationUser> userManager,
  
             // collect used fields in list
             var usedFields = new List<string>();
-            if (isEmailUsed) usedFields.Add($"Email '{toUserCreate.Email}'");
-            if (isPhoneUsed) usedFields.Add($"Phone number '{toUserCreate.PhoneNumber}'");
-            if (isUserNameUsed) usedFields.Add($"Username '{toUserCreate.UserName}'");
+            if (isEmailUsed) usedFields.Add("Email");
+            if (isPhoneUsed) usedFields.Add("Phone number");
+            if (isUserNameUsed) usedFields.Add("Username");
 
             // generate error message
             string fieldsText = string.Join(",\n", usedFields);
@@ -99,26 +152,5 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         }
 
         return Result<string>.Failure("");
-    }
-    
-    public async Task<Result<UserDTO>> LoginAsync(LoginDTO loginData, CancellationToken cancellationToken = default)
-    {
-        var user = await userManager.FindByEmailAsync(loginData.Email);
-        if(user is null)
-            return Result<UserDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
-        
-        var isPasswordCorrect = await userManager.CheckPasswordAsync(user, loginData.Password);
-        if(!isPasswordCorrect)
-            return Result<UserDTO>.Failure("Invalid Email or Password", HttpStatusCode.Unauthorized);
-
-        var generateTokensResult = await tokenService.GenerateNewTokensAsync(user, cancellationToken);
-        if (!generateTokensResult.IsSuccess)
-            return generateTokensResult.MapFailure<UserDTO>();
-
-        var addTokensToCookiesResult = cookiesServices.AddTokens(generateTokensResult.Value!);
-        if (!addTokensToCookiesResult.IsSuccess) 
-            return addTokensToCookiesResult.MapFailure<UserDTO>();
-
-        return Result<UserDTO>.Success(user.ToUserDTO());
     }
 }

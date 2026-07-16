@@ -4,11 +4,14 @@ using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
+using Microsoft.Extensions.Logging;
 
 namespace HR_System.Infrastructure.Services;
-using System.Net;
 
-public class ActivitiesService(IActivityRepository activityRepository) : IActivitiesService
+public class ActivitiesService(
+    IActivityRepository activityRepository,
+    ILogger<ActivitiesService> logger
+    ) : IActivitiesService
 {
     public async Task<Result<ActivityDTO>> AddAsync(ActivityAddDTO toAdd, Guid triggeredById, CancellationToken cancellationToken = default)
     {
@@ -23,16 +26,20 @@ public class ActivitiesService(IActivityRepository activityRepository) : IActivi
         activityRepository.Add(activity);
 
         if (!await activityRepository.SaveChangesAsync(cancellationToken))
-            return Result<ActivityDTO>.Failure("Failed saving activity to DB");
-
+        {
+            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
+                nameof(AccountService), nameof(AddAsync));
+            return Result<ActivityDTO>.Failure("Failed saving changes to DB");
+        }
+        
+        logger.LogInformation("{serviceName}.{methodName} activity was added by userId: {userId}",
+            nameof(AccountService), nameof(AddAsync), triggeredById);
+        
         return Result<ActivityDTO>.Success(activity.ToDTO());
     }
 
     public async Task<Result<IReadOnlyList<ActivityDTO>>> LazyGetAllSortedAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
     {
-        if (lazyData.Taken < 0)
-            return Result<IReadOnlyList<ActivityDTO>>.Failure("Taken cannot be negative", HttpStatusCode.BadRequest);
-
         var activities = await activityRepository.LazyGetAllSortedAsync(lazyData, userId, cancellationToken);
 
         var result = activities.Select(a => a.ToDTO()).ToList();

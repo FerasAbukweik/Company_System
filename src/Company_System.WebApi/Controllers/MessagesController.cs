@@ -8,17 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HR_System.Controllers;
 
-public class MessagesController(IMessagesService messagesService,
-    ILogger<MessagesController> logger) : ApplicationControllerBase
+public class MessagesController(IMessagesService messagesService) : ApplicationControllerBase
 {
     [HttpGet]
     [Authorize]
     public async Task<ActionResult<IReadOnlyList<MessageDTO>>> LazyGetMessages([FromQuery]LazyDTO lazyData,[FromQuery]Guid otherUserId, CancellationToken cancellationToken = default)
     {
         var currUserIdResult = User.GetUserId();
-        if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult(logger);
+        if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult();
         
         var result = await messagesService.LazyGetMessages(currUserIdResult.Value!,otherUserId, lazyData, cancellationToken);
-        return result.ToActionResult(logger);
+        return result.ToActionResult();
     }
 }

@@ -7,6 +7,7 @@ using HR_System.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace HR_System.Infrastructure;
 
@@ -23,6 +24,9 @@ public static class InfrastructureDependencyInjectionExtensionMethod
             options.Configuration = configuration.GetConnectionString("Redis");
             options.InstanceName = configuration["Redis:InstanceName"];
         });
+        
+        services.AddSingleton<IConnectionMultiplexer>(sp => 
+            ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis") ??  "localhost:6379"));
         
         
         // add identity
@@ -48,9 +52,12 @@ public static class InfrastructureDependencyInjectionExtensionMethod
         services.AddScoped<IMessageRepository, MessageRepository>();
         
         // services
-        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITokensService, TokensService>();
+        services.AddScoped<IAccessTokenService, AccessTokenService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<ITasksService, TasksService>();
-        services.AddScoped<IOrganizationHierarchyService, OrganizationHierarchyService>();
+        services.AddKeyedScoped<IOrganizationHierarchyService, OrganizationHierarchyService>("inner");
+        services.AddScoped<IOrganizationHierarchyService, CachedOrganizationHierarchyService>();
         services.AddScoped<IApprovalService, ApprovalService>();
         services.AddScoped<IActivitiesService, ActivitiesService>();
         services.AddScoped<IAccountService, AccountService>();

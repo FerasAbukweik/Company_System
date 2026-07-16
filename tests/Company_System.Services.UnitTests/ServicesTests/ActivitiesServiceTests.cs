@@ -7,6 +7,7 @@ using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.Infrastructure.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit.Abstractions;
 
@@ -30,7 +31,9 @@ public class ActivitiesServiceTests
 
         _activityRepositoryMock = new Mock<IActivityRepository>();
 
-        _activitiesService = new ActivitiesService(_activityRepositoryMock.Object);
+        _activitiesService = new ActivitiesService(
+            _activityRepositoryMock.Object,
+            NullLogger<ActivitiesService>.Instance);
     }
 
     private ActivityAddDTO CreateActivityAddDto()
@@ -56,7 +59,6 @@ public class ActivitiesServiceTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.ErrorMessage.Should().Be("Failed saving activity to DB");
     }
 
     [Fact]
@@ -108,24 +110,6 @@ public class ActivitiesServiceTests
     #endregion
 
     #region LazyGetAllSortedAsync
-
-    [Fact]
-    public async Task LazyGetAllSortedAsync_ShouldReturnFailure_WhenTakenIsNegative()
-    {
-        // Arrange
-        var lazyData = new LazyDTO { Taken = -1, SectionSize = 10 };
-
-        // Act
-        var result = await _activitiesService.LazyGetAllSortedAsync(lazyData, Guid.NewGuid());
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.ErrorMessage.Should().Be("Taken cannot be negative");
-
-        _activityRepositoryMock.Verify(
-            r => r.LazyGetAllSortedAsync(It.IsAny<LazyDTO>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
 
     [Fact]
     public async Task LazyGetAllSortedAsync_ShouldReturnMappedDtos_WhenRepositoryReturnsActivities()

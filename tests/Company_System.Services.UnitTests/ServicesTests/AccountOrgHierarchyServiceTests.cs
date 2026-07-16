@@ -10,6 +10,7 @@ using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit.Abstractions;
 
@@ -20,7 +21,6 @@ public class AccountOrgHierarchyServiceTests
     private readonly IAccountOrgHierarchyService _service;
     private readonly Mock<IAccountService> _accountServiceMock;
     private readonly Mock<IOrganizationHierarchyService> _hierarchyServiceMock;
-    private readonly Mock<IApplicationUsersRepository> _usersRepositoryMock;
     private readonly Mock<IImageService> _imageServiceMock;
     private readonly ITestOutputHelper _output;
     private readonly IFixture _fixture;
@@ -36,14 +36,13 @@ public class AccountOrgHierarchyServiceTests
 
         _accountServiceMock = new Mock<IAccountService>();
         _hierarchyServiceMock = new Mock<IOrganizationHierarchyService>();
-        _usersRepositoryMock = new Mock<IApplicationUsersRepository>();
         _imageServiceMock = new Mock<IImageService>();
-
+        
         _service = new AccountOrgHierarchyService(
             _accountServiceMock.Object,
             _hierarchyServiceMock.Object,
-            _usersRepositoryMock.Object,
-            _imageServiceMock.Object);
+            _imageServiceMock.Object,
+            NullLogger<AccountOrgHierarchyService>.Instance);
     }
 
     private AddEmployeeDTO CreateAddEmployeeDto(Guid? parentId = null)

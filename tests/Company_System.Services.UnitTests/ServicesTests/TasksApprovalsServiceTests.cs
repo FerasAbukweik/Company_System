@@ -12,6 +12,7 @@ using HR_System.Core.helpers;
 using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.Infrastructure.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit.Abstractions;
 
@@ -45,7 +46,8 @@ public class TasksApprovalsServiceTests
             _tasksServiceMock.Object,
             _approvalServiceMock.Object,
             _activitiesServiceMock.Object,
-            _approvalRepositoryMock.Object);
+            _approvalRepositoryMock.Object,
+            NullLogger<TasksApprovalsService>.Instance);
     }
 
     private TaskDTO CreateTaskDto(Guid? managerId = null, TaskStatusEnum? status = null)

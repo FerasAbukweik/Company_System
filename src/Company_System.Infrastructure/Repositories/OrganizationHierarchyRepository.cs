@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR_System.Infrastructure.Repositories;
 
-public class OrganizationHierarchyRepository(ApplicationDbContext dbContext) : IOrganizationHierarchyRepository
+public class OrganizationHierarchyRepository(
+    ApplicationDbContext dbContext
+    ) : IOrganizationHierarchyRepository
 {
     public void Add(OrganizationHierarchy toAdd)
     {

@@ -7,6 +7,7 @@ using AutoFixture;
    using HR_System.Core.Interfaces.RepositoryContracts;
    using HR_System.Core.Interfaces.ServiceContracts;
    using HR_System.Infrastructure.Services;
+   using Microsoft.Extensions.Logging.Abstractions;
    using Moq;
    using Xunit.Abstractions;
    
@@ -30,7 +31,9 @@ using AutoFixture;
    
            _messageRepositoryMock = new Mock<IMessageRepository>();
    
-           _messagesService = new MessagesService(_messageRepositoryMock.Object);
+           _messagesService = new MessagesService(
+               _messageRepositoryMock.Object,
+               NullLogger<MessagesService>.Instance);
        }
    
        private MessageAddDTO CreateMessageAddDto(Guid? receiverId = null)

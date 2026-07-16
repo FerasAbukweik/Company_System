@@ -10,6 +10,7 @@ using System.Net;
    using HR_System.Core.Interfaces.RepositoryContracts;
    using HR_System.Core.Interfaces.ServiceContracts;
    using HR_System.Infrastructure.Services;
+   using Microsoft.Extensions.Logging.Abstractions;
    using Moq;
    using Xunit.Abstractions;
    
@@ -33,7 +34,9 @@ using System.Net;
    
            _hierarchyRepositoryMock = new Mock<IOrganizationHierarchyRepository>();
    
-           _hierarchyService = new OrganizationHierarchyService(_hierarchyRepositoryMock.Object);
+           _hierarchyService = new OrganizationHierarchyService(
+               _hierarchyRepositoryMock.Object,
+               NullLogger<OrganizationHierarchyService>.Instance);
        }
    
        private OrganizationHierarchyAddDTO CreateAddDto(Guid? userId = null, Guid? parentId = null)

@@ -1,145 +1,118 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using HR_System.Core.common;
 using HR_System.Core.Constraints;
-using HR_System.Core.Domain.Entities;
 using HR_System.Core.Domain.Identity;
 using HR_System.Core.DTO.Token;
-using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Core.Interfaces.ServiceContracts;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 namespace HR_System.Infrastructure.Services;
 
-public class TokenService(ICookiesServices cookiesServices,
-    IRefreshTokensRepository refreshTokensRepository,
+public class TokensService(
+    IAccessTokenService accessTokenService,
+    IRefreshTokenService refreshTokenService,
+    ICookiesServices cookiesServices,
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration,
-    IOptions<CookieKeys> cookieKeys) : ITokenService
+    IOptions<CookieKeys> cookieKeys,
+    ILogger<TokensService> logger) : ITokensService
 {
-    public async Task<Result<string>> GenerateAccessTokenAsync(ApplicationUser user)
-    {
-        // if there is no email or userName return failure --because we need them later to create the token
-        if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(user.Email))
-            return Result<string>.Failure("access token Cannt be Created because of missing userName or Email" , HttpStatusCode.BadRequest);
-        
-        var roles = await userManager.GetRolesAsync(user);
-        if (!roles.Any())
-            return Result<string>.Failure("user has no roles" , HttpStatusCode.BadRequest);
-        
-        // claims
-        var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
-
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Email, user.Email),
-            
-            new Claim("Position", user.Position.ToString()),
-        };
-        
-        // add roles to claims
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-        // create SigningCredentials
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("Jwt:Key")!));
-        var creds = new SigningCredentials(key ,  SecurityAlgorithms.HmacSha256);
-
-        // generate token
-        var token = new JwtSecurityToken(
-            configuration.GetValue<string>("Jwt:Issuer"),
-            configuration.GetValue<string>("Jwt:Audience"),
-            claims,
-            expires: DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:AccessTokenLifeTime")),
-            signingCredentials: creds
-        );
-
-        return Result<string>.Success(new JwtSecurityTokenHandler().WriteToken(token));
-    }
-    public async Task<Result<string>> GenerateRefreshTokenAsync(Guid userId , CancellationToken cancellationToken = default)
-    {
-        // generate refresh token
-        byte[] bytes = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(bytes);
-        }
-        string refreshToken = Convert.ToBase64String(bytes);
-
-        
-        // add refresh token to DB
-        var toAddRefreshToken = new RefreshToken
-        {
-            Token = refreshToken,
-            UserId = userId,
-            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:RefreshTokenLifeTime")),
-        };
-        refreshTokensRepository.AddAsync(toAddRefreshToken , cancellationToken);
-        await refreshTokensRepository.SaveChangesAsync(cancellationToken);
-        
-        return Result<string>.Success(refreshToken);
-    }
     public async Task<Result<AccessAndRefreshTokenDTO>> GenerateNewTokensAsync(ApplicationUser user, CancellationToken cancellationToken = default)
     {
-        // generate access token
-        var generateAccessTokenResult = await this.GenerateAccessTokenAsync(user);
-        if (!generateAccessTokenResult.IsSuccess)
-            return generateAccessTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
-        
-        // generate refresh token
-        var generateRefreshTokenResult = await this.GenerateRefreshTokenAsync(user.Id, cancellationToken);
-        if (!generateRefreshTokenResult.IsSuccess)
-            return generateRefreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
+        logger.LogInformation("{ServiceName}.{MethodName} initiation for User ID {UserId}.",
+            nameof(TokensService), nameof(GenerateNewTokensAsync), user.Id);
 
-        // return result
-        var result = new AccessAndRefreshTokenDTO()
+        // 1. Access Token
+        var accessTokenResult = await accessTokenService.GenerateAccessTokenAsync(user);
+        if (!accessTokenResult.IsSuccess)
         {
-            AccessToken = generateAccessTokenResult.Value!,
-            RefreshToken = generateRefreshTokenResult.Value!
+            logger.LogWarning("{ServiceName}.{MethodName} delegation failed: AccessTokenService could not construct token for User ID {UserId}.",
+                nameof(TokensService), nameof(GenerateNewTokensAsync), user.Id);
+            return accessTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
+        }
+
+        // 2. Refresh Token
+        var refreshTokenResult = await refreshTokenService.GenerateRefreshTokenAsync(user.Id, cancellationToken);
+        if (!refreshTokenResult.IsSuccess)
+        {
+            logger.LogWarning("{ServiceName}.{MethodName} delegation failed: RefreshTokenService could not generate/save token for User ID {UserId}.",
+                nameof(TokensService), nameof(GenerateNewTokensAsync), user.Id);
+            return refreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
+        }
+
+        var result = new AccessAndRefreshTokenDTO
+        {
+            AccessToken = accessTokenResult.Value!,
+            RefreshToken = refreshTokenResult.Value!
         };
+
+        logger.LogInformation("{ServiceName}.{MethodName} successfully constructed both access and refresh token payloads for User ID {UserId}.",
+            nameof(TokensService), nameof(GenerateNewTokensAsync), user.Id);
 
         return Result<AccessAndRefreshTokenDTO>.Success(result);
     }
+
     public async Task<Result<AccessAndRefreshTokenDTO>> RegenerateTokensAsync(CancellationToken cancellationToken = default)
     {
-        var refreshTokenResult = cookiesServices.Get(cookieKeys.Value.RefreshToken);
-        if (!refreshTokenResult.IsSuccess) return refreshTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
-        
-        // remove refresh Token anyway(doesnt matter if its valid or not)
-        var removedRefreshToken = await
-            refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(refreshTokenResult.Value!, cancellationToken);
-        if (removedRefreshToken == null)
-            return Result<AccessAndRefreshTokenDTO>.Failure("refresh token expired or not found",
-                HttpStatusCode.BadRequest);
+        // 1. Retrieve refresh token string from HTTP Cookies
+        var cookieTokenResult = cookiesServices.Get(cookieKeys.Value.RefreshToken);
+        if (!cookieTokenResult.IsSuccess)
+        {
+            logger.LogWarning("{ServiceName}.{MethodName} failed: Refresh token key is missing from incoming request cookies.",
+                nameof(TokensService), nameof(RegenerateTokensAsync));
+            return cookieTokenResult.MapFailure<AccessAndRefreshTokenDTO>();
+        }
 
-        // check if refresh token is valid
-        if (removedRefreshToken.IsResolved) return Result<AccessAndRefreshTokenDTO>.Failure("Expired refresh token", HttpStatusCode.BadRequest);
-        
-        // get user to generate new tokens for it
-        var user = await userManager.FindByIdAsync(removedRefreshToken.UserId.ToString());
-        if(user == null) return Result<AccessAndRefreshTokenDTO>.Failure("User not found", HttpStatusCode.BadRequest);
-        
-        // generate new tokens
-        var generateNewTokensResult = await GenerateNewTokensAsync(user, cancellationToken);
+        // 2. Safely consume and remove token via RefreshTokenService
+        var consumeResult = await refreshTokenService.ConsumeRefreshTokenAsync(cookieTokenResult.Value!, cancellationToken);
+        if (!consumeResult.IsSuccess)
+        {
+            logger.LogWarning("{ServiceName}.{MethodName} failed: Token validation or revocation failed in RefreshTokenService.",
+                nameof(TokensService), nameof(RegenerateTokensAsync));
+            return consumeResult.MapFailure<AccessAndRefreshTokenDTO>();
+        }
 
-        return generateNewTokensResult;
+        var removedToken = consumeResult.Value!;
+
+        // 3. Locate related security user profile
+        var user = await userManager.FindByIdAsync(removedToken.UserId.ToString());
+        if (user == null)
+        {
+            logger.LogError("{ServiceName}.{MethodName} security mismatch: Valid refresh token was owned by User ID {UserId}, but the user profile no longer exists in DB.",
+                nameof(TokensService), nameof(RegenerateTokensAsync), removedToken.UserId);
+            return Result<AccessAndRefreshTokenDTO>.Failure("User not found", HttpStatusCode.BadRequest);
+        }
+
+        // 4. Delegate generation of new pairs
+        logger.LogInformation("{ServiceName}.{MethodName} generating replacement tokens for verified User ID {UserId}.",
+            nameof(TokensService), nameof(RegenerateTokensAsync), user.Id);
+
+        return await GenerateNewTokensAsync(user, cancellationToken);
     }
+
     public async Task<Result<AccessAndRefreshTokenDTO>> UpdateUserTokensAsync(CancellationToken cancellationToken = default)
     {
+        // 1. Perform rotation sequence
         var newTokensResult = await RegenerateTokensAsync(cancellationToken);
-        if(!newTokensResult.IsSuccess) return newTokensResult;
+        if (!newTokensResult.IsSuccess)
+        {
+            logger.LogWarning("{ServiceName}.{MethodName} aborted: Token regeneration cycle failed.",
+                nameof(TokensService), nameof(UpdateUserTokensAsync));
+            return newTokensResult;
+        }
 
-        var addToCookiesResult = cookiesServices.AddTokens(newTokensResult.Value!);
-        if (!addToCookiesResult.IsSuccess) return addToCookiesResult.MapFailure<AccessAndRefreshTokenDTO>();
+        // 2. Commit updated tokens directly back to the secure Client Cookies payload
+        var cookieSaveResult = cookiesServices.AddTokens(newTokensResult.Value!);
+        if (!cookieSaveResult.IsSuccess)
+        {
+            logger.LogError("{ServiceName}.{MethodName} failed to persist regenerated tokens into response cookies.",
+                nameof(TokensService), nameof(UpdateUserTokensAsync));
+            return cookieSaveResult.MapFailure<AccessAndRefreshTokenDTO>();
+        }
+
+        logger.LogInformation("{ServiceName}.{MethodName} successfully rotated tokens and committed updated values to HTTP response cookies.",
+            nameof(TokensService), nameof(UpdateUserTokensAsync));
 
         return newTokensResult;
     }

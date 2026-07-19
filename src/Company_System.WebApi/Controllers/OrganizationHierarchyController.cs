@@ -17,11 +17,7 @@ public class OrganizationHierarchyController(
     [Authorize]
     public async Task<ActionResult<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildren([FromQuery]IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
     {
-        var currUserIdResult = User.GetUserId();
-        if (!currUserIdResult.IsSuccess) return ((Result)currUserIdResult).ToActionResult();
-        
-        
-        var result = await hierarchyService.GetChildrenAsync(currUserIdResult.Value, parents, cancellationToken);
+        var result = await hierarchyService.GetChildrenAsync(parents, cancellationToken);
         return result.ToActionResult();
     }
 

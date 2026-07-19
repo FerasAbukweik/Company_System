@@ -208,7 +208,6 @@ public class AccountOrgHierarchyServiceTests
                 Id = Guid.NewGuid(),
                 UserId = createdUser.Id,
                 Children = [],
-                IsCurrUser = false,
                 UserName = createdUser.UserName!,
                 Position = createdUser.Position,
                 UserImageUrl = createdUser.ImageUrl ?? "unknown"
@@ -246,7 +245,6 @@ public class AccountOrgHierarchyServiceTests
                 Id = Guid.NewGuid(),
                 UserId = createdUser.Id,
                 Children = [],
-                IsCurrUser = false,
                 UserName = createdUser.UserName!,
                 Position = createdUser.Position,
                 UserImageUrl = createdUser.ImageUrl ?? "unknown"

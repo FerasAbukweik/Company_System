@@ -23,6 +23,6 @@
 <app-delegate-task />
 
 <app-chat-panel />
-@if (delegateTaskService.getIsShowDelegateTask()) {
-  <div class="absolute inset-0" (click)="delegateTaskService.close()"></div>
+@if (delegateTaskService.getIsShowDelegateTask() || chatPanelService.getIsVisable()) {
+  <div class="absolute inset-0" (click)="delegateTaskService.close(); chatPanelService.close()"></div>
 }

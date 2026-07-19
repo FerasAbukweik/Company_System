@@ -9,7 +9,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 // implementing serilog
-builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider service, LoggerConfiguration configuration) =>
+builder.Host.UseSerilog((context, service, configuration) =>
 {
     configuration
         .ReadFrom.Configuration(context.Configuration)

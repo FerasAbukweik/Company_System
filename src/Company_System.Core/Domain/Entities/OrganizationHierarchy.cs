@@ -26,14 +26,13 @@ public class OrganizationHierarchy
     
     // functions
 
-    public OrganizationHierarchyDTO ToDTO(Guid currUserId)
+    public OrganizationHierarchyDTO ToDTO()
     {
         return new OrganizationHierarchyDTO()
         {
             Id = Id,
             UserId = UserId,
-            Children = Children.Select(c => c.ToDTO(currUserId)).ToList(),
-            IsCurrUser = UserId == currUserId,
+            Children = Children.Select(c => c.ToDTO()).ToList(),
             UserName = User?.UserName ?? "unknown",
             Position = User?.Position ?? PositionsEnum.unknown,
             UserImageUrl = User?.ImageUrl ?? "Missing Photo",

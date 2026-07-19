@@ -48,7 +48,6 @@ public class CachedOrganizationHierarchyService : IOrganizationHierarchyService
     
     // get all children for parents
     public async Task<Result<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildrenAsync(
-        Guid currUserId, 
         IReadOnlyList<Guid>? parents, 
         CancellationToken cancellationToken = default)
     {
@@ -71,7 +70,7 @@ public class CachedOrganizationHierarchyService : IOrganizationHierarchyService
         }
 
         // Cache Miss -> DB
-        var dbResult = await _innerService.GetChildrenAsync(currUserId, parents, cancellationToken);
+        var dbResult = await _innerService.GetChildrenAsync(parents, cancellationToken);
         if (!dbResult.IsSuccess) return dbResult;
 
         // Save DTO to Redis

@@ -78,7 +78,6 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         return Result<ApplicationUser>.Success(toAddUser);
         
     }
-    
     public async Task<Result<UserDTO>> LoginAsync(LoginDTO loginData, CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByEmailAsync(loginData.Email);
@@ -110,9 +109,6 @@ public class AccountService(UserManager<ApplicationUser> userManager,
         
         return Result<UserDTO>.Success(user.ToUserDTO());
     }
-    
-    
-    
     private async Task<Result<string>> DoesUserExist(UserCreateDTO toUserCreate, CancellationToken cancellationToken = default)
     {
         // check if user already Exists

@@ -1,8 +1,8 @@
 <div class="flex flex-col items-center relative">
   <div
-    [class.outline]="node().isCurrUser"
-    [class.outline-2]="node().isCurrUser"
-    [class.outline-vibrant-turquoise]="node().isCurrUser"
+    [class.outline]="isCurrUser"
+    [class.outline-2]="isCurrUser"
+    [class.outline-vibrant-turquoise]="isCurrUser"
     class="group p-4 bg-surface-lowest border border-outline-light rounded-xl shadow-sm w-64 transition-all"
   >
     <div class="flex items-center gap-3">
@@ -24,7 +24,7 @@
     <div
       class="flex justify-end items-center gap-2 material-symbols-outlined text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity text-base"
     >
-      @if (!node().isCurrUser) {
+      @if (!isCurrUser) {
         <button
           class="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
           (click)="chatPanelService.open(node())"
@@ -79,7 +79,7 @@
       }
 
       @for (child of node().children; track child.id) {
-        <app-org-node [node]="child" [isCurrUserChild]="isCurrUserChild() || node().isCurrUser" />
+        <app-org-node [node]="child" [isCurrUserChild]="isCurrUserChild() || isCurrUser" />
       }
     </div>
   }

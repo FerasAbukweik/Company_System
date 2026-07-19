@@ -34,9 +34,9 @@ public class OrganizationHierarchyService(
         logger.LogError("{serviceName}.{methodName} OrganizationHierarchy with id of {OrganizationHierarchId} was created",
             nameof(MessagesService), nameof(AddAsync), toAdd_DB.Id);
         
-        return Result<OrganizationHierarchyDTO>.Success(toAdd_DB.ToDTO(Guid.Empty));
+        return Result<OrganizationHierarchyDTO>.Success(toAdd_DB.ToDTO());
     }
-    public async Task<Result<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildrenAsync(Guid currUserId, IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyDictionary<Guid, IReadOnlyList<OrganizationHierarchyDTO>>>> GetChildrenAsync(IReadOnlyList<Guid>? parents, CancellationToken cancellationToken = default)
     {
         var children = await hierarchyRepository.GetChildrenAsync(parents, cancellationToken);
         
@@ -44,7 +44,7 @@ public class OrganizationHierarchyService(
 
         if (parents == null || !parents.Any())
         {
-            result[Guid.Empty] = children.Select(c => c.ToDTO(currUserId)).ToList();
+            result[Guid.Empty] = children.Select(c => c.ToDTO()).ToList();
         }
         else
         {
@@ -56,7 +56,7 @@ public class OrganizationHierarchyService(
             foreach (var child in children)
             {
                 if(child.ParentId != null)
-                    result[child.ParentId.Value].Add(child.ToDTO(currUserId));
+                    result[child.ParentId.Value].Add(child.ToDTO());
             }
         }
 
@@ -94,7 +94,7 @@ public class OrganizationHierarchyService(
         logger.LogError("{serviceName}.{methodName} OrganizationHierarchy with id of {OrganizationHierarchyId} was removed",
             nameof(MessagesService), nameof(RemoveAsync), removed.Id);
         
-        return Result<OrganizationHierarchyDTO>.Success(removed.ToDTO(currUserId));
+        return Result<OrganizationHierarchyDTO>.Success(removed.ToDTO());
     }
     public async Task<Result<IReadOnlyList<Guid>>> GetParentUserIds(Guid userId, CancellationToken cancellationToken = default)
     {

@@ -153,7 +153,6 @@ using System.Net;
        public async Task GetChildrenAsync_ShouldGroupUnderEmptyGuid_WhenParentsIsNull()
        {
            // Arrange
-           var currUserId = Guid.NewGuid();
            var children = new List<OrganizationHierarchy> { CreateHierarchy(), CreateHierarchy() };
    
            _hierarchyRepositoryMock
@@ -161,7 +160,7 @@ using System.Net;
                .ReturnsAsync(children);
    
            // Act
-           var result = await _hierarchyService.GetChildrenAsync(currUserId, null);
+           var result = await _hierarchyService.GetChildrenAsync( null);
    
            // Assert
            result.IsSuccess.Should().BeTrue();
@@ -173,8 +172,7 @@ using System.Net;
        public async Task GetChildrenAsync_ShouldGroupUnderEmptyGuid_WhenParentsIsEmpty()
        {
            // Arrange
-           var currUserId = Guid.NewGuid();
-           var parents = new List<Guid>();
+           Guid[] parents = [];
            var children = new List<OrganizationHierarchy> { CreateHierarchy() };
    
            _hierarchyRepositoryMock
@@ -182,7 +180,7 @@ using System.Net;
                .ReturnsAsync(children);
    
            // Act
-           var result = await _hierarchyService.GetChildrenAsync(currUserId, parents);
+           var result = await _hierarchyService.GetChildrenAsync(parents);
    
            // Assert
            result.IsSuccess.Should().BeTrue();
@@ -194,7 +192,6 @@ using System.Net;
        public async Task GetChildrenAsync_ShouldGroupChildrenByParentId_WhenParentsProvided()
        {
            // Arrange
-           var currUserId = Guid.NewGuid();
            var parent1 = Guid.NewGuid();
            var parent2 = Guid.NewGuid();
            var parents = new List<Guid> { parent1, parent2 };
@@ -209,7 +206,7 @@ using System.Net;
                .ReturnsAsync(children);
    
            // Act
-           var result = await _hierarchyService.GetChildrenAsync(currUserId, parents);
+           var result = await _hierarchyService.GetChildrenAsync(parents);
    
            // Assert
            result.IsSuccess.Should().BeTrue();
@@ -221,7 +218,6 @@ using System.Net;
        public async Task GetChildrenAsync_ShouldSkipChildrenWithNullParentId_WhenParentsProvided()
        {
            // Arrange
-           var currUserId = Guid.NewGuid();
            var parent1 = Guid.NewGuid();
            var parents = new List<Guid> { parent1 };
    
@@ -234,7 +230,7 @@ using System.Net;
                .ReturnsAsync(children);
    
            // Act
-           var result = await _hierarchyService.GetChildrenAsync(currUserId, parents);
+           var result = await _hierarchyService.GetChildrenAsync(parents);
    
            // Assert
            result.IsSuccess.Should().BeTrue();
@@ -242,29 +238,9 @@ using System.Net;
        }
    
        [Fact]
-       public async Task GetChildrenAsync_ShouldMapIsCurrUser_WhenChildUserIdMatchesCurrUserId()
-       {
-           // Arrange
-           var currUserId = Guid.NewGuid();
-           var matchingChild = CreateHierarchy(userId: currUserId);
-           var children = new List<OrganizationHierarchy> { matchingChild };
-   
-           _hierarchyRepositoryMock
-               .Setup(r => r.GetChildrenAsync(null, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(children);
-   
-           // Act
-           var result = await _hierarchyService.GetChildrenAsync(currUserId, null);
-   
-           // Assert
-           result.Value![Guid.Empty].Single().IsCurrUser.Should().BeTrue();
-       }
-   
-       [Fact]
        public async Task GetChildrenAsync_ShouldCallRepository_WithCorrectParents()
        {
            // Arrange
-           var currUserId = Guid.NewGuid();
            var parents = new List<Guid> { Guid.NewGuid() };
    
            _hierarchyRepositoryMock
@@ -272,7 +248,7 @@ using System.Net;
                .ReturnsAsync(new List<OrganizationHierarchy>());
    
            // Act
-           await _hierarchyService.GetChildrenAsync(currUserId, parents);
+           await _hierarchyService.GetChildrenAsync(parents);
    
            // Assert
            _hierarchyRepositoryMock.Verify(
@@ -381,7 +357,6 @@ using System.Net;
            result.IsSuccess.Should().BeTrue();
            result.Value.Should().NotBeNull();
            result.Value!.UserId.Should().Be(currUserId);
-           result.Value.IsCurrUser.Should().BeTrue();
            result.Value.UserName.Should().Be(user.UserName);
        }
    

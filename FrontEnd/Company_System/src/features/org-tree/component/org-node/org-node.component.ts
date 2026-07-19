@@ -4,6 +4,7 @@ import { OrgNodeDTO } from '../../../../core/dto/org-node';
 import { PositionsEnum } from '../../../../core/enum/positions-enum';
 import { DelegateTaskService } from '../delegate-task/delegate-task.service';
 import { ChatPanelService } from '../chat-panel/chat-panel.service';
+import { AuthService } from '../../../../core/services/client/auth-service';
 
 @Component({
   selector: 'app-org-node',
@@ -15,6 +16,7 @@ export class OrgNodeComponent {
   // DI
   protected readonly delegateTaskService = inject(DelegateTaskService);
   protected readonly chatPanelService = inject(ChatPanelService);
+  protected readonly authService = inject(AuthService);
 
   // input
   node = input.required<OrgNodeDTO>();
@@ -23,5 +25,9 @@ export class OrgNodeComponent {
   // getters
   get displayRole(): string {
     return PositionsEnum[this.node().position] || 'Unknown';
+  }
+
+  get isCurrUser() {
+    return this.node().userId === (this.authService.getUserData()?.userId ?? '');
   }
 }

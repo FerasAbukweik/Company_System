@@ -5,7 +5,6 @@ export interface OrgNodeDTO {
   position: PositionsEnum;
   userId: string;
   children: OrgNodeDTO[];
-  isCurrUser: boolean;
   userName: string;
   userImageUrl: string
 }

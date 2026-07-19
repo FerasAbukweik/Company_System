@@ -9,7 +9,6 @@ public class OrganizationHierarchyDTO
     public required PositionsEnum Position { get; set; }
     public required Guid UserId { get; set; }
     public required List<OrganizationHierarchyDTO> Children { get; set; }
-    public required bool IsCurrUser { get; set; }
     public required string UserName { get; set; }
     public required string UserImageUrl { get; set; }
 
@@ -24,6 +23,6 @@ public class OrganizationHierarchyDTO
 
         return
             $"Id: {Id}\nPosition: {Position.ToString()}\nUserId: {UserId}\n" +
-            $"Children: {sb.ToString()}\nIsCurrUser: {IsCurrUser}\nUserImageUrl: {UserImageUrl}";
+            $"Children: {sb.ToString()}\nUserImageUrl: {UserImageUrl}";
     }
 }

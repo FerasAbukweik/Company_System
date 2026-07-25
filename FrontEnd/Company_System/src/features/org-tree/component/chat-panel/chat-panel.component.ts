@@ -6,6 +6,7 @@ import {
   OnInit,
   viewChild,
   ElementRef,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,12 +24,12 @@ import { LoadingComponent } from '../../../../shared/components/loading/loading.
   imports: [CommonModule, FormsModule, MessageCardComponent, IsVisableDirective, LoadingComponent],
   templateUrl: './chat-panel.component.html',
 })
-export class ChatPanelComponent implements OnInit {
+export class ChatPanelComponent implements OnInit, OnDestroy {
   // DI
   protected readonly chatPanelService = inject(ChatPanelService);
   protected readonly messageHubService = inject(MessagesHubService);
   protected readonly messagesService = inject(MessagesService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly _destroyRef = inject(DestroyRef);
 
   // viewChild
   messagesDiv = viewChild.required<ElementRef<HTMLDivElement>>('messagesDiv');
@@ -45,8 +46,8 @@ export class ChatPanelComponent implements OnInit {
     let firstCheck = true;
     let secondCheck = true;
 
-    const sub = toObservable(this.messagesService.getIsLoading)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    const sub = toObservable(this.messagesService.isLoading)
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (isLoading) => {
           if (!isLoading) {
@@ -67,15 +68,15 @@ export class ChatPanelComponent implements OnInit {
       });
 
     // when receive a message scroll to bottom
-    this.messageHubService.onMessageReceived$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.messageHubService.onMessageReceived$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
       next: () => {
         this.scrollToBottom();
       },
     });
 
     // clear text input after closing / opening chat panel
-    toObservable(this.chatPanelService.getIsVisable)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    toObservable(this.chatPanelService.isVisable)
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: () => {
           this.messageContent = '';
@@ -98,14 +99,14 @@ export class ChatPanelComponent implements OnInit {
 
   registerHandlers() {
     // on typing
-    this.messageHubService.onTyping$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.messageHubService.onTyping$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
       next: () => {
         this.isTyping.set(true);
       },
     });
 
     // on stoped typing
-    this.messageHubService.onStopTyping$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.messageHubService.onStopTyping$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe({
       next: () => {
         this.isTyping.set(false);
       },
@@ -147,5 +148,10 @@ export class ChatPanelComponent implements OnInit {
 
       div.scrollTop = oldScrollTop + heightDifference;
     }, 0);
+  }
+
+  // on destroy
+  ngOnDestroy(): void {
+    this.messagesService.cancelRequests$.next();
   }
 }

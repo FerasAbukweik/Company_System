@@ -14,7 +14,7 @@ import { HeroIcon } from '../../core/constants/hero-icon-d';
 export class MainLayoutComponent {
   // DI
   protected readonly sideBarService = inject(SideBarService);
-  private readonly authService = inject(AuthService);
+  private readonly _authService = inject(AuthService);
 
   // protected
   protected sideBarItems = computed(() => {
@@ -23,7 +23,7 @@ export class MainLayoutComponent {
       { icon: HeroIcon.chartLine, label: 'Org Tree', route: '/org-tree' },
     ];
 
-    if (this.authService.getIsAdmin()) {
+    if (this._authService.isAdmin()) {
       result = [
         ...result,
         {

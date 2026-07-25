@@ -41,7 +41,7 @@ public static class WebApiDependencyInjectionExtensionMethod
                             context.Token = accessToken;
                         }
                 
-                        return  Task.CompletedTask;
+                        return Task.CompletedTask;
                     }
                 };
             });

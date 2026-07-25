@@ -1,12 +1,12 @@
 <div
-  [class.translate-x-0!]="delegateTaskService.getIsShowDelegateTask()"
+  [class.translate-x-0!]="delegateTaskService.isShowDelegateTask()"
   class="fixed inset-y-0 translate-x-full right-0 w-112.5 bg-surface-lowest z-51 transition-transform duration-300 border-l border-outline-light flex flex-col"
 >
   <div class="p-6 border-b border-outline-light flex justify-between items-center bg-surface-low">
     <div>
       <h3 class="text-xl font-bold text-corporate-blue">Delegate Task</h3>
       <p class="text-sm text-text-secondary">
-        Assign directive to {{ delegateTaskService.getNode()?.userName ?? 'unknown' }}
+        Assign directive to {{ delegateTaskService.node()?.userName ?? 'unknown' }}
       </p>
     </div>
     <button

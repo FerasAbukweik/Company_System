@@ -7,16 +7,16 @@ import { catchError, firstValueFrom, tap, throwError } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   // DI
-  private readonly accountApiService = inject(AccountApiService);
-  private readonly toastService = inject(ToastService);
+  private readonly _accountApiService = inject(AccountApiService);
+  private readonly _toastService = inject(ToastService);
 
   // methods
 
   addEmployee(toAddEmployee: AddEmployeeDTO) {
-    return this.accountApiService.addEmployee(toAddEmployee).pipe(
-      tap(() => this.toastService.success('Account Created Successfully')),
+    return this._accountApiService.addEmployee(toAddEmployee).pipe(
+      tap(() => this._toastService.success('Account Created Successfully')),
       catchError((err) => {
-        this.toastService.error('something went wrong createing account');
+        this._toastService.error('something went wrong createing account');
         return throwError(() => err);
       }),
     );

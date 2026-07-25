@@ -1,5 +1,5 @@
 <div
-  [class.translate-x-0!]="chatPanelService.getIsVisable()"
+  [class.translate-x-0!]="chatPanelService.isVisable()"
   class="fixed inset-y-0 w-112.5 bg-surface-lowest z-51 transition-transform translate-x-full duration-300 border-l border-outline-light flex flex-col top-0 right-0 h-full shadow-16px chat-slide-in"
   id="chatPanel"
 >
@@ -20,10 +20,10 @@
       </div>
       <div>
         <h4 class="font-bold text-corporate-blue">
-          {{ chatPanelService.getNode()?.userName ?? 'unknown' }}
+          {{ chatPanelService.node()?.userName ?? 'unknown' }}
         </h4>
         <p class="text-vibrant-turquoise font-medium">
-          {{ getPositionString(chatPanelService.getNode()?.position ?? null) }}
+          {{ getPositionString(chatPanelService.node()?.position ?? null) }}
         </p>
       </div>
     </div>
@@ -54,17 +54,17 @@
   >
     <div
       appIsVisable
-      (visible)="messagesService.loadMoreMessages(chatPanelService.getNode()?.userId ?? '')"
+      (visible)="messagesService.loadMoreMessages(chatPanelService.node()?.userId ?? '')"
     ></div>
 
-    @if (messagesService.getIsLoading()) {
+    @if (messagesService.isLoading()) {
       <app-loading [loadingName]="'More Messages'" />
     }
 
     @for (message of messagesService.messages(); track message.id) {
       <app-message-card [message]="message" />
     } @empty {
-      @if (!messagesService.getIsLoading()) {
+      @if (!messagesService.isLoading()) {
         <div class="w-full text-center text-xl font-bold text-outline-light">
           ---- No Messages ----
         </div>

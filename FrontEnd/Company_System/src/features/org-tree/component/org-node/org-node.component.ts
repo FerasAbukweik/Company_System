@@ -28,6 +28,6 @@ export class OrgNodeComponent {
   }
 
   get isCurrUser() {
-    return this.node().userId === (this.authService.getUserData()?.userId ?? '');
+    return this.node().userId === (this.authService.userData()?.userId ?? '');
   }
 }

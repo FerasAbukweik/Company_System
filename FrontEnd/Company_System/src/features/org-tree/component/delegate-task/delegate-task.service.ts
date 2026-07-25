@@ -4,31 +4,31 @@ import { OrgNodeDTO } from '../../../../core/dto/org-node';
 @Injectable()
 export class DelegateTaskService {
   // signals
-  private isShowDelegateTask = signal<boolean>(false);
-  private node = signal<OrgNodeDTO | null>(null);
+  private _isShowDelegateTask = signal<boolean>(false);
+  private _node = signal<OrgNodeDTO | null>(null);
 
   // getters
-  get getIsShowDelegateTask() {
-    return this.isShowDelegateTask.asReadonly();
+  get isShowDelegateTask() {
+    return this._isShowDelegateTask.asReadonly();
   }
 
-  get getNode() {
-    return this.node.asReadonly();
+  get node() {
+    return this._node.asReadonly();
   }
 
   // mehtods
 
   toggle() {
-    this.isShowDelegateTask.update((curr) => !curr);
+    this._isShowDelegateTask.update((curr) => !curr);
   }
 
   close() {
-    this.isShowDelegateTask.set(false);
-    this.node.set(null);
+    this._isShowDelegateTask.set(false);
+    this._node.set(null);
   }
 
   open(node: OrgNodeDTO) {
-    this.isShowDelegateTask.set(true);
-    this.node.set(node);
+    this._isShowDelegateTask.set(true);
+    this._node.set(node);
   }
 }

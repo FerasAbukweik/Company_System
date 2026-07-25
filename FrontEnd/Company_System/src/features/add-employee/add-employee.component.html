@@ -121,7 +121,7 @@
               class="w-full border-2 rounded-xl overflow-y-auto max-h-48 p-1.5 flex flex-col gap-1 bg-surface-lowest border-outline-light transition-all duration-300"
               [ngClass]="{ 'border-error!': isError('parentId') }"
             >
-              @for (user of orgTreeService.getUserNames(); track user.treeId) {
+              @for (user of orgTreeService.userNames(); track user.treeId) {
                 <div
                   class="flex items-center active:scale-99 justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer bg-surface-lowest border border-transparent hover:bg-surface-low hover:border-outline-light group"
                   (click)="selectParent(user.treeId)"
@@ -196,7 +196,7 @@
                   </span>
                 </div>
               } @empty {
-                @if (!orgTreeService.getIsLoadingUserNames()) {
+                @if (!orgTreeService.isLoadingUserNames()) {
                   <div
                     class="text-xs font-medium text-text-secondary flex flex-col items-center justify-center py-6 gap-2"
                   >
@@ -206,7 +206,7 @@
               }
 
               <div appIsVisable (visible)="orgTreeService.loadMoreUserNames()"></div>
-              @if (orgTreeService.getIsLoadingUserNames()) {
+              @if (orgTreeService.isLoadingUserNames()) {
                 <div class="flex w-full justify-center items-center">
                   <app-loading [loadingName]="'More UserNames'" />
                 </div>

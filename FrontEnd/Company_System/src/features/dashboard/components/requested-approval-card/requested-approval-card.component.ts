@@ -1,7 +1,8 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { RequestedApprovalDTO } from '../../../../core/dto/requested-approval-dto';
 import { DatePipe } from '@angular/common';
 import { ApprovalStatusEnum } from '../../../../core/enums/approval-state-enum';
+import { ApprovalService } from '../../../../core/services/client/approval-service';
 
 @Component({
   selector: 'app-requested-approval-card',

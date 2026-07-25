@@ -6,7 +6,7 @@ export const adminGuard: CanMatchFn = async () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (await authService.isAdmin()) return true;
+  if (await authService.updateIsAdmin()) return true;
 
   router.navigateByUrl('/dashboard');
   return false;

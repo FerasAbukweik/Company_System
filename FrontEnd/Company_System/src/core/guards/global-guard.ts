@@ -8,7 +8,7 @@ export const globalGuard: CanMatchFn = async () => {
 
   if (await authService.isAuthenticated()) {
     // update is admin
-    authService.isAdmin();
+    authService.updateIsAdmin();
     
     return true;
   }

@@ -5,32 +5,32 @@ import { MessagesHubService } from '../../../../core/services/signalR/Messages-h
 @Injectable({ providedIn: 'root' })
 export class ChatPanelService {
   // DI
-  private readonly messageHubService = inject(MessagesHubService);
+  private readonly _messageHubService = inject(MessagesHubService);
 
   // siganls
-  private isVisable = signal<boolean>(false);
-  private node = signal<OrgNodeDTO | null>(null);
+  private _isVisable = signal<boolean>(false);
+  private _node = signal<OrgNodeDTO | null>(null);
 
   // getters
-  get getIsVisable() {
-    return this.isVisable.asReadonly();
+  get isVisable() {
+    return this._isVisable.asReadonly();
   }
 
-  get getNode() {
-    return this.node.asReadonly();
+  get node() {
+    return this._node.asReadonly();
   }
 
   // methods
 
   close() {
-    this.isVisable.set(false);
-    this.node.set(null);
-    this.messageHubService.stopConnection();
+    this._isVisable.set(false);
+    this._node.set(null);
+    this._messageHubService.stopConnection();
   }
 
   open(node: OrgNodeDTO) {
-    this.isVisable.set(true);
-    this.node.set(node);
-    this.messageHubService.startConnection(node.userId);
+    this._isVisable.set(true);
+    this._node.set(node);
+    this._messageHubService.startConnection(node.userId);
   }
 }

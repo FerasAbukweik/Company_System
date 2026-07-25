@@ -11,42 +11,43 @@ import { AuthService } from './auth-service';
 @Injectable({ providedIn: 'root' })
 export class MessagesService {
   // DI
-  private readonly messagesApiService = inject(MessagesApiService);
-  private readonly toastService = inject(ToastService);
-  private readonly messageHubService = inject(MessagesHubService);
-  private readonly chatPanelService = inject(ChatPanelService);
-  private readonly authService = inject(AuthService);
+  private readonly _messagesApiService = inject(MessagesApiService);
+  private readonly _toastService = inject(ToastService);
+  private readonly _messageHubService = inject(MessagesHubService);
+  private readonly _chatPanelService = inject(ChatPanelService);
+  private readonly _authService = inject(AuthService);
 
   // signals
-  private isLoading = signal<boolean>(false);
+  private _isLoading = signal<boolean>(false);
 
   // private
   private _messages = signal<Record<string, MessageDTO[]>>({});
-  private usersWithNoMoreMessages = new Set<string>();
-  private takenMessagesPerUser: Record<string, number> = {};
-  private sectionSize = 10;
+  private _usersWithNoMoreMessages = new Set<string>();
+  private _takenMessagesPerUser: Record<string, number> = {};
+  private _sectionSize = 10;
 
   // computed
   readonly messages = computed(() => {
-    const currUserId = this.authService.getUserData()?.userId;
-    const otherUserId = this.chatPanelService.getNode()?.userId;
+    const currUserId = this._authService.userData()?.userId;
+    const otherUserId = this._chatPanelService.node()?.userId;
 
     if (currUserId == null || otherUserId == null) return [];
 
     return this._messages()[this.generateGroupId(currUserId, otherUserId)];
   });
+
   // subject
-  private stopRequests$ = new Subject<void>();
+  readonly cancelRequests$ = new Subject<void>();
 
   // getters
 
-  get getIsLoading() {
-    return this.isLoading.asReadonly();
+  get isLoading() {
+    return this._isLoading.asReadonly();
   }
 
   // constructor
   constructor() {
-    this.messageHubService.onMessageReceived$.subscribe({
+    this._messageHubService.onMessageReceived$.subscribe({
       next: (newMessage) => {
         this._messages.update((curr) => ({
           ...curr,
@@ -55,8 +56,8 @@ export class MessagesService {
           ),
         }));
 
-        this.takenMessagesPerUser[newMessage.groupName] =
-          (this.takenMessagesPerUser[newMessage.groupName] ?? 0) + 1;
+        this._takenMessagesPerUser[newMessage.groupName] =
+          (this._takenMessagesPerUser[newMessage.groupName] ?? 0) + 1;
       },
     });
   }
@@ -64,12 +65,12 @@ export class MessagesService {
   // methods
 
   reset() {
-    this.stopRequests$.next();
+    this.cancelRequests$.next();
 
     this._messages.set({});
-    this.isLoading.set(false);
-    this.usersWithNoMoreMessages = new Set();
-    this.takenMessagesPerUser = {};
+    this._isLoading.set(false);
+    this._usersWithNoMoreMessages = new Set();
+    this._takenMessagesPerUser = {};
   }
 
   generateGroupId(currUserId: string, otherUserId: string) {
@@ -80,18 +81,18 @@ export class MessagesService {
 
   // lazy load data
   loadMoreMessages(otherUserId: string) {
-    if (this.isLoading() || this.usersWithNoMoreMessages.has(otherUserId) || !otherUserId) return;
-    this.isLoading.set(true);
+    if (this._isLoading() || this._usersWithNoMoreMessages.has(otherUserId) || !otherUserId) return;
+    this._isLoading.set(true);
 
-    const groupId = this.generateGroupId(this.authService.getUserData()!.userId, otherUserId);
+    const groupId = this.generateGroupId(this._authService.userData()!.userId, otherUserId);
     const lazyData: LazyDTO = {
-      taken: this.takenMessagesPerUser[groupId] ?? 0,
-      sectionSize: this.sectionSize,
+      taken: this._takenMessagesPerUser[groupId] ?? 0,
+      sectionSize: this._sectionSize,
     };
 
-    this.messagesApiService
+    this._messagesApiService
       .lazyGetMessages(lazyData, otherUserId)
-      .pipe(takeUntil(this.stopRequests$))
+      .pipe(takeUntil(this.cancelRequests$))
       .subscribe({
         next: (data) => {
           if (data.length) {
@@ -104,17 +105,17 @@ export class MessagesService {
           }
 
           if (data.length === 0) {
-            this.usersWithNoMoreMessages.add(otherUserId);
+            this._usersWithNoMoreMessages.add(otherUserId);
           }
 
-          this.takenMessagesPerUser[groupId] =
-            (this.takenMessagesPerUser[groupId] ?? 0) + data.length;
+          this._takenMessagesPerUser[groupId] =
+            (this._takenMessagesPerUser[groupId] ?? 0) + data.length;
 
-          this.isLoading.set(false);
+          this._isLoading.set(false);
         },
         error: () => {
-          this.toastService.error('something went wrong while fetching messages');
-          this.isLoading.set(false);
+          this._toastService.error('something went wrong while fetching messages');
+          this._isLoading.set(false);
         },
       });
   }

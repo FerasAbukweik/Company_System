@@ -7,12 +7,12 @@
       </p>
     </div>
     <div class="relative flex flex-col items-center py-6 w-fit min-w-full mx-auto">
-      @if (orgTreeService.getTreeRoot()) {
-        <app-org-node [node]="orgTreeService.getTreeRoot()!" [isCurrUserChild]="false" />
+      @if (orgTreeService.treeRoot()) {
+        <app-org-node [node]="orgTreeService.treeRoot()!" [isCurrUserChild]="false" />
       } @else {
         <span class="font-bold text-text-primary text-xl">Something Is Wrong</span>
       }
-      @if (orgTreeService.getIsLoadingTree()) {
+      @if (orgTreeService.isLoadingTree()) {
         <app-loading class="scale-125 mt-10" [loadingName]="'Users'" />
       }
       <div (appIsVisable)="orgTreeService.loadMoreTree()"></div>
@@ -23,6 +23,6 @@
 <app-delegate-task />
 
 <app-chat-panel />
-@if (delegateTaskService.getIsShowDelegateTask() || chatPanelService.getIsVisable()) {
+@if (delegateTaskService.isShowDelegateTask() || chatPanelService.isVisable()) {
   <div class="absolute inset-0" (click)="delegateTaskService.close(); chatPanelService.close()"></div>
 }

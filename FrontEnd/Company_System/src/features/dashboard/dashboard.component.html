@@ -2,7 +2,7 @@
   <div>
     <h2 class="text-2xl font-semibold text-corporate-blue tracking-tight">Operational Overview</h2>
     <p class="text-sm text-text-secondary mt-1">
-      Welcome back, {{ authService.getUserData()?.userName }}.
+      Welcome back, {{ authService.userData()?.userName }}.
     </p>
   </div>
   <button
@@ -47,16 +47,16 @@
 
       <div
         class="space-y-4 max-h-100 overflow-y-scroll"
-        [class.min-h-40]="taskCardService.getIsStatusMenuShown"
+        [class.min-h-40]="taskCardService.isStatusMenuShown"
       >
-        @for (task of tasksService.getTasks(); track task.id) {
+        @for (task of tasksService.tasks(); track task.id) {
           <app-task-card [task]="task" (showTaskDesctiption)="showTaskDescription.set($event)" />
         } @empty {
-          @if (!tasksService.getIsLoading()) {
+          @if (!tasksService.isLoading()) {
             <div class="text-center w-full text-lg font-bold">No Tasks Currently</div>
           }
         }
-        @if (tasksService.getIsLoading()) {
+        @if (tasksService.isLoading()) {
           <app-loading [loadingName]="'tasks'" />
         }
         <div appIsVisable (visible)="tasksService.loadMore()"></div>
@@ -122,31 +122,31 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
         @if (currApproval() == 'toApprove') {
-          @for (approval of approvalService.getToApprove(); track approval.id) {
+          @for (approval of approvalService.toApprove(); track approval.id) {
             <app-needs-approval-card [approval]="approval" />
           } @empty {
-            @if (!approvalService.getIsLoadingToApprove()) {
+            @if (!approvalService.isLoadingToApprove()) {
               <div class="text-center w-full md:col-span-2 text-lg font-bold">
                 Nothing Needs Approval
               </div>
             }
           }
-          @if (approvalService.getIsLoadingToApprove()) {
+          @if (approvalService.isLoadingToApprove()) {
             <app-loading class="w-full md:col-span-2" [loadingName]="'Needs Approval'" />
           }
           <div appIsVisable (visible)="approvalService.loadMoreToApprove()"></div>
         }
         @if (currApproval() == 'requested') {
-          @for (approval of approvalService.getRequestedApprovals(); track approval.id) {
+          @for (approval of approvalService.requestedApprovals(); track approval.id) {
             <app-requested-approval-card [approval]="approval" />
           } @empty {
-            @if (!approvalService.getIsLoadingRequestedApprovals()) {
+            @if (!approvalService.isLoadingRequestedApprovals()) {
               <div class="text-center w-full md:col-span-2 text-lg font-bold">
                 No Requested Approvals
               </div>
             }
           }
-          @if (approvalService.getIsLoadingRequestedApprovals()) {
+          @if (approvalService.isLoadingRequestedApprovals()) {
             <app-loading class="w-full md:col-span-2" [loadingName]="'Requested Approvals'" />
           }
           <div appIsVisable (visible)="approvalService.loadMoreRequestedApprovals()"></div>
@@ -188,14 +188,14 @@
         <div
           class="flex-1 pl-12 pr-1 space-y-6 relative before:absolute before:left-4.75 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-low"
         >
-          @for (activity of activitiesService.getActivities(); track activity.id) {
+          @for (activity of activitiesService.activities(); track activity.id) {
             <app-activity-card [activity]="activity" />
           } @empty {
-            @if (!activitiesService.getIsActivitiesLoading()) {
+            @if (!activitiesService.isActivitiesLoading()) {
               <div class="text-center w-full text-lg font-bold">No Activities</div>
             }
           }
-          @if (activitiesService.getIsActivitiesLoading()) {
+          @if (activitiesService.isActivitiesLoading()) {
             <app-loading [loadingName]="'Activities'" />
           }
           <div appIsVisable (visible)="activitiesService.loadMore()"></div>
@@ -205,7 +205,7 @@
   </section>
 </div>
 
-@if (taskCardService.getIsStatusMenuShown) {
+@if (taskCardService.isStatusMenuShown) {
   <div
     class="fixed inset-0 z-40"
     (click)="$event.stopPropagation(); taskCardService.closeStatusMenu()"

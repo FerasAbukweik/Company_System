@@ -1,6 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { ActivitiesApiService } from '../api/activities-api-service';
-import { Urls } from '../../constants/urls';
 import { LazyDTO } from '../../dto/lazy-dto';
 import { ActivityDTO } from '../../dto/activity-dto';
 import { ToastService } from './toast-service';
@@ -9,31 +8,30 @@ import { Subject, takeUntil } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class ActivitiesService {
   // DI
-  private readonly activitiesApiService = inject(ActivitiesApiService);
-  private readonly toastService = inject(ToastService);
+  private readonly _activitiesApiService = inject(ActivitiesApiService);
+  private readonly _toastService = inject(ToastService);
 
   // subject
-  private cancelRequest$ = new Subject<void>();
+  readonly cancelRequest$ = new Subject<void>();
 
   // private
-  private readonly url = Urls.api + '/Activities';
-  private isMoreDataAvaiable = true;
-  private lazyData: LazyDTO = {
+  private _isMoreDataAvaiable = true;
+  private _lazyData: LazyDTO = {
     taken: 0,
     sectionSize: 10,
   };
 
   // signals
-  private activities = signal<ActivityDTO[]>([]);
-  private isActivitiesLoading = signal<boolean>(false);
+  private _activities = signal<ActivityDTO[]>([]);
+  private _isActivitiesLoading = signal<boolean>(false);
 
   // getters
-  get getActivities() {
-    return this.activities.asReadonly();
+  get activities() {
+    return this._activities.asReadonly();
   }
 
-  get getIsActivitiesLoading() {
-    return this.isActivitiesLoading.asReadonly();
+  get isActivitiesLoading() {
+    return this._isActivitiesLoading.asReadonly();
   }
 
   // methods
@@ -41,30 +39,30 @@ export class ActivitiesService {
   reset() {
     this.cancelRequest$.next();
 
-    this.activities.set([]);
-    this.isActivitiesLoading.set(false);
-    this.isMoreDataAvaiable = true;
-    this.lazyData.taken = 0;
+    this._activities.set([]);
+    this._isActivitiesLoading.set(false);
+    this._isMoreDataAvaiable = true;
+    this._lazyData.taken = 0;
   }
 
   loadMore() {
-    if (this.isActivitiesLoading() || !this.isMoreDataAvaiable) return;
-    this.isActivitiesLoading.set(true);
+    if (this._isActivitiesLoading() || !this._isMoreDataAvaiable) return;
+    this._isActivitiesLoading.set(true);
 
-    this.activitiesApiService
-      .lazyGet(this.lazyData)
+    this._activitiesApiService
+      .lazyGet(this._lazyData)
       .pipe(takeUntil(this.cancelRequest$))
       .subscribe({
         next: (data) => {
-          this.activities.update((curr) => [...curr, ...data]);
+          this._activities.update((curr) => [...curr, ...data]);
 
-          this.lazyData.taken += data.length;
-          this.isMoreDataAvaiable = data.length > 0;
-          this.isActivitiesLoading.set(false);
+          this._lazyData.taken += data.length;
+          this._isMoreDataAvaiable = data.length > 0;
+          this._isActivitiesLoading.set(false);
         },
         error: () => {
-          this.toastService.error('something went wrong while loading activities');
-          this.isActivitiesLoading.set(false);
+          this._toastService.error('something went wrong while loading activities');
+          this._isActivitiesLoading.set(false);
         },
       });
   }

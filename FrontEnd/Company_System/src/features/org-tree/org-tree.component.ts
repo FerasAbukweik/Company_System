@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { OrgNodeComponent } from './component/org-node/org-node.component';
 import { OrgTreeService } from '../../core/services/client/org-tree-service';
 import { DelegateTaskComponent } from './component/delegate-task/delegate-task.component';
@@ -21,7 +21,7 @@ import { ChatPanelService } from './component/chat-panel/chat-panel.service';
   providers: [DelegateTaskService],
   templateUrl: './org-tree.component.html',
 })
-export class OrgTreeComponent implements OnInit {
+export class OrgTreeComponent implements OnInit, OnDestroy {
   // DI
   protected readonly orgTreeService = inject(OrgTreeService);
   protected readonly delegateTaskService = inject(DelegateTaskService);
@@ -29,5 +29,10 @@ export class OrgTreeComponent implements OnInit {
 
   ngOnInit(): void {
     this.orgTreeService.loadMoreTree();
+  }
+
+  // on destroy
+  ngOnDestroy(): void {
+    this.orgTreeService.cancelTreeRequests$.next();
   }
 }

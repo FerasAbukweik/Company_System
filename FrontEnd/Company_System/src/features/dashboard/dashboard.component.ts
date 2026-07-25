@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { TasksService } from '../../core/services/client/tasks-service';
 import { IsVisableDirective } from '../../shared/directives/is-visable.directive';
 import { ApprovalService } from '../../core/services/client/approval-service';
@@ -29,7 +29,7 @@ import { TaskDTO } from '../../core/dto/task-dto';
     class: 'text-text-primary min-h-screen font-sans p-4 block',
   },
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnDestroy {
   // DI
   protected readonly tasksService = inject(TasksService);
   protected readonly approvalService = inject(ApprovalService);
@@ -61,5 +61,13 @@ export class DashboardComponent {
 
   hideTaskDescription() {
     this.showTaskDescription.set(null);
+  }
+
+  // on destroy
+  ngOnDestroy(): void {
+    this.approvalService.cancelToApproveRequest$.next();
+    this.approvalService.cancelRequestedApprovalsRequest$.next();
+    this.tasksService.cancelRequest$.next();
+    this.activitiesService.cancelRequest$.next();
   }
 }

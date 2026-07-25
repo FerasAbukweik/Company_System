@@ -50,15 +50,15 @@
   <div class="flex items-center gap-2 cursor-pointer group relative" (click)="togglePanel()">
     <div class="z-41 text-right hidden sm:block">
       <p class="text-xs font-bold text-corporate-blue">
-        {{ authService.getUserData()?.userName ?? 'unknown' }}
+        {{ authService.userData()?.userName ?? 'unknown' }}
       </p>
       <p class="text-xs text-text-secondary">
-        {{ authService.getUserData()?.position ?? 'unknown position' }}
+        {{ authService.userData()?.position ?? 'unknown position' }}
       </p>
     </div>
     <img
       class="z-41 w-10 h-10 rounded-full border-2 border-vibrant-turquoise object-cover"
-      [src]="authService.getUserData()?.userImageUrl"
+      [src]="authService.userData()?.userImageUrl"
       (error)="$event.target.src = 'user_vector.jpg'"
       alt="Alex Rivera Headshot"
     />
@@ -74,7 +74,7 @@
         (click)="$event.stopPropagation()"
       >
         <p class="px-5 py-2 text-center border-b mb-2 text-text-secondary border-outline-light">
-          {{ authService.getUserData()?.userName }}
+          {{ authService.userData()?.userName }}
         </p>
         <button
           type="button"

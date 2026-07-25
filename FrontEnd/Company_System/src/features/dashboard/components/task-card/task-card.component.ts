@@ -20,8 +20,8 @@ import { ToastService } from '../../../../core/services/client/toast-service';
 export class TaskCardComponent {
   // DI
   protected readonly taskCardService = inject(TaskCardService);
-  private readonly tasksService = inject(TasksService);
-  private readonly toastService = inject(ToastService);
+  private readonly _tasksService = inject(TasksService);
+  private readonly _toastService = inject(ToastService);
 
   // input
   task = input.required<TaskDTO>();
@@ -47,13 +47,13 @@ export class TaskCardComponent {
 
     switch (optionIdx) {
       case 0:
-        this.tasksService.updateTaskStatus(taskId, TaskStatusEnum.Completed);
+        this._tasksService.updateTaskStatus(taskId, TaskStatusEnum.Completed);
         break;
       case 1:
         this.showTaskDesctiption.emit(this.task());
         break;
       default:
-        this.toastService.error('unhandled menu options');
+        this._toastService.error('unhandled menu options');
     }
   }
 }

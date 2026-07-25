@@ -11,49 +11,49 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   // DI
-  private readonly authApiService = inject(AuthApiService);
-  private readonly toastService = inject(ToastService);
-  private readonly router = inject(Router);
+  private readonly _authApiService = inject(AuthApiService);
+  private readonly _toastService = inject(ToastService);
+  private readonly _router = inject(Router);
 
   // private
-  private userData = signal<UserDTO | null>(null);
-  private isUserAdmin = signal<boolean | null>(null);
+  private _userData = signal<UserDTO | null>(null);
+  private _isUserAdmin = signal<boolean | null>(null);
 
   // getters
-  get getUserData() {
-    return this.userData.asReadonly();
+  get userData() {
+    return this._userData.asReadonly();
   }
 
-  get getIsAdmin() {
-    return this.isUserAdmin.asReadonly();
+  get isAdmin() {
+    return this._isUserAdmin.asReadonly();
   }
 
   // constructor
   constructor() {
     const localUser = localStorage.getItem('user');
     if (localUser) {
-      this.userData.set(JSON.parse(localUser));
+      this._userData.set(JSON.parse(localUser));
     }
   }
 
   // methods
 
-  async isAdmin() {
-    if (this.isUserAdmin() != null) return this.isUserAdmin();
+  async updateIsAdmin() {
+    if (this._isUserAdmin() != null) return this._isUserAdmin();
     try {
-      await firstValueFrom(this.authApiService.isAdmin());
-      this.isUserAdmin.set(true);
+      await firstValueFrom(this._authApiService.isAdmin());
+      this._isUserAdmin.set(true);
       return true;
     } catch {
-      this.isUserAdmin.set(false);
+      this._isUserAdmin.set(false);
       return false;
     }
   }
 
   async isAuthenticated() {
-    if (this.userData()) return true;
+    if (this._userData()) return true;
     try {
-      await firstValueFrom(this.authApiService.isAuthenticated());
+      await firstValueFrom(this._authApiService.isAuthenticated());
       return true;
     } catch {
       return false;
@@ -61,27 +61,27 @@ export class AuthService {
   }
 
   logout() {
-    this.authApiService.logout().subscribe({
+    this._authApiService.logout().subscribe({
       next: () => {
-        this.router.navigateByUrl('/login');
+        this._router.navigateByUrl('/login');
         localStorage.removeItem('user');
         window.location.reload();
       },
       error: () => {
-        this.toastService.error('something went wrong logging out');
+        this._toastService.error('something went wrong logging out');
       },
     });
   }
 
   login(loginData: LoginDTO) {
-    return this.authApiService.login(loginData).pipe(
+    return this._authApiService.login(loginData).pipe(
       tap((userData) => {
         // update is admin
         this.isAdmin();
-        this.userData.set(userData);
+        this._userData.set(userData);
         localStorage.setItem('user', JSON.stringify(userData));
 
-        this.router.navigateByUrl('/dashboard');
+        this._router.navigateByUrl('/dashboard');
       }),
     );
   }

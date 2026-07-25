@@ -5,24 +5,24 @@ export class TaskCardService {
   // DI
 
   // signals
-  private showActivityStatusMenuFor = signal<string>('');
+  private _showActivityStatusMenuFor = signal<string>('');
 
   // getters
-  get getIsStatusMenuShown() {
-    return !!this.showActivityStatusMenuFor();
+  get isStatusMenuShown() {
+    return !!this._showActivityStatusMenuFor();
   }
 
   // methods
 
   toggleShowActivityStatusMenu(showForId: string) {
-    this.showActivityStatusMenuFor.update((curr) => (!!curr ? '' : showForId));
+    this._showActivityStatusMenuFor.update((curr) => (!!curr ? '' : showForId));
   }
 
   closeStatusMenu() {
-    this.showActivityStatusMenuFor.set('');
+    this._showActivityStatusMenuFor.set('');
   }
 
   IsStatusMenuShownFor(taskId: string) {
-    return this.showActivityStatusMenuFor() === taskId;
+    return this._showActivityStatusMenuFor() === taskId;
   }
 }

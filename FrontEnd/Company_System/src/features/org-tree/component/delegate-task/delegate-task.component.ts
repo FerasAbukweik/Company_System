@@ -37,7 +37,7 @@ export class DelegateTaskComponent {
 
   constructor() {
     effect(() => {
-      if (!this.delegateTaskService.getIsShowDelegateTask()) {
+      if (!this.delegateTaskService.isShowDelegateTask()) {
         this.resetComponentState();
       }
     });
@@ -59,7 +59,7 @@ export class DelegateTaskComponent {
   public onSubmit(): void {
     this.form.markAllAsTouched();
     this.form.markAllAsDirty();
-    const currentNode = this.delegateTaskService.getNode();
+    const currentNode = this.delegateTaskService.node();
 
     if (this.form.invalid || !currentNode || !currentNode.userId) {
       return;

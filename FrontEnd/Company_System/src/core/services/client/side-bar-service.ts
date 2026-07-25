@@ -3,24 +3,24 @@ import { Injectable, signal } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class SideBarService {
   // signals
-  private isSideBarOpen = signal<boolean>(window.innerWidth >= 1024);
+  private _isSideBarOpen = signal<boolean>(window.innerWidth >= 1024);
 
   // getters
-  get getIsSideBarOpen() {
-    return this.isSideBarOpen.asReadonly();
+  get isSideBarOpen() {
+    return this._isSideBarOpen.asReadonly();
   }
 
   // methods
 
   reset() {
-    this.isSideBarOpen.set(window.innerWidth >= 1024);
+    this._isSideBarOpen.set(window.innerWidth >= 1024);
   }
 
   toggleSideBar() {
-    this.isSideBarOpen.update((curr) => !curr);
+    this._isSideBarOpen.update((curr) => !curr);
   }
 
   close() {
-    this.isSideBarOpen.set(false);
+    this._isSideBarOpen.set(false);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
 import { PositionsEnum } from '../../core/enum/positions-enum';
@@ -26,7 +26,7 @@ interface RegisterForm {
   imports: [CommonModule, ReactiveFormsModule, IsVisableDirective, LoadingComponent],
   templateUrl: './add-employee.component.html',
 })
-export class AddEmployeeComponent {
+export class AddEmployeeComponent implements OnDestroy {
   // DI
   private readonly toastService = inject(ToastService);
   private readonly accountService = inject(AccountService);
@@ -162,9 +162,14 @@ export class AddEmployeeComponent {
         this.serverError.set(errorMessaege);
 
         setTimeout(() => {
-          this.serverError.set('')
+          this.serverError.set('');
         }, 5000);
       },
     });
+  }
+
+  // on destroy
+  ngOnDestroy(): void {
+    this.orgTreeService.cancelTreeRequests$.next();
   }
 }

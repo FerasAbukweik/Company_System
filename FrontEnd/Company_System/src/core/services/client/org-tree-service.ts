@@ -9,45 +9,45 @@ import { LazyDTO } from '../../dto/lazy-dto';
 @Injectable({ providedIn: 'root' })
 export class OrgTreeService {
   // DI
-  private readonly orgTreeApiService = inject(OrgTreeApiService);
-  private toastService = inject(ToastService);
+  private readonly _orgTreeApiService = inject(OrgTreeApiService);
+  private _toastService = inject(ToastService);
 
   // signals
-  private orgTreeRoot = signal<OrgNodeDTO | null>(null);
-  private isLoadingTree = signal<boolean>(false);
-  private userNames = signal<UserNameDTO[]>([]);
-  private isLoadingUserNames = signal<boolean>(false);
+  private _orgTreeRoot = signal<OrgNodeDTO | null>(null);
+  private _isLoadingTree = signal<boolean>(false);
+  private _userNames = signal<UserNameDTO[]>([]);
+  private _isLoadingUserNames = signal<boolean>(false);
 
   // sets
-  private nodesWithnoChildren = new Set<string>();
+  private _nodesWithnoChildren = new Set<string>();
 
   // private
-  private lazyUserNamesData: LazyDTO = {
+  private _lazyUserNamesData: LazyDTO = {
     taken: 0,
     sectionSize: 10,
   };
-  private areMoreUserNamesAvaiable = true;
+  private _areMoreUserNamesAvaiable = true;
 
   // subjects
-  private cancelTreeRequests$ = new Subject<void>();
-  private cancelUserNamesRequests$ = new Subject<void>();
+  readonly cancelTreeRequests$ = new Subject<void>();
+  readonly cancelUserNamesRequests$ = new Subject<void>();
 
   // getters
 
-  get getTreeRoot() {
-    return this.orgTreeRoot.asReadonly();
+  get treeRoot() {
+    return this._orgTreeRoot.asReadonly();
   }
 
-  get getIsLoadingTree() {
-    return this.isLoadingTree.asReadonly();
+  get isLoadingTree() {
+    return this._isLoadingTree.asReadonly();
   }
 
-  get getUserNames() {
-    return this.userNames.asReadonly();
+  get userNames() {
+    return this._userNames.asReadonly();
   }
 
-  get getIsLoadingUserNames() {
-    return this.isLoadingUserNames.asReadonly();
+  get isLoadingUserNames() {
+    return this._isLoadingUserNames.asReadonly();
   }
 
   // methods
@@ -60,18 +60,18 @@ export class OrgTreeService {
   resetTree() {
     this.cancelTreeRequests$.next();
 
-    this.orgTreeRoot.set(null);
-    this.isLoadingTree.set(false);
-    this.nodesWithnoChildren = new Set<string>();
+    this._orgTreeRoot.set(null);
+    this._isLoadingTree.set(false);
+    this._nodesWithnoChildren = new Set<string>();
   }
 
   resetUserNames() {
     this.cancelUserNamesRequests$.next();
 
-    this.userNames.set([]);
-    this.isLoadingUserNames.set(false);
-    this.areMoreUserNamesAvaiable = true;
-    this.lazyUserNamesData.taken = 0;
+    this._userNames.set([]);
+    this._isLoadingUserNames.set(false);
+    this._areMoreUserNamesAvaiable = true;
+    this._lazyUserNamesData.taken = 0;
   }
 
   private mergeChildren(
@@ -94,42 +94,42 @@ export class OrgTreeService {
 
   // load more tree children
   private loadChildren(fatherIds: string[] | null) {
-    if (this.isLoadingTree()) return;
-    this.isLoadingTree.set(true);
+    if (this._isLoadingTree()) return;
+    this._isLoadingTree.set(true);
 
     const fatherIdsSet = new Set(fatherIds || []);
 
-    this.orgTreeApiService
+    this._orgTreeApiService
       .GetChildren(fatherIds)
       .pipe(takeUntil(this.cancelTreeRequests$))
       .subscribe({
         next: (data) => {
           // add data to memory
 
-          if (fatherIdsSet.size == 0 || !this.orgTreeRoot) {
+          if (fatherIdsSet.size == 0 || !this._orgTreeRoot) {
             // should return one node which is the root
 
             const result = Object.values(data);
             if (result.length == 0 || result[0].length == 0) {
-              this.toastService.error('server returned bad tree data');
+              this._toastService.error('server returned bad tree data');
             }
 
-            this.orgTreeRoot.set(Object.values(data)[0][0]);
+            this._orgTreeRoot.set(Object.values(data)[0][0]);
           } else {
-            this.orgTreeRoot.update((curr) => this.mergeChildren(new Set(fatherIds), curr!, data));
+            this._orgTreeRoot.update((curr) => this.mergeChildren(new Set(fatherIds), curr!, data));
           }
 
           // update status
 
           // add fathers with no children to this.nodesWithnoChildren
           Object.entries(data).forEach(([key, val]) => {
-            if (val.length == 0) this.nodesWithnoChildren.add(key);
+            if (val.length == 0) this._nodesWithnoChildren.add(key);
           });
-          this.isLoadingTree.set(false);
+          this._isLoadingTree.set(false);
         },
         error: () => {
-          this.toastService.error('failed fetching org tree');
-          this.isLoadingTree.set(false);
+          this._toastService.error('failed fetching org tree');
+          this._isLoadingTree.set(false);
         },
       });
   }
@@ -143,37 +143,37 @@ export class OrgTreeService {
 
   // load more Tree
   loadMoreTree() {
-    if (!this.orgTreeRoot()) {
+    if (!this._orgTreeRoot()) {
       this.loadChildren(null);
       return;
     }
 
     this.leafeIds = [];
-    this.updateLeaves(this.orgTreeRoot()!);
+    this.updateLeaves(this._orgTreeRoot()!);
 
     this.loadChildren(this.leafeIds);
   }
 
   // load more usernames
   loadMoreUserNames() {
-    if (this.isLoadingUserNames() || !this.areMoreUserNamesAvaiable) return;
-    this.isLoadingUserNames.set(true);
+    if (this._isLoadingUserNames() || !this._areMoreUserNamesAvaiable) return;
+    this._isLoadingUserNames.set(true);
 
-    this.orgTreeApiService
-      .getUserNames(this.lazyUserNamesData)
+    this._orgTreeApiService
+      .getUserNames(this._lazyUserNamesData)
       .pipe(takeUntil(this.cancelUserNamesRequests$))
       .subscribe({
         next: (data) => {
-          this.userNames.update((curr) => [...curr, ...data]);
+          this._userNames.update((curr) => [...curr, ...data]);
 
-          this.areMoreUserNamesAvaiable = data.length > 0;
-          this.lazyUserNamesData.taken += data.length;
-          this.isLoadingUserNames.set(false);
+          this._areMoreUserNamesAvaiable = data.length > 0;
+          this._lazyUserNamesData.taken += data.length;
+          this._isLoadingUserNames.set(false);
         },
         error: () => {
-          this.toastService.error('something went wrong fetching usernames');
+          this._toastService.error('something went wrong fetching usernames');
 
-          this.isLoadingUserNames.set(false);
+          this._isLoadingUserNames.set(false);
         },
       });
   }

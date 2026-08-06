@@ -99,66 +99,56 @@ Company_System/
 
 ### Prerequisites
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Node.js 22+](https://nodejs.org/)
-- [Docker](https://www.docker.com/) (recommended for full-stack local run)
+- [Docker](https://www.docker.com/)
 
 ### Run everything with Docker Compose
 
-1. Create a `.env` file in the project root with the required variables:
+Create a `.env` file in the project root with the required variables:
 
-   ```env
-   ASPNETCORE_ENVIRONMENT=Development
-   JWT_KEY=your-secret-key
-   DB_NAME=CompanySystemDb
-   SA_PASSWORD=YourStrong@Passw0rd
-   SeqPassword=YourSeqPassword
-   CloudName=your-cloudinary-cloud-name
-   ApiKey=your-cloudinary-api-key
-   ApiSecret=your-cloudinary-api-secret
-   ```
-
-2. Build and start all services:
-
-   ```bash
-   docker compose up --build
-   ```
-
-3. Services will be available at:
-   - API: `https://localhost:8081`
-   - Angular app: `https://localhost:4000`
-   - Seq logs: `http://localhost:5341`
-
-### Run the API locally
-
-```bash
-cd src/Company_System.WebApi
-dotnet restore
-dotnet ef database update
-dotnet run
+```env
+ASPNETCORE_ENVIRONMENT=Development
+JWT_KEY=your-secret-key
+DB_NAME=CompanySystemDb
+SA_PASSWORD=YourStrong@Passw0rd
+SeqPassword=YourSeqPassword
+CloudName=your-cloudinary-cloud-name
+ApiKey=your-cloudinary-api-key
+ApiSecret=your-cloudinary-api-secret
 ```
 
-### Run the Angular app locally
+Then run:
 
 ```bash
-cd FrontEnd/Company_System
-npm install
-npm start
+1. docker compose up -d --build
+2. dotnet ef database update -p src/Company_System.Infrastructure -s Company_System.WebApi
+3. docker compose down
+4. docker compose up
 ```
 
-The dev server runs over HTTPS at `https://localhost:4200` using the certificates in `ssl/`.
+This spins up everything — API, Angular frontend, SQL Server, Redis, and Seq. Services will be available at:
+
+- API: `https://localhost:8081`
+- Angular app: `https://localhost:4000`
+- Seq logs: `http://localhost:5341`
 
 ---
 
 ## ✅ Testing
 
-```bash
-# Backend unit tests (repositories & services)
-dotnet test
+Unit tests are split into two projects, run with:
 
-# Frontend unit tests
-cd FrontEnd/Company_System
-npm test
+```bash
+dotnet test
 ```
+
+- **`Company_System.Repositories.UnitTests`** — Tests repositories against EF Core's **InMemory database provider**, giving each test a fresh, isolated database instance without needing SQL Server, while still exercising real LINQ-to-Entities query behavior.
+- **`Company_System.Services.UnitTests`** — Tests services in isolation using mocked repository/service dependencies (Moq), verifying business logic and `Result`/`Result<T>` outcomes independently of persistence.
+
+Shared testing infrastructure includes:
+
+- **Fixtures** (`IClassFixture<T>`) — Shared, reusable setup (e.g. a configured `ApplicationDbContext` or seeded data) across multiple test classes, avoiding repeated boilerplate and expensive re-initialization per test.
+- **`ITestOutputHelper`** — Injected into test classes to write diagnostic output (query results, entity states, failure context) directly into the test runner's output, making failures easier to debug without attaching a debugger.
+- **Arrange-Act-Assert** structure throughout, with each test targeting a single repository/service method and its edge cases (not found, invalid state transitions, concurrency/ownership checks, etc.).
 
 ---
 

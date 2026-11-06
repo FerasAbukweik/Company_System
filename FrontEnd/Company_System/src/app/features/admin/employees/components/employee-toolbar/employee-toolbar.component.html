@@ -1,0 +1,36 @@
+<div>
+  <h2 class="text-2xl font-bold tracking-tight text-corporate-blue">
+    Employee Management & Compensation
+  </h2>
+  <p class="text-sm text-text-secondary mt-1">
+    Manage employee profiles, hourly rates, holiday allowances, and active accounts.
+  </p>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+  <div class="relative min-w-70">
+    <app-icon
+      class="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
+      [path]="HeroIcon.search"
+    />
+    <input
+      type="text"
+      aria-label="Search employees"
+      name="search"
+      class="w-full bg-surface-low pl-10 pr-4 py-2 rounded-xl text-sm text-text-primary placeholder:text-text-secondary outline-0 border-2 border-transparent focus:border-vibrant-turquoise transition-colors"
+      placeholder="Name, username, email, phone, position…"
+      [value]="search()"
+      appDebounce
+      (appDebounce)="search.set($event)"
+    />
+  </div>
+
+  <button
+    type="button"
+    class="cursor-pointer bg-vibrant-turquoise hover:opacity-90 text-corporate-blue text-sm font-semibold px-5 py-2 rounded-xl shadow-sm flex items-center gap-1 transition-all active:scale-95"
+    (click)="addEmployee.emit()"
+  >
+    <app-icon class="size-5" [path]="HeroIcon.add" />
+    <span>Add New Employee</span>
+  </button>
+</div>

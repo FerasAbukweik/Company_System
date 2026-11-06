@@ -1,0 +1,26 @@
+<footer
+  class="flex flex-wrap items-center justify-between gap-3 border-t border-surface-high px-5 py-4 text-xs text-text-secondary"
+>
+  <p>Showing {{ total() ? (page() - 1) * size() + 1 : 0 }}–{{ end() }} of {{ total() }} records</p>
+  <div class="flex items-center gap-2">
+    <button
+      type="button"
+      class="rounded border border-outline-light px-3 py-1.5 hover:bg-surface-low disabled:opacity-40"
+      [disabled]="page() <= 1"
+      (click)="changed.emit(page() - 1)"
+    >
+      Previous
+    </button>
+    <span aria-live="polite" class="px-2 font-mono text-corporate-blue">
+      {{ page() }} / {{ pages() }}
+    </span>
+    <button
+      type="button"
+      class="rounded border border-outline-light px-3 py-1.5 hover:bg-surface-low disabled:opacity-40"
+      [disabled]="page() >= pages()"
+      (click)="changed.emit(page() + 1)"
+    >
+      Next
+    </button>
+  </div>
+</footer>

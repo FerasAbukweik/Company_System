@@ -1,0 +1,208 @@
+<div class="mb-6 flex justify-between items-center">
+  <div>
+    <h2 class="text-2xl font-semibold text-corporate-blue tracking-tight">Operational Overview</h2>
+    <p class="text-sm text-text-secondary mt-1">
+      Welcome back, {{ authService.userData()?.userName }}.
+    </p>
+  </div>
+  <button
+    class="bg-corporate-blue text-white px-2 py-3 rounded-xl font-bold text-sm cursor-pointer hover:opacity-95 border border-outline-light"
+    (click)="requestHoliday()"
+  >
+    Request Holiday
+  </button>
+</div>
+
+<div class="grid grid-cols-12 gap-6">
+  <section class="col-span-12 lg:col-span-8 space-y-6">
+    <!-- tasks header  -->
+
+    <div class="bg-surface-lowest border border-outline-light rounded-xl p-6 pb-10 shadow-sm">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">
+          My Active Tasks
+        </h3>
+        <button
+          type="button"
+          aria-label="Refresh tasks"
+          class="cursor-pointer p-2 hover:bg-surface-low rounded-full transition-colors"
+          (click)="tasksService.reset(); loadMoreTasks()"
+        >
+          <app-icon class="size-6 text-text-secondary" [path]="HeroIcon.arrowPath" />
+        </button>
+      </div>
+
+      <!-- tasks -->
+
+      <div
+        class="space-y-4 max-h-100 overflow-y-scroll"
+        [class.min-h-40]="taskCardService.isStatusMenuShown"
+      >
+        @for (task of tasksService.tasks(); track task.id) {
+          <app-task-card [task]="task" (showTaskDesctiption)="showTaskDescription.set($event)" />
+        } @empty {
+          @if (!tasksService.isLoading()) {
+            <div class="text-center w-full text-lg font-bold">No Tasks Currently</div>
+          }
+        }
+        @if (tasksService.isLoading()) {
+          <app-loading [loadingName]="'tasks'" />
+        }
+        <div appIsVisable (visible)="loadMoreTasks()"></div>
+      </div>
+    </div>
+
+    <!-- approvals header -->
+
+    <div class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm @container">
+      <div class="flex flex-wrap gap-4 @max-[530px]:justify-center items-center mb-6">
+        <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">Approvals</h3>
+        <div
+          class="min-w-42.5 font-bold relative isolate flex justify-around items-center text-center gap-2 text-xs @min-[530px]:mr-auto w-50 h-12 border rounded-xl border-outline-light"
+        >
+          <button
+            [class]="
+              'cursor-pointer h-full ' +
+              (currApproval() == 'toApprove' ? 'text-white' : 'text-text-primary')
+            "
+            (click)="chaneApproval('toApprove')"
+          >
+            Needs<br />
+            Approval
+          </button>
+          <button
+            [class]="
+              'cursor-pointer h-full ' +
+              (currApproval() == 'requested' ? 'text-white' : 'text-text-primary')
+            "
+            (click)="chaneApproval('requested')"
+          >
+            Requested
+          </button>
+
+          <div
+            class="absolute bg-corporate-blue h-full w-1/2 rounded-xl -z-1 transition-all left-0 duration-300"
+            [class.translate-x-0]="currApproval() == 'toApprove'"
+            [class.translate-x-full]="currApproval() == 'requested'"
+          ></div>
+        </div>
+        <button
+          type="button"
+          aria-label="Refresh approvals"
+          class="cursor-pointer p-2 hover:bg-surface-low rounded-full transition-colors"
+          (click)="resetApproval()"
+        >
+          <app-icon class="size-6 text-text-secondary" [path]="HeroIcon.arrowPath" />
+        </button>
+      </div>
+
+      <!-- approvals -->
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-100 overflow-y-scroll">
+        @if (currApproval() == 'toApprove') {
+          @for (approval of approvalService.toApprove(); track approval.id) {
+            <app-needs-approval-card [approval]="approval" />
+          } @empty {
+            @if (!approvalService.isLoadingToApprove()) {
+              <div class="text-center w-full md:col-span-2 text-lg font-bold">
+                Nothing Needs Approval
+              </div>
+            }
+          }
+          @if (approvalService.isLoadingToApprove()) {
+            <app-loading class="w-full md:col-span-2" [loadingName]="'Needs Approval'" />
+          }
+          <div appIsVisable (visible)="loadMoreToApprove()"></div>
+        }
+        @if (currApproval() == 'requested') {
+          @for (approval of approvalService.requestedApprovals(); track approval.id) {
+            <app-requested-approval-card [approval]="approval" />
+          } @empty {
+            @if (!approvalService.isLoadingRequestedApprovals()) {
+              <div class="text-center w-full md:col-span-2 text-lg font-bold">
+                No Requested Approvals
+              </div>
+            }
+          }
+          @if (approvalService.isLoadingRequestedApprovals()) {
+            <app-loading class="w-full md:col-span-2" [loadingName]="'Requested Approvals'" />
+          }
+          <div appIsVisable (visible)="loadMoreRequestedApprovals()"></div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="col-span-12 lg:col-span-4">
+    <div
+      class="bg-surface-lowest border border-outline-light rounded-xl p-6 shadow-sm h-full flex flex-col"
+    >
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-semibold text-corporate-blue flex items-center gap-2">
+          Recent Activity
+        </h3>
+        <button
+          type="button"
+          aria-label="Refresh activity"
+          class="cursor-pointer p-2 hover:bg-surface-low rounded-full transition-colors"
+          (click)="activitiesService.reset(); loadMoreActivities()"
+        >
+          <app-icon class="size-6 text-text-secondary" [path]="HeroIcon.arrowPath" />
+        </button>
+      </div>
+
+      <div class="max-h-[calc(min(70vh,1200px))] overflow-y-auto">
+        <div
+          class="flex-1 pl-12 pr-1 space-y-6 relative before:absolute before:left-4.75 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-low"
+        >
+          @for (activity of activitiesService.activities(); track activity.id) {
+            <app-activity-card [activity]="activity" />
+          } @empty {
+            @if (!activitiesService.isActivitiesLoading()) {
+              <div class="text-center w-full text-lg font-bold">No Activities</div>
+            }
+          }
+          @if (activitiesService.isActivitiesLoading()) {
+            <app-loading [loadingName]="'Activities'" />
+          }
+          <div appIsVisable (visible)="loadMoreActivities()"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+@if (taskCardService.isStatusMenuShown) {
+  <div
+    class="fixed inset-0 z-40"
+    (click)="$event.stopPropagation(); taskCardService.closeStatusMenu()"
+  ></div>
+}
+
+@if (showTaskDescription()) {
+  <div
+    class="fixed p-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-85/100 h-85/100 max-w-100 max-h-100 border-outline-light border-2 rounded-xl z-50 bg-surface-base flex flex-col"
+  >
+    <div
+      class="flex items-center pb-4 min-h-16 relative shrink-0 after:w-full after:absolute after:h-0.5 after:bg-outline-light after:bottom-0"
+    >
+      <span class="text-xl font-bold text-text-secondary">
+        {{ showTaskDescription()?.title ?? 'unknown' }} Description
+      </span>
+      <button
+        class="absolute right-2 top-2 hover:bg-surface-low cursor-pointer rounded-full p-2"
+        (click)="showTaskDescription.set(null)"
+        aria-label="Close"
+      >
+        <app-icon class="size-6" [path]="HeroIcon.xMark" />
+      </button>
+    </div>
+
+    <textarea
+      class="flex-1 w-full resize-none text-lg overflow-x-hidden overflow-y-auto wrap-break-word outline-none bg-transparent pt-4"
+      placeholder="Enter description..."
+      >{{ showTaskDescription()?.description ?? 'description not found' }}</textarea>
+  </div>
+
+  <div class="z-40 fixed inset-0" (click)="hideTaskDescription()"></div>
+}

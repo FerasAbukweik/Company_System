@@ -1,7 +1,8 @@
 using System.Text.Json;
-using HR_System.Core.Interfaces.ServiceContracts;
+using HR_System.Core.Abstraction.ServiceContracts;
+using HR_System.Core.Options;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace HR_System.Infrastructure.Services;
@@ -9,7 +10,7 @@ namespace HR_System.Infrastructure.Services;
 public class RedisService(
     IDistributedCache cache,
     IConnectionMultiplexer redisMultiplexer,
-    IConfiguration configuration) : IRedisService
+    IOptions<RedisOptions> redisOptions) : IRedisService
 {
     
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
@@ -27,12 +28,17 @@ public class RedisService(
         return JsonSerializer.Deserialize<T>(data, options);
     }
     
-    public async Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
+    public async Task SetAsync<T>(
+        string key,
+        T value,
+        int? absoluteExpirationMinutes = null,
+        int? slidingExpirationMinutes = null,
+        CancellationToken cancellationToken = default)
     {
         var options = new DistributedCacheEntryOptions()
         {
-            AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(configuration.GetValue<int>("Redis:AbsoluteExpiration")),
-            SlidingExpiration = TimeSpan.FromMinutes(configuration.GetValue<int>("Redis:SlidingExpiration"))
+            AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(absoluteExpirationMinutes ?? redisOptions.Value.AbsoluteExpiration),
+            SlidingExpiration = TimeSpan.FromMinutes(slidingExpirationMinutes ?? redisOptions.Value.SlidingExpiration)
         };
         
         var serializedData = JsonSerializer.Serialize(value);
@@ -47,7 +53,7 @@ public class RedisService(
     
     public async Task RemoveByPrefixAsync(string prefix, CancellationToken cancellationToken = default)
     {
-        var instanceName = configuration.GetValue<string>("Redis:InstanceName") ?? string.Empty;
+        var instanceName = redisOptions.Value.InstanceName;
         var searchPattern = $"{instanceName}{prefix}*";
 
         var db = redisMultiplexer.GetDatabase();

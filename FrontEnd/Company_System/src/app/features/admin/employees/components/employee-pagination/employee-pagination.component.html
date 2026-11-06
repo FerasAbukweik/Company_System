@@ -1,0 +1,76 @@
+<div class="flex items-center gap-4">
+  <span class="text-sm text-text-secondary">
+    Showing
+    <span class="font-semibold text-text-primary">{{ firstItem() }} to {{ lastItem() }}</span>
+    of
+    <span class="font-semibold text-text-primary">{{ total() }}</span>
+    {{ label() }}
+  </span>
+  <label class="flex items-center gap-1 text-xs font-medium text-text-secondary">
+    <span>Rows per page:</span>
+    <select
+      class="bg-surface-low text-text-primary rounded-lg py-1 px-2 text-xs outline-0 cursor-pointer"
+      (change)="onPageSize($event)"
+    >
+      @for (size of pageSizeOptions; track size) {
+        <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+      }
+    </select>
+  </label>
+</div>
+
+<div class="flex items-center gap-1">
+  <button
+    type="button"
+    aria-label="First page"
+    class="cursor-pointer px-2.5 py-1.5 rounded-lg bg-surface-low hover:bg-surface-high text-text-secondary disabled:opacity-40 disabled:cursor-default transition-colors flex items-center"
+    [disabled]="page() === 1"
+    (click)="goTo(1)"
+  >
+    <app-icon class="size-4" [path]="HeroIcon.chevronDoubleLeft" />
+  </button>
+  <button
+    type="button"
+    aria-label="Previous page"
+    class="cursor-pointer px-2.5 py-1.5 rounded-lg bg-surface-low hover:bg-surface-high text-text-secondary disabled:opacity-40 disabled:cursor-default transition-colors flex items-center"
+    [disabled]="page() === 1"
+    (click)="goTo(page() - 1)"
+  >
+    <app-icon class="size-4" [path]="HeroIcon.chevronLeft" />
+  </button>
+
+  @for (number of pageButtons(); track number) {
+    <button
+      type="button"
+      class="cursor-pointer size-8 rounded-lg text-xs flex items-center justify-center transition-colors"
+      [class]="
+        number === page()
+          ? 'bg-corporate-blue text-white font-semibold'
+          : 'bg-surface-low hover:bg-surface-high text-text-primary font-medium'
+      "
+      [attr.aria-current]="number === page() ? 'page' : null"
+      (click)="goTo(number)"
+    >
+      {{ number }}
+    </button>
+  }
+
+  <button
+    type="button"
+    aria-label="Next page"
+    class="cursor-pointer px-2.5 py-1.5 rounded-lg bg-surface-low hover:bg-surface-high text-text-secondary disabled:opacity-40 disabled:cursor-default transition-colors flex items-center"
+    [disabled]="page() === totalPages()"
+    (click)="goTo(page() + 1)"
+  >
+    <app-icon class="size-4" [path]="HeroIcon.chevronRight" />
+  </button>
+  <button
+    type="button"
+    aria-label="Last page"
+    class="cursor-pointer px-2.5 py-1.5 rounded-lg bg-surface-low hover:bg-surface-high text-text-secondary disabled:opacity-40 disabled:cursor-default transition-colors flex items-center"
+    [disabled]="page() === totalPages()"
+    (click)="goTo(totalPages())"
+  >
+    <app-icon class="size-4" [path]="HeroIcon.chevronDoubleRight" />
+  </button>
+</div>

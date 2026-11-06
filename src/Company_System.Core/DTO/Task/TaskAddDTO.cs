@@ -6,24 +6,27 @@ namespace HR_System.Core.DTO.Task;
 
 public class TaskAddDTO
 {
-        
+
     [Required]
+    [MaxLength(50)]
     public required string Title { get; set; }
-        
+
     [Required]
+    [MaxLength(500)]
     public required string Description { get; set; }
-    
+
     [Required]
     [NewDate]
     public required DateTime Deadline { get; set; }
-        
+
     [Required]
+    [EnumDataType(typeof(PrioritiesEnum))]
     public required PrioritiesEnum Priority { get; set; }
-        
+
     [Required]
     public required Guid UserId { get; set; }
-    
-    
+
+
     // override
 
     public override string ToString()

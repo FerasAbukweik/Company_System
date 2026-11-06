@@ -1,0 +1,61 @@
+<div class="flex items-center gap-6 flex-1">
+  <div class="relative w-full transition-all duration-300">
+    <app-icon class="size-5 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" [path]="HeroIcon.search" />
+    <input
+      class="w-full max-w-md focus:max-w-xl bg-surface-low border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-vibrant-turquoise transition-all text-text-primary placeholder-text-secondary"
+      placeholder="Search tasks, people, or ops..."
+      type="text"
+    />
+  </div>
+</div>
+
+<div class="flex items-center gap-4 ml-4">
+  <button
+    type="button"
+    aria-label="Notifications"
+    class="p-2 hover:bg-surface-low rounded-full cursor-pointer active:opacity-80 transition-all"
+  >
+    <app-icon class="size-6 text-corporate-blue" [path]="HeroIcon.bell" />
+  </button>
+  <div class="h-8 w-px bg-outline-light mx-2"></div>
+  <div class="flex items-center gap-2 cursor-pointer group relative" (click)="togglePanel()">
+    <div class="z-41 text-right hidden sm:block">
+      <p class="text-xs font-bold text-corporate-blue">
+        {{ authService.userData()?.userName ?? 'unknown' }}
+      </p>
+      <p class="text-xs text-text-secondary">
+        {{ authService.userData()?.position ?? 'unknown position' }}
+      </p>
+    </div>
+    <img
+      class="z-41 w-10 h-10 rounded-full border-2 border-vibrant-turquoise object-cover"
+      [src]="authService.userData()?.userImageUrl"
+      (error)="$event.target.src = 'user_vector.jpg'"
+      alt="Alex Rivera Headshot"
+    />
+
+    @if (showUserMenu()) {
+      <div
+        class="fixed inset-0 cursor-default"
+        (click)="$event.stopPropagation(); togglePanel()"
+      ></div>
+
+      <div
+        class="absolute cursor-default p-1 right-0 top-12 z-50 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-md"
+        (click)="$event.stopPropagation()"
+      >
+        <p class="px-5 py-2 text-center border-b mb-2 text-text-secondary border-outline-light">
+          {{ authService.userData()?.userName }}
+        </p>
+        <button
+          type="button"
+          class="flex items-center gap-3 px-5 py-2 text-left text-sm font-medium rounded-lg text-error transition-colors hover:bg-red-50 cursor-pointer"
+          (click)="$event.stopPropagation(); logout()"
+        >
+          <span>Logout</span>
+          <app-icon class="size-6" [path]="HeroIcon.arrowRightOnRectangle" />
+        </button>
+      </div>
+    }
+  </div>
+</div>

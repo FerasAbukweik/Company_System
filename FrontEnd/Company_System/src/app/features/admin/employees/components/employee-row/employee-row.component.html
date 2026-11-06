@@ -1,0 +1,71 @@
+<td class="py-4 px-6 text-center">
+  <input
+    type="checkbox"
+    class="size-4 rounded cursor-pointer accent-vibrant-turquoise"
+    [attr.aria-label]="'Select ' + employee().fullName"
+    [checked]="selected()"
+    (change)="selectedChange.emit($any($event.target).checked)"
+  />
+</td>
+
+<td class="py-4 px-6">
+  <div class="flex items-center gap-4">
+    <app-avatar class="size-10" [name]="employee().fullName" [imageUrl]="employee().imageUrl" />
+    <div class="min-w-0">
+      <div class="text-base font-bold text-text-primary truncate">{{ employee().fullName }}</div>
+      <div class="text-xs text-text-secondary truncate">{{ employee().email }}</div>
+      <div class="font-mono text-xs text-text-secondary/80">{{ employee().phone }}</div>
+    </div>
+  </div>
+</td>
+
+<td class="py-4 px-6 text-corporate-blue">{{ positionLabel() }}</td>
+<td class="py-4 px-6 whitespace-nowrap text-corporate-blue">
+  @if (employee().hourlyRate !== null) {
+    {{ employee().hourlyRate | currency: 'USD' }} / hr
+  } @else {
+    <span class="text-text-secondary">Not configured</span>
+  }
+</td>
+<td class="py-4 px-6">
+  <span
+    class="rounded-full px-3 py-1 text-xs font-semibold"
+    [class]="
+      employee().isActive
+        ? 'bg-turquoise-tint text-turquoise-text'
+        : 'bg-surface-high text-text-secondary'
+    "
+  >
+    {{ employee().isActive ? 'Active' : 'Inactive' }}
+  </span>
+</td>
+<td class="py-4 px-6 text-right whitespace-nowrap">
+  <div class="relative inline-flex items-center gap-1">
+    <button
+      type="button"
+      class="cursor-pointer px-3 py-1.5 rounded-lg bg-surface-low hover:bg-surface-high text-corporate-blue text-xs font-semibold transition-colors"
+      (click)="edit.emit()"
+    >
+      Edit Member
+    </button>
+    <button
+      type="button"
+      class="cursor-pointer p-1.5 rounded-lg hover:bg-surface-low text-text-secondary transition-colors"
+      aria-label="More actions"
+      aria-haspopup="menu"
+      [attr.aria-expanded]="isMenuOpen()"
+      (click)="toggleMenu($event)"
+    >
+      <app-icon class="size-5" [path]="HeroIcon.ellipsisVertical" />
+    </button>
+
+    @if (isMenuOpen()) {
+      <app-drop-down-menu
+        class="right-0 min-w-44"
+        [class]="menuOpensUp() ? 'bottom-full mb-1' : 'top-full mt-1'"
+        [options]="menuOptions"
+        (selectOption)="onMenuOption($event)"
+      />
+    }
+  </div>
+</td>

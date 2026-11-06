@@ -1,18 +1,18 @@
 using System.Net;
 using System.Security.Cryptography;
-using HR_System.Core.common;
+using HR_System.Core.Abstraction.RepositoryContracts;
+using HR_System.Core.Abstraction.ServiceContracts;
 using HR_System.Core.Domain.Entities;
-using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts; // Ensure this matches or create IRefreshTokenService
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using HR_System.Core.Options;
+using HR_System.Core.Result;
+// Ensure this matches or create IRefreshTokenService
+using Microsoft.Extensions.Options;
 
 namespace HR_System.Infrastructure.Services;
 
 public class RefreshTokenService(
     IRefreshTokensRepository refreshTokensRepository,
-    IConfiguration configuration,
-    ILogger<RefreshTokenService> logger) : IRefreshTokenService
+    IOptions<JWTOptions> jwtOptions) : IRefreshTokenService
 {
     public async Task<Result<string>> GenerateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -25,7 +25,7 @@ public class RefreshTokenService(
         string refreshToken = Convert.ToBase64String(bytes);
 
         // 2. Prepare database entry
-        var lifetimeMinutes = configuration.GetValue<int>("Jwt:RefreshTokenLifeTime");
+        var lifetimeMinutes = jwtOptions.Value.RefreshTokenLifeTime;
         var toAddRefreshToken = new RefreshToken
         {
             Token = refreshToken,
@@ -37,38 +37,34 @@ public class RefreshTokenService(
         refreshTokensRepository.AddAsync(toAddRefreshToken, cancellationToken);
         if (!(await refreshTokensRepository.SaveChangesAsync(cancellationToken)))
         {
-            logger.LogError("{ServiceName}.{MethodName} failed saving changes to DB",
-                nameof(RefreshTokenService), nameof(GenerateRefreshTokenAsync));
             return Result<string>.Failure("Failed saving changes to DB");
         }
 
-        logger.LogInformation("{ServiceName}.{MethodName} successfully created and saved refresh token in DB for User ID {UserId}.",
-            nameof(RefreshTokenService), nameof(GenerateRefreshTokenAsync), userId);
 
         return Result<string>.Success(refreshToken);
     }
 
     public async Task<Result<RefreshToken>> ConsumeRefreshTokenAsync(string tokenString, CancellationToken cancellationToken = default)
     {
-        // Remove anyway (one-time use strategy to prevent token reuse replay attacks)
-        var removedToken = await refreshTokensRepository.RemoveRefreshTokenByRefreshTokenString(tokenString, cancellationToken);
+        var removedToken = await refreshTokensRepository.GetByTokenAsync(tokenString, cancellationToken);
         
         if (removedToken == null)
         {
-            logger.LogWarning("{ServiceName}.{MethodName} failed: Refresh token string was either not found in DB or has already been used/removed.",
-                nameof(RefreshTokenService), nameof(ConsumeRefreshTokenAsync));
 
             return Result<RefreshToken>.Failure("Refresh token expired or not found", HttpStatusCode.BadRequest);
         }
 
-        logger.LogInformation("{ServiceName}.{MethodName} successfully removed consumed token string from DB for User ID {UserId}.",
-            nameof(RefreshTokenService), nameof(ConsumeRefreshTokenAsync), removedToken.UserId);
+        // Remove anyway (one-time use strategy to prevent token reuse replay attacks).
+        // false means a concurrent request already consumed this token
+        if (!await refreshTokensRepository.RemoveAsync(removedToken, cancellationToken))
+        {
+            return Result<RefreshToken>.Failure("Refresh token expired or not found", HttpStatusCode.BadRequest);
+        }
+
 
         // Check if the removed token was already expired or resolved
         if (removedToken.IsResolved) 
         {
-            logger.LogWarning("{ServiceName}.{MethodName} failed: Token removed, but it was already resolved/expired for User ID {UserId}.",
-                nameof(RefreshTokenService), nameof(ConsumeRefreshTokenAsync), removedToken.UserId);
 
             return Result<RefreshToken>.Failure("Expired refresh token", HttpStatusCode.BadRequest);
         }

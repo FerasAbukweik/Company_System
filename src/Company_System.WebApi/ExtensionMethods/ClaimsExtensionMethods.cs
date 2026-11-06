@@ -1,7 +1,7 @@
 using System.Net;
 using System.Security.Claims;
-using HR_System.Core.common;
 using HR_System.Core.Enums;
+using HR_System.Core.Result;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace HR_System.ExtensionMethods;

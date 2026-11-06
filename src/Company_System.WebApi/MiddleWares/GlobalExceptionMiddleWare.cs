@@ -11,20 +11,24 @@ public class GlobalExceptionMiddleWare(RequestDelegate next,
         {
             await next(context);
         }
-        
+
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
-            
+
+            if (context.Response.HasStarted)
+                throw;
+
+            context.Response.Clear();
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
 
             var res = new
             {
-                message = ex.Message + "|" + ex.InnerException?.Message ?? "no inner exception" // temporary for test
+                message = "An unexpected error occurred. Please try again later."
             };
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(res) , context.RequestAborted);
+            await context.Response.WriteAsync(JsonSerializer.Serialize(res), context.RequestAborted);
         }
     }
 }

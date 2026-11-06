@@ -1,5 +1,5 @@
 using System.Net;
-using HR_System.Core.common;
+using HR_System.Core.Result;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HR_System.ExtensionMethods;

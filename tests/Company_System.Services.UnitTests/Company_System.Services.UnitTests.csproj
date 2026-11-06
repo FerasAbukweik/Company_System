@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.9" />
         <PackageReference Include="AutoFixture" Version="5.0.0-preview0012" />
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
         <PackageReference Include="EntityFrameworkCoreMock.Moq" Version="4.0.0" />
@@ -27,4 +28,10 @@
       <ProjectReference Include="..\..\src\Company_System.WebApi\Company_System.WebApi.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="../Shared/TestBase.cs" Link="TestBase.cs" />
+        <Using Include="HR_System.Tests.Shared" />
+        <Using Include="FluentAssertions" />
+        <Using Include="Xunit.Abstractions" />
+    </ItemGroup>
 </Project>

@@ -1,0 +1,27 @@
+<header class="flex">
+  <div
+    class="flex-0 flex border-r border-b border-outline-light items-center gap-2 cursor-pointer min-w-[clamp(150px,30vw,300px)] h-16 px-4"
+    (click)="$event.stopPropagation(); sideBarService.toggleSideBar()"
+  >
+    <div class="w-10 h-10 bg-corporate-blue rounded-xl flex items-center justify-center">
+      <app-icon class="size-6 text-surface-lowest" [path]="HeroIcon.share" />
+    </div>
+    <div>
+      <h1 class="text-xl font-bold text-corporate-blue tracking-tight">FlexiOps</h1>
+      <p class="text-xs font-medium text-text-secondary">Enterprise SaaS</p>
+    </div>
+  </div>
+  <nav app-top-nav></nav>
+</header>
+
+<div class="flex relative">
+  <aside app-side-bar></aside>
+
+  <main class="max-w-[1800px] w-full mx-auto overflow-scroll relative">
+    @if (sideBarService.isSideBarOpen() && isScreenSmall) {
+      <div class="absolute inset-0 z-1" (pointerdown)="sideBarService.close()"></div>
+    }
+
+    <router-outlet />
+  </main>
+</div>

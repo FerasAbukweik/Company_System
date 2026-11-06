@@ -6,10 +6,11 @@ namespace HR_System.Core.DTO.OrganizationHierarchy;
 public class OrganizationHierarchyDTO
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public required PositionsEnum Position { get; set; }
+    public PositionsEnum? Position { get; set; }
     public required Guid UserId { get; set; }
     public required List<OrganizationHierarchyDTO> Children { get; set; }
     public required string UserName { get; set; }
+    public string FullName { get; set; } = string.Empty;
     public required string UserImageUrl { get; set; }
 
 

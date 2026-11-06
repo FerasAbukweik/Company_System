@@ -5,12 +5,13 @@ namespace HR_System.Core.DTO.Message;
 public class MessageAddDTO
 {
     [Required]
+    [MaxLength(500)]
     public required string Content { get; set; }
-    
+
     [Required]
     public required Guid ReceiverId { get; set; }
-    
-    
+
+
     // override
 
     public override string ToString()

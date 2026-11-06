@@ -1,0 +1,140 @@
+<app-payment-toolbar
+  [(search)]="search"
+  [(month)]="month"
+  [(year)]="year"
+  [years]="paymentsService.years()"
+  (exported)="exportReport()"
+/>
+
+<div class="mb-4 flex items-center justify-between gap-3">
+  <p class="text-sm text-text-secondary">
+    Monthly pending payments are generated automatically from active employees’ hourly rates.
+  </p>
+</div>
+@if (paymentsService.loading()) {
+  <p class="mb-4 text-text-secondary" role="status">Loading payments…</p>
+}
+@if (paymentsService.error()) {
+  <div class="mb-4 rounded-lg bg-error-bg p-4 text-error-text" role="alert">
+    {{ paymentsService.error() }}
+    <button type="button" class="underline" (click)="paymentsService.reload()">Retry</button>
+  </div>
+}
+
+<app-payment-metrics [summary]="paymentsService.summary()" />
+
+<section
+  aria-label="Payment transactions"
+  class="overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-sm"
+>
+  <div class="flex flex-wrap items-center justify-between gap-4 border-b border-surface-high p-5">
+    <div
+      class="flex flex-wrap gap-1 rounded-lg bg-surface-low p-1"
+      role="group"
+      aria-label="Payment view"
+    >
+      @for (option of views; track option.key) {
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:text-corporate-blue"
+          [class.bg-surface-lowest]="view() === option.key"
+          [class.text-corporate-blue]="view() === option.key"
+          [class.shadow-sm]="view() === option.key"
+          [attr.aria-pressed]="view() === option.key"
+          (click)="view.set(option.key)"
+        >
+          {{ option.label }}
+          <span class="rounded-full bg-surface-high px-2 py-0.5 text-corporate-blue">
+            {{ counts()[option.key] }}
+          </span>
+        </button>
+      }
+    </div>
+
+    @if (view() !== 'history') {
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-text-secondary">{{ selectedPayments().length }} selected</span>
+        <button
+          type="button"
+          class="rounded-lg bg-corporate-blue px-4 py-2 text-xs font-semibold text-surface-lowest hover:bg-corporate-blue/90 disabled:cursor-not-allowed disabled:opacity-40"
+          [disabled]="!selectedPayments().length"
+          (click)="approveSelected()"
+        >
+          Approve Selected
+        </button>
+      </div>
+    }
+
+    @if (view() === 'history') {
+      <div
+        class="flex flex-wrap gap-1 rounded-lg bg-surface-low p-1"
+        role="group"
+        aria-label="History state"
+      >
+        @for (filter of historyFilters; track filter.key) {
+          <button
+            type="button"
+            class="rounded px-3 py-1.5 text-xs font-semibold text-text-secondary hover:text-corporate-blue"
+            [class.bg-surface-lowest]="historyFilter() === filter.key"
+            [attr.aria-pressed]="historyFilter() === filter.key"
+            (click)="historyFilter.set(filter.key)"
+          >
+            {{ filter.label }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div aria-live="polite" class="border-b border-surface-high px-5 py-4">
+    <h2 class="font-semibold text-corporate-blue">
+      {{
+        view() === 'pending'
+          ? 'Payments Awaiting Approval'
+          : view() === 'history'
+            ? 'Payment History'
+            : 'All Payments'
+      }}
+    </h2>
+    <p class="mt-1 text-xs text-text-secondary">
+      {{
+        view() === 'pending'
+          ? 'Review each pending payment before approving or rejecting it.'
+          : 'Payroll month identifies the earnings period. Payment date records the date of payment.'
+      }}
+    </p>
+  </div>
+
+  <app-payment-table
+    [payments]="paymentsService.paymentPages()[page()] ?? []"
+    [selected]="selected()"
+    [title]="
+      view() === 'pending'
+        ? 'Pending payments'
+        : view() === 'history'
+          ? 'Payment history'
+          : 'All payments'
+    "
+    (toggled)="toggleSelected($event)"
+    (togglePage)="selectPage($event)"
+    (decided)="openDecision($event)"
+    (viewed)="receipt.set($event)"
+  />
+
+  <app-payment-pagination
+    [page]="page()"
+    [size]="pageSize"
+    [total]="paymentsService.totalCount()"
+    [pages]="totalPages()"
+    (changed)="changePage($event)"
+  />
+</section>
+
+<app-payment-decision
+  [decision]="decision()"
+  [saving]="saving()"
+  [error]="decisionError()"
+  (closed)="!saving() && decision.set(null)"
+  (confirmed)="confirmDecision($event)"
+/>
+<app-payment-receipt [payment]="receipt()" (closed)="receipt.set(null)" />

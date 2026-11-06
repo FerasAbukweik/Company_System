@@ -1,0 +1,91 @@
+<button
+  type="button"
+  role="combobox"
+  class="rounded-lg border border-outline-light bg-surface-lowest px-3 py-2 text-text-primary flex w-full cursor-pointer items-center justify-between gap-2 text-start disabled:cursor-not-allowed disabled:opacity-60"
+  [class]="triggerClass() + (invalid() ? ' border-error!' : '')"
+  aria-haspopup="listbox"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="open() ? id + '-list' : null"
+  [attr.aria-activedescendant]="open() && activeIndex() >= 0 ? id + '-opt-' + activeIndex() : null"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-invalid]="invalid() || null"
+  [disabled]="isDisabled()"
+  (click)="toggle()"
+  (keydown)="onKeydown($event)"
+  (keyup)="$event.key === ' ' && $event.preventDefault()"
+  (blur)="touch()"
+>
+  <span class="min-w-0 flex-1 truncate" [class.text-text-secondary]="!selected()">
+    {{ selected()?.name ?? placeholder() }}
+  </span>
+  <svg
+    class="flex-none text-text-secondary transition-transform"
+    [class.rotate-180]="open()"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    aria-hidden="true"
+  >
+    <path d="m6 9 6 6 6-6"></path>
+  </svg>
+</button>
+
+@if (open()) {
+  <!-- mousedown / click are cancelled so the button keeps the focus, and a click on the empty part of the
+       dropdown does not reach a <label> around the select (it would click the button again) -->
+  <div
+    class="absolute inset-x-0 z-30 max-h-60 overflow-y-auto border border-outline-light bg-surface-lowest shadow-md"
+    [class]="openUp() ? 'bottom-full mb-1' : 'top-full mt-1'"
+    (mousedown)="$event.preventDefault()"
+    (click)="$event.preventDefault()"
+  >
+    <div [id]="id + '-list'" role="listbox" [attr.aria-label]="ariaLabel()">
+      @for (entry of entries(); track entry.value; let i = $index) {
+        <div
+          role="option"
+          class="flex cursor-pointer items-center justify-between gap-2 px-3.5 py-2.5 text-sm"
+          [class]="
+            (i === activeIndex() ? 'bg-blue-tint ' : '') +
+            (entry === selected() ? 'font-semibold text-secondary-blue' : '')
+          "
+          [id]="id + '-opt-' + i"
+          [attr.aria-selected]="entry === selected()"
+          (mouseenter)="activeIndex.set(i)"
+          (click)="pick(entry)"
+        >
+          <span class="min-w-0 truncate">{{ entry.name }}</span>
+          @if (entry === selected()) {
+            <span aria-hidden="true">✓</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- The end of the dropdown: when it comes into view the next page is asked (see IsVisableDirective). -->
+    @if (hasMore()) {
+      @if (failed()) {
+        <button
+          type="button"
+          class="m-2 rounded-lg bg-surface-low px-3 py-2 text-secondary-blue w-[calc(100%-1rem)]"
+          (click)="retry()"
+        >
+          Unable to load options. Retry
+        </button>
+      } @else {
+        <div
+          appIsVisable
+          (visible)="loadMore()"
+          [visibleRecheck]="loading() + ':' + entries().length"
+          class="px-3.5 py-2.5 text-center text-sm text-text-secondary"
+        >
+          {{ loading() ? 'Loading…' : '' }}
+        </div>
+      }
+    } @else if (!items().length) {
+      <div class="px-3.5 py-2.5 text-center text-sm text-text-secondary">No options found</div>
+    }
+  </div>
+}

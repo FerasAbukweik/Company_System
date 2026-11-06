@@ -12,6 +12,7 @@
           "Company_System.WebApi": "1.0.0",
           "EntityFrameworkCoreMock.Moq": "4.0.0",
           "FluentAssertions": "8.10.0",
+          "Microsoft.EntityFrameworkCore.InMemory": "10.0.9",
           "Microsoft.NET.Test.Sdk": "17.14.1",
           "Moq": "4.20.72",
           "xunit": "2.9.3"
@@ -142,7 +143,7 @@
       },
       "Microsoft.AspNetCore.OpenApi/10.0.9": {
         "dependencies": {
-          "Microsoft.OpenApi": "2.0.0"
+          "Microsoft.OpenApi": "2.12.2"
         },
         "runtime": {
           "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
@@ -286,6 +287,17 @@
           }
         }
       },
+      "Microsoft.EntityFrameworkCore.InMemory/10.0.9": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.9"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.InMemory.dll": {
+            "assemblyVersion": "10.0.9.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
       "Microsoft.EntityFrameworkCore.Relational/10.0.9": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "10.0.9"
@@ -421,11 +433,11 @@
           "Microsoft.TestPlatform.TestHost": "17.14.1"
         }
       },
-      "Microsoft.OpenApi/2.0.0": {
+      "Microsoft.OpenApi/2.12.2": {
         "runtime": {
           "lib/net8.0/Microsoft.OpenApi.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.0.0"
+            "assemblyVersion": "2.12.2.0",
+            "fileVersion": "2.12.2.0"
           }
         }
       },
@@ -715,6 +727,17 @@
           }
         }
       },
+      "Scrutor/6.1.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyModel": "10.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/Scrutor.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.0.0"
+          }
+        }
+      },
       "Serilog/4.4.0-dev-02437": {
         "runtime": {
           "lib/net10.0/Serilog.dll": {
@@ -970,7 +993,8 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "10.0.9",
           "Microsoft.EntityFrameworkCore": "10.0.9",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.9",
-          "Microsoft.Extensions.Caching.StackExchangeRedis": "10.0.9"
+          "Microsoft.Extensions.Caching.StackExchangeRedis": "10.0.9",
+          "Scrutor": "6.1.0"
         },
         "runtime": {
           "Company_System.Infrastructure.dll": {
@@ -984,6 +1008,7 @@
           "Company_System.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.9",
           "Microsoft.AspNetCore.OpenApi": "10.0.9",
+          "Microsoft.OpenApi": "2.12.2",
           "Scalar.AspNetCore": "2.16.4",
           "Serilog": "4.4.0-dev-02437",
           "Serilog.AspNetCore": "10.0.0",
@@ -1139,6 +1164,13 @@
       "path": "microsoft.entityframeworkcore.abstractions/10.0.9",
       "hashPath": "microsoft.entityframeworkcore.abstractions.10.0.9.nupkg.sha512"
     },
+    "Microsoft.EntityFrameworkCore.InMemory/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lvlLJ7kgGivXApixK4FN7pB/aZZJ+bqdNRv2jLR0K0t2ZFIUwNylF1Mo6tMQAN8/2FsNKbv7U4S4FgSdfFtPIQ==",
+      "path": "microsoft.entityframeworkcore.inmemory/10.0.9",
+      "hashPath": "microsoft.entityframeworkcore.inmemory.10.0.9.nupkg.sha512"
+    },
     "Microsoft.EntityFrameworkCore.Relational/10.0.9": {
       "type": "package",
       "serviceable": true,
@@ -1230,12 +1262,12 @@
       "path": "microsoft.net.test.sdk/17.14.1",
       "hashPath": "microsoft.net.test.sdk.17.14.1.nupkg.sha512"
     },
-    "Microsoft.OpenApi/2.0.0": {
+    "Microsoft.OpenApi/2.12.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-GGYLfzV/G/ct80OZ45JxnWP7NvMX1BCugn/lX7TH5o0lcVaviavsLMTxmFV2AybXWjbi3h6FF1vgZiTK6PXndw==",
-      "path": "microsoft.openapi/2.0.0",
-      "hashPath": "microsoft.openapi.2.0.0.nupkg.sha512"
+      "sha512": "sha512-ZkT7qiJe0Kj0+DTZOZo+xrDy1kNmdsWFQVPIQLNx9ZJ0T9cB2LG7r+Bi60so8/+yg1nkS7QCPadrzsTG4VPKrA==",
+      "path": "microsoft.openapi/2.12.2",
+      "hashPath": "microsoft.openapi.2.12.2.nupkg.sha512"
     },
     "Microsoft.SqlServer.Server/1.0.0": {
       "type": "package",
@@ -1285,6 +1317,13 @@
       "sha512": "sha512-ZDD3CHXn1OR4yHQ55NcXsU+aRzSIc1kwkpgPVM9LaK0XKuEzRqZWZ/4WS9tLI3dur6OMlcpXjGIDk/Pe3fniXQ==",
       "path": "scalar.aspnetcore/2.16.4",
       "hashPath": "scalar.aspnetcore.2.16.4.nupkg.sha512"
+    },
+    "Scrutor/6.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-m4+0RdgnX+jeiaqteq9x5SwEtuCjWG0KTw1jBjCzn7V8mCanXKoeF8+59E0fcoRbAjdEq6YqHFCmxZ49Kvqp3g==",
+      "path": "scrutor/6.1.0",
+      "hashPath": "scrutor.6.1.0.nupkg.sha512"
     },
     "Serilog/4.4.0-dev-02437": {
       "type": "package",

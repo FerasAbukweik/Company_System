@@ -1,0 +1,88 @@
+<header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="text-xs uppercase tracking-wider text-text-secondary">Self-Service Portal</p>
+    <h1 class="mt-1 text-2xl font-bold text-corporate-blue">Payroll &amp; Attendance</h1>
+    <p class="mt-1 text-sm text-text-secondary">
+      {{ portal.profile()?.fullName }} · Your payment records, holidays, and daily attendance
+    </p>
+  </div>
+  <div class="flex items-center gap-3">
+    <label class="text-sm">
+      Year
+      <select
+        aria-label="Portal year"
+        class="ml-2 rounded-lg border border-outline-light p-2"
+        [value]="year()"
+        (change)="changeYear($any($event.target).value)"
+      >
+        @for (option of years; track option) {
+          <option [value]="option" [selected]="option === year()">{{ option }}</option>
+        }
+      </select>
+    </label>
+    <button
+      type="button"
+      class="rounded-lg bg-corporate-blue px-4 py-2 text-sm text-surface-lowest disabled:opacity-50"
+      [disabled]="!portal.latestApproved()"
+      (click)="selectedPayslip.set(portal.latestApproved())"
+    >
+      Latest Approved Payment
+    </button>
+  </div>
+</header>
+@if (portal.loading()) {
+  <p role="status" class="mb-4 text-text-secondary">Loading your records…</p>
+}
+@if (portal.error()) {
+  <div role="alert" class="mb-4 rounded-lg bg-error-bg p-4 text-error-text">
+    {{ portal.error() }}
+    <button type="button" class="underline" (click)="portal.loadDetails(year())">Retry</button>
+  </div>
+}
+<app-portal-summary
+  [profile]="portal.profile()"
+  [approvedAmount]="portal.paymentSummary().approvedAmount"
+  [pendingAmount]="portal.paymentSummary().pendingAmount"
+  [attendance]="portal.attendance()"
+/>
+<div class="grid grid-cols-12 gap-6">
+  <div class="col-span-12 min-w-0 lg:col-span-8">
+    @if (portal.paymentsLoading()) {
+      <p role="status" class="mb-3 text-sm text-text-secondary">Loading payments…</p>
+    }
+    @if (portal.paymentsError()) {
+      <div role="alert" class="mb-3 rounded-lg bg-error-bg p-3 text-error-text">
+        {{ portal.paymentsError() }}
+        <button
+          type="button"
+          class="underline"
+          (click)="portal.loadPayments(year(), page(), pageSize())"
+        >
+          Retry
+        </button>
+      </div>
+    }
+    <app-payslip-ledger
+      [records]="portal.portalPaymentPages()[page()] ?? []"
+      (viewed)="selectedPayslip.set($event)"
+    />
+    <app-employee-pagination
+      label="payments"
+      [total]="portal.paymentSummary().totalCount"
+      [(page)]="page"
+      [(pageSize)]="pageSize"
+    />
+  </div>
+  <div class="col-span-12 lg:col-span-4">
+    <app-attendance-calendar
+      [records]="portal.attendance()"
+      [month]="calendarMonth()"
+      (monthChanged)="changeMonth($event)"
+    />
+  </div>
+</div>
+<app-payslip-drawer
+  [record]="selectedPayslip()"
+  (closed)="selectedPayslip.set(null)"
+  (printRequested)="printPayslip()"
+/>

@@ -1,0 +1,36 @@
+<section class="flex h-[calc(100dvh-4rem)] min-h-0 flex-col text-text-primary">
+  <header class="shrink-0 px-8 pt-8 pb-2">
+    <h2 class="text-2xl font-bold text-corporate-blue">Organizational Structure</h2>
+    <p class="text-text-secondary">Visualize and manage your team hierarchy and task delegation.</p>
+  </header>
+
+  <div
+    #treeViewport
+    appDragPan
+    tabindex="0"
+    aria-label="Organizational structure"
+    class="min-h-0 w-full flex-1 overflow-auto custom-scrollbar"
+  >
+    <div #treeContent class="flex w-max min-w-full flex-col items-center px-8 py-10">
+      @if (orgTreeService.treeRoot(); as root) {
+        <app-org-node [node]="root" [isCurrUserChild]="false" />
+      } @else if (!orgTreeService.isLoadingTree()) {
+        <p class="font-semibold text-text-secondary">No organizational structure available.</p>
+      }
+      @if (orgTreeService.isLoadingTree()) {
+        <app-loading class="mt-10" [loadingName]="'Users'" />
+      }
+      <div appIsVisable (visible)="loadMoreTree()"></div>
+    </div>
+  </div>
+</section>
+
+<app-delegate-task />
+
+<app-chat-panel />
+@if (delegateTaskService.isShowDelegateTask() || chatPanelService.isVisable()) {
+  <div
+    class="absolute inset-0"
+    (click)="delegateTaskService.close(); chatPanelService.close()"
+  ></div>
+}

@@ -1,25 +1,26 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using HR_System.Core.Interfaces.ServiceContracts;
+using HR_System.Core.Abstraction.ServiceContracts;
+using HR_System.Core.DTO.Images;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using HR_System.Core.Options;
+using Microsoft.Extensions.Options;
 
 namespace HR_System.Infrastructure.Services;
 
 public class ImageService: IImageService
 {
+    // Cloudinary's delete_resources accepts at most 100 public ids per request
+    private const int MaxIdsPerRequest = 100;
+
     private readonly Cloudinary _cloudinary;
-    private readonly ILogger<ImageService> _logger;
-    public ImageService(IConfiguration configuration,
-        ILogger<ImageService> logger)
+    public ImageService(IOptions<CloudinaryOptions> options)
     {
-        _logger = logger;
-        
+        var settings = options.Value;
         var account = new Account(
-            configuration["CloudinarySettings:CloudName"], 
-            configuration["CloudinarySettings:ApiKey"],
-            configuration["CloudinarySettings:ApiSecret"]);
+            settings.CloudName,
+            settings.ApiKey,
+            settings.ApiSecret);
         
         _cloudinary = new Cloudinary(account);
     }
@@ -37,18 +38,6 @@ public class ImageService: IImageService
         };
         
         var result = await _cloudinary.UploadAsync(uploadParams);
-
-        if (result.Error != null)
-        {
-            _logger.LogError("{serviceName}.{methodName} failed uploading image\nErrors: {errors}",
-                nameof(ImageService), nameof(Upload), result.Error.Message);
-        }
-        else
-        {
-            _logger.LogError("{serviceName}.{methodName} image was uploaded with publicId of {publicId}",
-                nameof(ImageService), nameof(Upload), result.PublicId);
-        }
-
         return result;
     }
 
@@ -57,18 +46,43 @@ public class ImageService: IImageService
         var deletionParams = new DeletionParams(publicId);
 
         var result = await _cloudinary.DestroyAsync(deletionParams);
-
-        if (result.Error != null)
-        {
-            _logger.LogError("{serviceName}.{methodName} failed deleting image\nErrors: {errors}",
-                nameof(ImageService), nameof(Delete), result.Error.Message);
-        }
-        else
-        {
-            _logger.LogError("{serviceName}.{methodName} image with public id of {publicId} was deleted",
-                nameof(ImageService), nameof(Delete), publicId);
-        }
-        
         return result;
+    }
+
+    public async Task<ImagesDeletionResult> DeleteMany(
+        IReadOnlyCollection<string> publicIds,
+        CancellationToken cancellationToken = default)
+    {
+        var gone = new List<string>();
+        var failed = new List<string>();
+
+        foreach (var batch in publicIds.Distinct().Chunk(MaxIdsPerRequest))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var result = await _cloudinary.DeleteResourcesAsync(new DelResParams
+            {
+                PublicIds = batch.ToList(),
+                ResourceType = ResourceType.Image
+            });
+
+            // whole request failed: nothing in this batch is known to be deleted
+            if (result.Error != null || result.Deleted == null)
+            {
+                failed.AddRange(batch);
+                continue;
+            }
+
+            foreach (var publicId in batch)
+            {
+                // "not_found" means it is already gone from Cloudinary
+                var isGone = result.Deleted.TryGetValue(publicId, out var status)
+                             && (status is "deleted" or "not_found");
+
+                (isGone ? gone : failed).Add(publicId);
+            }
+        }
+
+        return new ImagesDeletionResult(gone, failed);
     }
 }

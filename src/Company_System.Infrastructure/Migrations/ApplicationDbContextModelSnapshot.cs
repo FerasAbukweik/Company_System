@@ -28,15 +28,19 @@ namespace HR_System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ApprovalId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<Guid?>("TaskId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("TriggeredById")
@@ -46,6 +50,10 @@ namespace HR_System.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApprovalId");
+
+                    b.HasIndex("TaskId");
 
                     b.HasIndex("TriggeredById");
 
@@ -128,6 +136,66 @@ namespace HR_System.Infrastructure.Migrations
                     b.ToTable("Approvals");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.DailyWorkRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("MinutesWorked")
+                        .HasColumnType("int");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("DailyWorkRecords", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_DailyWorkRecords_MinutesWorked", "[MinutesWorked] >= 0 AND [MinutesWorked] <= 1440");
+
+                            t.HasCheckConstraint("CK_DailyWorkRecords_State", "[State] IN (0, 1, 2, 3)");
+                        });
+                });
+
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Image", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -162,6 +230,11 @@ namespace HR_System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uniqueidentifier");
 
@@ -176,6 +249,50 @@ namespace HR_System.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("OrganizationHierarchies");
+                });
+
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly?>("PaymentDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("State")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Year", "Month")
+                        .IsUnique();
+
+                    b.ToTable("Payments", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Payments_Month", "[Month] >= 1 AND [Month] <= 12");
+
+                            t.HasCheckConstraint("CK_Payments_PaidAmount", "[PaidAmount] > 0");
+
+                            t.HasCheckConstraint("CK_Payments_State", "[State] IN (0, 1, 2)");
+
+                            t.HasCheckConstraint("CK_Payments_Year", "[Year] >= 1 AND [Year] <= 9999");
+                        });
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.RefreshToken", b =>
@@ -254,9 +371,15 @@ namespace HR_System.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<int?>("AnnualHolidayAllowance")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -269,8 +392,8 @@ namespace HR_System.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(150)");
+                    b.Property<decimal?>("HourlyRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -297,9 +420,6 @@ namespace HR_System.Infrastructure.Migrations
 
                     b.Property<int>("Position")
                         .HasColumnType("int");
-
-                    b.Property<string>("PublicImageId")
-                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -429,11 +549,25 @@ namespace HR_System.Infrastructure.Migrations
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.Activity", b =>
                 {
+                    b.HasOne("HR_System.Core.Domain.Entities.Approval", "Approval")
+                        .WithMany()
+                        .HasForeignKey("ApprovalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HR_System.Core.Domain.Entities.AppTask", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "TriggeredBy")
                         .WithMany("Activities")
                         .HasForeignKey("TriggeredById")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Approval");
+
+                    b.Navigation("Task");
 
                     b.Navigation("TriggeredBy");
                 });
@@ -483,6 +617,27 @@ namespace HR_System.Infrastructure.Migrations
                     b.Navigation("UserRequesting");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.DailyWorkRecord", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithMany("DailyWorkRecords")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Image", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithOne("Image")
+                        .HasForeignKey("HR_System.Core.Domain.Entities.Image", "UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.Message", b =>
                 {
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "Receiver")
@@ -511,10 +666,21 @@ namespace HR_System.Infrastructure.Migrations
                     b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
                         .WithOne("OrganizationHierarchy")
                         .HasForeignKey("HR_System.Core.Domain.Entities.OrganizationHierarchy", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Parent");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithMany("Payments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -599,8 +765,14 @@ namespace HR_System.Infrastructure.Migrations
 
                     b.Navigation("CreatedTasks");
 
+                    b.Navigation("DailyWorkRecords");
+
+                    b.Navigation("Image");
+
                     b.Navigation("OrganizationHierarchy")
                         .IsRequired();
+
+                    b.Navigation("Payments");
 
                     b.Navigation("ReceivedMessages");
 

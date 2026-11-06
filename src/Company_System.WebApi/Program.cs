@@ -18,7 +18,8 @@ builder.Host.UseSerilog((context, service, configuration) =>
 
 // DI ---------------------------------
 
-builder.Services.AddCore()
+builder.Services
+    .AddCore()
     .AddInfrastructure(builder.Configuration)
     .AddWebApi(builder.Configuration);
 
@@ -39,9 +40,9 @@ if (builder.Environment.IsDevelopment())
 }
 
 app.UseGlobalExceptionMiddleWare();
-app.UseCors("Angular");
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors("Angular");   // after UseRouting and before auth, so preflight requests get answered
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

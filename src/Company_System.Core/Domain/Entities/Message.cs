@@ -7,26 +7,26 @@ namespace HR_System.Core.Domain.Entities;
 
 public class Message
 {
-    public Guid Id { get; set; } =  Guid.NewGuid();
-    
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     [Required]
     [Column(TypeName = "nvarchar(500)")]
     public required string Content { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    
-    
-    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+
+
     // relations
-    
+
     [Required]
     public required Guid SenderId { get; set; }
     public ApplicationUser? Sender { get; set; }
-    
+
     [Required]
     public required Guid ReceiverId { get; set; }
     public ApplicationUser? Receiver { get; set; }
-    
-    
+
+
     // functions
 
     public MessageDTO ToDTO(Guid currUserId)
@@ -40,15 +40,15 @@ public class Message
             GroupName = GenerateGroupName()
         };
     }
-    
+
     private string GenerateGroupName()
     {
         if (string.Compare(SenderId.ToString(), ReceiverId.ToString(), StringComparison.Ordinal) > 0)
             return $"{SenderId}-{ReceiverId}";
-        
+
         return $"{ReceiverId}-{SenderId}";
     }
-    
+
     // override
 
     public override string ToString()
@@ -60,7 +60,7 @@ public class Message
     {
         if (obj is not Message other)
             return false;
-        
+
         return other.Id == Id && other.Content == Content &&
                other.CreatedAt == CreatedAt && other.SenderId == SenderId &&
                other.ReceiverId == ReceiverId;

@@ -1,0 +1,60 @@
+<header class="flex flex-col gap-5 pb-6">
+  <div>
+    <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-2 text-xs text-text-secondary">
+      Enterprise Admin
+      <app-icon class="size-3" [path]="HeroIcon.chevronRight" />
+      <span class="font-semibold text-corporate-blue">Payments Management</span>
+    </nav>
+    <h1 class="text-2xl font-bold tracking-tight text-corporate-blue">Payments Management</h1>
+    <p class="mt-1 text-sm text-text-secondary">
+      Review pending payroll disbursements, approve hourlyRate payments, and audit transaction
+      history
+    </p>
+  </div>
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="relative flex-1 min-w-52">
+      <app-icon
+        class="absolute left-3 top-2.5 size-4 text-text-secondary"
+        [path]="HeroIcon.search"
+      />
+      <input
+        aria-label="Search employees"
+        type="search"
+        placeholder="Search employee..."
+        class="w-full rounded-lg border border-outline-light bg-surface-lowest py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary-blue/40"
+        [value]="search()"
+        appDebounce
+        (appDebounce)="search.set($event)"
+      />
+    </div>
+    <select
+      aria-label="Payroll month"
+      class="rounded-lg border border-outline-light bg-surface-lowest p-2 text-sm"
+      [value]="month()"
+      (change)="month.set(+$any($event.target).value)"
+    >
+      <option value="0">All Months</option>
+      @for (name of months; track name; let i = $index) {
+        <option [value]="i + 1">{{ name }}</option>
+      }
+    </select>
+    <select
+      aria-label="Payroll year"
+      class="rounded-lg border border-outline-light bg-surface-lowest p-2 text-sm"
+      [value]="year()"
+      (change)="year.set(+$any($event.target).value)"
+    >
+      @for (option of years(); track option) {
+        <option [value]="option" [selected]="option === year()">{{ option }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 rounded-lg border border-outline-light bg-surface-lowest px-4 py-2 text-sm font-semibold text-corporate-blue hover:bg-surface-low"
+      (click)="exported.emit()"
+    >
+      <app-icon class="size-4" [path]="HeroIcon.documentText" />
+      Export Current Page
+    </button>
+  </div>
+</header>

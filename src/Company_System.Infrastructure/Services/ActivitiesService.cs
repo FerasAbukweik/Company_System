@@ -1,49 +1,72 @@
-using HR_System.Core.common;
+using HR_System.Core.Abstraction.RepositoryContracts;
+using HR_System.Core.Abstraction.ServiceContracts;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.Activity;
 using HR_System.Core.DTO.LazyLoading;
-using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts;
-using Microsoft.Extensions.Logging;
+using HR_System.Core.Result;
 
 namespace HR_System.Infrastructure.Services;
 
 public class ActivitiesService(
     IActivityRepository activityRepository,
-    ILogger<ActivitiesService> logger
+    IOrganizationHierarchyRepository hierarchyRepository
     ) : IActivitiesService
 {
-    public async Task<Result<ActivityDTO>> AddAsync(ActivityAddDTO toAdd, Guid triggeredById, CancellationToken cancellationToken = default)
+    public async Task<Result<ActivityDto>> AddAsync(ActivityAddDto toAdd, Guid triggeredById, CancellationToken cancellationToken = default)
     {
         var activity = new Activity
         {
             Type = toAdd.Type,
             TriggeredById = triggeredById,
-            Title = toAdd.Title,
-            Description = toAdd.Description 
+            TaskId = toAdd.TaskId,
+            ApprovalId = toAdd.ApprovalId
         };
 
         activityRepository.Add(activity);
 
         if (!await activityRepository.SaveChangesAsync(cancellationToken))
         {
-            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
-                nameof(AccountService), nameof(AddAsync));
-            return Result<ActivityDTO>.Failure("Failed saving changes to DB");
+            return Result<ActivityDto>.Failure("Failed saving changes to DB");
         }
-        
-        logger.LogInformation("{serviceName}.{methodName} activity was added by userId: {userId}",
-            nameof(AccountService), nameof(AddAsync), triggeredById);
-        
-        return Result<ActivityDTO>.Success(activity.ToDTO());
+
+
+        var activityWithInclude = await activityRepository.GetByIdAsync(
+            activity.Id,
+            [
+                a => a.TriggeredBy,
+                a => a.Task,
+                a => a.Approval!.Task,
+                a => a.Approval!.Manager,
+                a => a.Approval!.UserRequesting
+            ],
+            cancellationToken);
+
+        return Result<ActivityDto>.Success((activityWithInclude ?? activity).ToDTO());
     }
 
-    public async Task<Result<IReadOnlyList<ActivityDTO>>> LazyGetAllSortedAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<ActivityDto>>> LazyGetAllSortedAsync(LazyDTO lazyData, Guid userId, CancellationToken cancellationToken = default)
     {
-        var activities = await activityRepository.LazyGetAllSortedAsync(lazyData, userId, cancellationToken);
+        // users under the current user's subtree
+        var subTreeUserIds = await hierarchyRepository.GetSubTreeUserIds(userId, cancellationToken);
+
+        // activities triggered by those users, newest first, one section at a time
+        var activities = await activityRepository.FilterAsync(
+            a => subTreeUserIds.Contains(a.TriggeredById),
+            [
+                a => a.TriggeredBy,
+                a => a.Task,
+                a => a.Approval!.Task,
+                a => a.Approval!.Manager,
+                a => a.Approval!.UserRequesting
+            ],
+            a => a.CreatedAt,
+            true,
+            lazyData.Taken,
+            lazyData.SectionSize,
+            cancellationToken);
 
         var result = activities.Select(a => a.ToDTO()).ToList();
 
-        return Result<IReadOnlyList<ActivityDTO>>.Success(result);
+        return Result<IReadOnlyList<ActivityDto>>.Success(result);
     }
 }

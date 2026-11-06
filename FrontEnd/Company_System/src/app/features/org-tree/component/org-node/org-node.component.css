@@ -1,0 +1,45 @@
+.org-tree-children {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.org-tree-branch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 1.5rem 1rem 0;
+}
+
+.org-tree-branch::before,
+.org-tree-branch::after {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  border-top: 2px solid var(--color-outline-light);
+  content: '';
+}
+
+.org-tree-branch::before {
+  left: 0;
+}
+
+.org-tree-branch::after {
+  right: 0;
+}
+
+.org-tree-branch:first-child::before,
+.org-tree-branch:last-child::after {
+  display: none;
+}
+
+.org-tree-connector {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 1.5rem;
+  border-left: 2px solid var(--color-outline-light);
+  transform: translateX(-50%);
+}

@@ -1,0 +1,49 @@
+<section class="overflow-hidden rounded-xl border border-outline-light bg-surface-lowest">
+  <header class="p-5">
+    <h2 class="text-lg font-semibold text-corporate-blue">Payment Records</h2>
+    <p class="mt-1 text-xs text-text-secondary">Actual recorded amounts and approval states</p>
+  </header>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-135 text-left text-sm">
+      <thead class="bg-surface-low text-xs uppercase text-text-secondary">
+        <tr>
+          @for (
+            heading of ['Payroll period', 'Payment date', 'Amount', 'State', 'Details'];
+            track heading
+          ) {
+            <th scope="col" class="p-4">{{ heading }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-high">
+        @for (record of records(); track record.id) {
+          <tr>
+            <td class="p-4 font-mono">
+              {{ record.year }}-{{ record.month.toString().padStart(2, '0') }}
+            </td>
+            <td class="p-4">{{ (record.paymentDate | date: 'MMM d, yyyy') ?? '—' }}</td>
+            <td class="p-4 font-mono font-semibold text-corporate-blue">
+              {{ record.paidAmount | currency: 'USD' }}
+            </td>
+            <td class="p-4"><app-payment-state-badge [state]="record.state" /></td>
+            <td class="p-4">
+              <button
+                type="button"
+                class="rounded bg-surface-low px-3 py-2 text-corporate-blue"
+                (click)="viewed.emit(record)"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="p-8 text-center text-text-secondary">
+              No payments recorded for this year.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

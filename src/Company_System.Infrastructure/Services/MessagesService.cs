@@ -1,20 +1,22 @@
+using System.Net;
 using System.Collections.Immutable;
-using HR_System.Core.common;
+using HR_System.Core.Abstraction.RepositoryContracts;
+using HR_System.Core.Abstraction.ServiceContracts;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.DTO.Message;
-using HR_System.Core.Interfaces.RepositoryContracts;
-using HR_System.Core.Interfaces.ServiceContracts;
-using Microsoft.Extensions.Logging;
+using HR_System.Core.Result;
 
 namespace HR_System.Infrastructure.Services;
 
 public class MessagesService(
-    IMessageRepository messageRepository,
-    ILogger<MessagesService> logger) : IMessagesService
+    IMessageRepository messageRepository) : IMessagesService
 {
     public async Task<Result<MessageDTO>> AddAsync(MessageAddDTO toAdd, Guid userId, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(toAdd.Content) || toAdd.Content.Length > 500 || toAdd.ReceiverId == Guid.Empty)
+            return Result<MessageDTO>.Failure("A recipient and message of 1 to 500 characters are required", HttpStatusCode.BadRequest);
+
         var toAdd_DB = new Message()
         {
             Content = toAdd.Content,
@@ -25,20 +27,24 @@ public class MessagesService(
 
         if (!(await messageRepository.SaveChangesAsync(cancellationToken)))
         {
-            logger.LogError("{serviceName}.{methodName} failed saving changes to DB",
-                nameof(MessagesService), nameof(AddAsync));
             return Result<MessageDTO>.Failure("Failed to save changes to DB");
         }
-        
-        logger.LogError("{serviceName}.{methodName} message with id of {messageId} was added",
-            nameof(MessagesService), nameof(AddAsync), toAdd_DB.Id);
-        
+
+
         return Result<MessageDTO>.Success(toAdd_DB.ToDTO(userId));
     }
 
-    public async Task<Result<IReadOnlyList<MessageDTO>>> LazyGetMessages(Guid userId,Guid otherUserId, LazyDTO lazyData, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<MessageDTO>>> LazyGetMessages(Guid userId, Guid otherUserId, LazyDTO lazyData, CancellationToken cancellationToken = default)
     {
-        var messages = await messageRepository.LazyGetMessages(userId,otherUserId, lazyData, cancellationToken);
+        // the conversation between the two users, newest first, one section at a time
+        var messages = await messageRepository.FilterAsync(
+            m => (m.SenderId == userId && m.ReceiverId == otherUserId) ||
+                 (m.SenderId == otherUserId && m.ReceiverId == userId),
+            orderBy: m => m.CreatedAt,
+            orderByDesc: true,
+            skip: lazyData.Taken,
+            take: lazyData.SectionSize,
+            cancellationToken: cancellationToken);
 
         return Result<IReadOnlyList<MessageDTO>>.Success(messages.Select(m => m.ToDTO(userId)).ToImmutableList());
     }

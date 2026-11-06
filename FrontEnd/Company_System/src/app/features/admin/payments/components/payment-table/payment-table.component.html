@@ -1,0 +1,126 @@
+<div class="overflow-x-auto">
+  <table class="w-full min-w-225 text-left text-sm">
+    <caption class="sr-only">
+      {{ title() }}
+    </caption>
+    <thead class="bg-surface-low text-xs uppercase tracking-wider text-text-secondary">
+      <tr>
+        <th scope="col" class="p-4">
+          <input
+            type="checkbox"
+            aria-label="Select all pending payments on this page"
+            class="size-4 accent-corporate-blue"
+            [checked]="allSelected()"
+            [indeterminate]="someSelected() && !allSelected()"
+            [disabled]="!pending().length"
+            (change)="togglePage.emit($any($event.target).checked)"
+          />
+        </th>
+        @for (
+          heading of [
+            'Employee',
+            'Payroll Month/Year',
+            'Payment Date',
+            'Paid Amount',
+            'State',
+            'Actions',
+          ];
+          track heading
+        ) {
+          <th
+            scope="col"
+            class="px-4 py-3 font-semibold"
+            [class.text-right]="heading === 'Paid Amount' || heading === 'Actions'"
+          >
+            {{ heading }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-high">
+      @for (payment of payments(); track payment.id) {
+        <tr class="hover:bg-surface-low/80">
+          <td class="p-4">
+            @if (payment.state === State.Pending) {
+              <input
+                type="checkbox"
+                class="size-4 accent-corporate-blue"
+                [attr.aria-label]="'Select payment for ' + payment.employeeName"
+                [checked]="selected().has(payment.id)"
+                (change)="toggled.emit(payment.id)"
+              />
+            }
+          </td>
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-3">
+              <app-avatar
+                class="size-9 text-xs"
+                [name]="payment.employeeName"
+                [imageUrl]="payment.imageUrl"
+              />
+              <div>
+                <p class="font-semibold text-corporate-blue">{{ payment.employeeName }}</p>
+                <p class="mt-0.5 font-mono text-xs text-text-secondary">{{ payment.userId }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-4">
+            <span
+              class="inline-flex whitespace-nowrap rounded-md bg-surface-low px-2.5 py-1 font-mono text-xs text-corporate-blue"
+            >
+              {{ payrollDate(payment) | date: 'MMMM yyyy' }}
+            </span>
+          </td>
+          <td class="px-4 py-4 whitespace-nowrap text-corporate-blue">
+            {{ (payment.paymentDate | date: 'MMM d, yyyy') ?? '—' }}
+          </td>
+          <td class="px-4 py-4 text-right font-mono font-bold text-corporate-blue">
+            {{ payment.paidAmount | currency: 'USD' }}
+          </td>
+          <td class="px-4 py-4"><app-payment-state-badge [state]="payment.state" /></td>
+          <td class="px-4 py-4 text-right">
+            <div class="inline-flex items-center gap-2">
+              @if (payment.state === State.Pending) {
+                <button
+                  type="button"
+                  class="rounded bg-vibrant-turquoise px-3 py-1.5 text-xs font-semibold text-corporate-blue hover:brightness-95"
+                  [attr.aria-label]="'Approve payment for ' + payment.employeeName"
+                  (click)="decided.emit({ payments: [payment], state: State.Approved })"
+                >
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  class="rounded px-3 py-1.5 text-xs font-semibold text-error-text hover:bg-error-bg"
+                  [attr.aria-label]="'Reject payment for ' + payment.employeeName"
+                  (click)="decided.emit({ payments: [payment], state: State.Rejected })"
+                >
+                  Reject
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded border border-outline-light px-3 py-1.5 text-xs font-semibold text-corporate-blue hover:bg-surface-low"
+                  (click)="viewed.emit(payment)"
+                >
+                  <app-icon class="size-4" [path]="HeroIcon.documentText" />
+                  Receipt
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="p-12 text-center">
+            <app-icon class="size-9 text-outline-strong" [path]="HeroIcon.documentText" />
+            <p class="mt-3 font-semibold text-corporate-blue">No payments found</p>
+            <p class="mt-1 text-sm text-text-secondary">
+              Try another view, employee, or payroll period.
+            </p>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

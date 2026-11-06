@@ -1,0 +1,56 @@
+<section class="min-w-0 overflow-hidden rounded-xl border border-outline-light bg-surface-lowest">
+  <header class="border-b border-surface-high p-5">
+    <h2 class="text-lg font-semibold text-corporate-blue">
+      {{ date() | date: 'EEEE, MMM d, yyyy' }}
+    </h2>
+    <p class="mt-1 text-sm text-text-secondary">
+      Unrecorded days default to 8 hours and Worked. Save each row to record it.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <p role="status" class="p-6 text-sm text-text-secondary">Loading employees and attendance…</p>
+  } @else {
+    <fieldset [disabled]="!!savingUserId()" class="min-w-0">
+      <legend class="sr-only">Employee attendance</legend>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface-low">
+            <tr>
+              @for (heading of ['Employee', 'Worked hours', 'State', 'Action']; track heading) {
+                <th scope="col" class="p-4">{{ heading }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (employee of employees(); track employee.userId) {
+              <tr
+                app-attendance-employee-row
+                [employee]="employee"
+                [date]="date()"
+                [saving]="savingUserId() === employee.userId"
+                [disabled]="!!savingUserId()"
+                (saved)="saved.emit($event)"
+              ></tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="p-8 text-center text-text-secondary">No employees found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  }
+
+  <fieldset [disabled]="loading() || !!savingUserId()">
+    <legend class="sr-only">Employee pages</legend>
+    <app-employee-pagination
+      [total]="total()"
+      [page]="page()"
+      [pageSize]="pageSize()"
+      (pageChange)="pageChanged.emit($event)"
+      (pageSizeChange)="pageSizeChanged.emit($event)"
+    />
+  </fieldset>
+</section>

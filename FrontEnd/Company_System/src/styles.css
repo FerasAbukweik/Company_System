@@ -3,26 +3,58 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-corporate-blue: #0A2540;
-  --color-vibrant-turquoise: #00D1B2;
-  --color-secondary-blue: #3B82F6;
-  --color-surface-base: #F9F9FF;
-  --color-surface-dim: #D0DAF0;
-  --color-surface-lowest: #FFFFFF;
-  --color-surface-low: #F0F3FF;
-  --color-surface-high: #E2E7FF;
-  --color-text-primary: #1A1C1E;
-  --color-text-secondary: #44474E;
-  --color-outline-strong: #74777F;
-  --color-outline-light: #C4C6CF;
-  --color-error: #E63946;
+  --color-corporate-blue: #0a2540;
+  --color-vibrant-turquoise: #00d1b2;
+  --color-secondary-blue: #3b82f6;
+  --color-surface-base: #f9f9ff;
+  --color-surface-dim: #d0daf0;
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #f0f3ff;
+  --color-surface-high: #e2e7ff;
+  --color-text-primary: #1a1c1e;
+  --color-text-secondary: #44474e;
+  --color-outline-strong: #74777f;
+  --color-outline-light: #c4c6cf;
+  --color-error: #e63946;
+  --color-turquoise-tint: rgba(0, 209, 178, 0.12);
+  --color-turquoise-text: #00796b;
+  --color-blue-tint: rgba(59, 130, 246, 0.1);
+  --color-error-bg: #fde8ea;
+  --color-error-text: #c62f3b;
+  --color-on-dark-muted: #a9bcd6;
 }
 
-*{
+* {
   box-sizing: border-box;
   scrollbar-width: none;
 }
 
-body{
+body {
   background-color: var(--color-surface-base);
+}
+/* Print only the open payslip, including the full scrollable breakdown. */
+@media print {
+  body:has(app-my-portal app-drawer aside:not([inert])) {
+    visibility: hidden;
+  }
+
+  app-my-portal app-drawer aside:not([inert]) {
+    visibility: visible;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    border: 0;
+    box-shadow: none;
+    transform: none;
+  }
+
+  app-my-portal app-drawer aside:not([inert]) .overflow-y-auto {
+    overflow: visible;
+  }
+
+  app-my-portal app-drawer button {
+    display: none;
+  }
 }

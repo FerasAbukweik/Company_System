@@ -1,0 +1,124 @@
+<app-drawer [open]="open()" labelledBy="employee-title" (closed)="close()">
+  <header class="flex items-center justify-between bg-surface-low p-6">
+    <h2 id="employee-title" class="text-xl font-bold text-corporate-blue">
+      {{ isEdit() ? 'Edit Employee' : 'Add Employee' }}
+    </h2>
+    <button type="button" aria-label="Close employee editor" (click)="close()">
+      <app-icon class="size-5" [path]="HeroIcon.xMark" />
+    </button>
+  </header>
+  <form class="flex-1 overflow-y-auto p-6 space-y-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="flex items-center gap-4">
+      <app-avatar class="size-16" [name]="form.controls.fullName.value" [imageUrl]="avatarUrl()" />
+      <label class="text-sm text-secondary-blue">
+        Profile picture
+        <input
+          aria-label="Profile picture"
+          type="file"
+          accept="image/*"
+          class="block text-xs mt-2"
+          (change)="onImageSelected($event)"
+        />
+      </label>
+    </div>
+    @if (isImageError()) {
+      <p class="text-sm text-error-text">A profile picture is required.</p>
+    }
+    @for (field of ['fullName', 'userName', 'email', 'phone']; track field) {
+      <label class="block text-sm text-text-secondary">
+        {{
+          field === 'fullName'
+            ? 'Full name'
+            : field === 'userName'
+              ? 'Username'
+              : field === 'email'
+                ? 'Email'
+                : 'Phone number'
+        }}
+        <input
+          class="mt-1 w-full rounded-lg border border-outline-light bg-surface-lowest p-2 text-text-primary"
+          [formControlName]="field"
+          [type]="field === 'email' ? 'email' : 'text'"
+        />
+        @if (form.get(field)?.invalid && form.get(field)?.touched) {
+          <span class="text-xs text-error-text">Enter a valid value.</span>
+        }
+      </label>
+    }
+    <label class="block text-sm text-text-secondary">
+      Position
+      <select
+        formControlName="position"
+        class="mt-1 w-full rounded-lg border border-outline-light p-2"
+      >
+        @for (option of positionOptions; track option.value) {
+          <option [ngValue]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </label>
+    <label class="block text-sm text-text-secondary">
+      Hourly rate (USD, optional)
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        formControlName="hourlyRate"
+        class="mt-1 w-full rounded-lg border border-outline-light p-2"
+      />
+    </label>
+    <label class="block text-sm text-text-secondary">
+      Annual holiday allowance (days, optional)
+      <input
+        type="number"
+        min="0"
+        max="366"
+        step="1"
+        formControlName="annualHolidayAllowance"
+        class="mt-1 w-full rounded-lg border border-outline-light p-2"
+      />
+    </label>
+    @if (!isEdit()) {
+      <label class="block text-sm text-text-secondary">
+        Password
+        <input
+          type="password"
+          formControlName="password"
+          class="mt-1 w-full rounded-lg border border-outline-light p-2"
+        />
+        @if (isError('password')) {
+          <span class="text-xs text-error-text">
+            Use at least 8 characters including uppercase, lowercase, a number, and a symbol.
+          </span>
+        }
+      </label>
+    }
+    <div class="space-y-2">
+      <p class="text-sm text-text-secondary">Manager</p>
+      @if (open()) {
+        <app-employee-parent-picker
+          [selectedId]="form.controls.parentId.value"
+          [excludedUserId]="employee()?.id ?? ''"
+          [invalid]="isError('parentId')"
+          (parentSelected)="selectParent($event)"
+        />
+      }
+      @if (isEdit()) {
+        <p class="text-xs text-text-secondary">
+          Select a manager to change the reporting relationship.
+        </p>
+      }
+    </div>
+    @if (serverError()) {
+      <p role="alert" class="rounded-lg bg-error-bg p-3 text-sm text-error-text">
+        {{ serverError() }}
+      </p>
+    }
+    <button
+      type="submit"
+      class="w-full rounded-lg bg-corporate-blue p-3 font-semibold text-surface-lowest disabled:opacity-50"
+      [disabled]="isSaving()"
+    >
+      {{ isSaving() ? 'Saving…' : 'Save Employee' }}
+    </button>
+  </form>
+</app-drawer>

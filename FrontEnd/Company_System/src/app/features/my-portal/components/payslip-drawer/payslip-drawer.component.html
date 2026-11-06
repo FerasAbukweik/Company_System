@@ -1,0 +1,41 @@
+<app-drawer [open]="record() !== null" labelledBy="payslip-title" (closed)="closed.emit()">
+  <header class="flex justify-between bg-surface-low p-6">
+    <h2 id="payslip-title" class="text-xl font-bold text-corporate-blue">Payment Receipt</h2>
+    <button type="button" aria-label="Close payment receipt" (click)="closed.emit()">Close</button>
+  </header>
+  @if (record(); as payment) {
+    <div class="flex-1 overflow-y-auto space-y-6 p-6">
+      <p class="text-3xl font-bold text-corporate-blue">
+        {{ payment.paidAmount | currency: 'USD' }}
+      </p>
+      <app-payment-state-badge [state]="payment.state" />
+      <dl class="space-y-4 text-sm">
+        <div>
+          <dt class="text-text-secondary">Payment ID</dt>
+          <dd class="break-all font-mono">{{ payment.id }}</dd>
+        </div>
+        <div>
+          <dt class="text-text-secondary">Payroll period</dt>
+          <dd>{{ payment.year }}-{{ payment.month.toString().padStart(2, '0') }}</dd>
+        </div>
+        <div>
+          <dt class="text-text-secondary">Payment date</dt>
+          <dd>{{ (payment.paymentDate | date: 'MMM d, yyyy') ?? '—' }}</dd>
+        </div>
+      </dl>
+      <p class="text-xs text-text-secondary">
+        This receipt contains the recorded payment amount. No tax or benefit breakdown has been
+        recorded.
+      </p>
+    </div>
+  }
+  <footer class="border-t border-outline-light p-4">
+    <button
+      type="button"
+      class="rounded-lg bg-corporate-blue px-4 py-2 text-surface-lowest"
+      (click)="printRequested.emit()"
+    >
+      Print / Save PDF
+    </button>
+  </footer>
+</app-drawer>

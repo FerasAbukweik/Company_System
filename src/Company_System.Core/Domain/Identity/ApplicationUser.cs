@@ -10,62 +10,81 @@ namespace HR_System.Core.Domain.Identity;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
-    public override Guid Id { get; set; } =  Guid.NewGuid();
-    
+    public override Guid Id { get; set; } = Guid.NewGuid();
+
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+
     [Required]
-    [Column(TypeName =  "nvarchar(100)")]
+    [Column(TypeName = "nvarchar(100)")]
     public required string FullName { get; set; }
-    
+
     [Required]
     public required PositionsEnum Position { get; set; }
 
-    [Column(TypeName ="nvarchar(150)")]
-    public string? PublicImageId { get; set; }
-    
-    [Column(TypeName ="nvarchar(150)")]
-    public string? ImageUrl { get; set; }
+    [Range(typeof(decimal), "0", "9999999999999999.99")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal? HourlyRate { get; set; }
+
+    [Range(0, 366)]
+    public int? AnnualHolidayAllowance { get; set; }
+
 
     public UserDTO ToUserDTO()
     {
         return new UserDTO()
         {
+            FullName = FullName,
+            Email = Email,
+            Phone = PhoneNumber,
+            HourlyRate = HourlyRate,
+            AnnualHolidayAllowance = AnnualHolidayAllowance,
+            IsActive = OrganizationHierarchy?.IsActive ?? false,
             Position = Position.ToString(),
             UserId = Id.ToString(),
             UserName = UserName ?? "unknown",
-            UserImageUrl = ImageUrl ?? "unknown",
+            UserImageUrl = Image?.Url ?? "unknown",
         };
     }
 
     // relations
     [JsonIgnore]
+    public Image? Image { get; set; }
+
+    [JsonIgnore]
     public List<RefreshToken> RefreshTokens { get; set; } = [];
-    
+
     [JsonIgnore]
     public List<AppTask> Tasks { get; set; } = [];
-    
+
+    [JsonIgnore]
+    public List<DailyWorkRecord> DailyWorkRecords { get; set; } = [];
+
+    [JsonIgnore]
+    public List<Payment> Payments { get; set; } = [];
+
     [JsonIgnore]
     public List<AppTask> CreatedTasks { get; set; } = [];
-    
+
     [JsonIgnore]
     public List<Approval> Approvals { get; set; } = [];
 
     [JsonIgnore]
     public List<Approval> ToApprove { get; set; } = [];
-    
+
     [JsonIgnore]
     public List<Activity> Activities { get; set; } = [];
-    
+
     [JsonIgnore]
     public OrganizationHierarchy OrganizationHierarchy { get; set; }
-    
+
     [JsonIgnore]
     public List<Message> SentMessages { get; set; } = [];
-    
+
     [JsonIgnore]
     public List<Message> ReceivedMessages { get; set; } = [];
-    
-    
-    
+
+
+
     // override
     public override string ToString()
     {
@@ -76,9 +95,9 @@ public class ApplicationUser : IdentityUser<Guid>
     {
         if (obj is not ApplicationUser otherUser)
         {
-            return  false;
+            return false;
         }
-        
+
         return (this.Id == otherUser.Id) &&
                (this.UserName == otherUser.UserName) &&
                (this.Email == otherUser.Email) &&

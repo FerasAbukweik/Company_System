@@ -1,0 +1,63 @@
+<div class="flex flex-col items-center relative">
+  <div
+    [class.outline]="isCurrUser"
+    [class.outline-2]="isCurrUser"
+    [class.outline-vibrant-turquoise]="isCurrUser"
+    class="group flex min-h-32 w-64 flex-col justify-between rounded-xl border border-outline-light bg-surface-lowest p-4 shadow-sm transition-all"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="overflow-hidden w-11 h-11 rounded-full bg-corporate-blue/5 border border-corporate-blue/10 flex items-center justify-center font-bold text-corporate-blue text-sm uppercase tracking-wider shrink-0"
+      >
+        <img
+          [src]="node().userImageUrl"
+          [alt]="node().fullName"
+          (error)="$event.target.src = 'user_vector.jpg'"
+        />
+      </div>
+      <div class="min-w-0">
+        <p class="font-bold text-corporate-blue truncate">{{ node().fullName }}</p>
+        <p class="text-xs text-text-secondary font-medium truncate">{{ displayRole }}</p>
+      </div>
+    </div>
+
+    <div
+      class="flex justify-end items-center gap-2 text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      @if (!isCurrUser) {
+        <button
+          type="button"
+          aria-label="Open chat"
+          class="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
+          (click)="chatPanelService.open(node())"
+        >
+          <app-icon class="size-5" [path]="HeroIcon.chatBubbleLeft" />
+        </button>
+      }
+
+      @if (isCurrUserChild()) {
+        <button
+          type="button"
+          aria-label="Delegate task"
+          class="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
+          (click)="delegateTaskService.open(node())"
+        >
+          <app-icon class="size-5" [path]="HeroIcon.documentText" />
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (node().children && node().children.length > 0) {
+    <div aria-hidden="true" class="h-6 shrink-0 border-l-2 border-outline-light"></div>
+
+    <div class="org-tree-children">
+      @for (child of node().children; track child.id) {
+        <div class="org-tree-branch">
+          <span aria-hidden="true" class="org-tree-connector"></span>
+          <app-org-node [node]="child" [isCurrUserChild]="isCurrUserChild() || isCurrUser" />
+        </div>
+      }
+    </div>
+  }
+</div>

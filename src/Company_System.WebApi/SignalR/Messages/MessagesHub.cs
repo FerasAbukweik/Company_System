@@ -1,19 +1,23 @@
-using HR_System.Core.Constraints;
+using HR_System.Core.Abstraction.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using HR_System.Core.DTO.Message;
-using HR_System.Core.Interfaces.ServiceContracts;
 using HR_System.ExtensionMethods;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
 
 namespace HR_System.SignalR.Messages;
 
+[Authorize]
 public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
 {
     public override async Task OnConnectedAsync()
     {
         var groupName = GenerateGroupName();
-        if(groupName == null) return;
-        
+        if (groupName == null)
+        {
+            Context.Abort();
+            return;
+        }
+
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
     }
 
@@ -21,9 +25,9 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
     {
         var otherUserId = GetOtherPersonId();
         if (otherUserId == null) return;
-        
-        var currUserId =  GetUserId();
-        if(currUserId == null) return;
+
+        var currUserId = GetUserId();
+        if (currUserId == null) return;
 
         MessageAddDTO toAddMessage = new MessageAddDTO()
         {
@@ -31,13 +35,14 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
             ReceiverId = otherUserId.Value
         };
 
-        var addMessageResult = await messagesService.AddAsync(toAddMessage, currUserId.Value);
-        if(!addMessageResult.IsSuccess) return;
+        var addMessageResult = await messagesService.AddAsync(toAddMessage, currUserId.Value, Context.ConnectionAborted);
+        if (!addMessageResult.IsSuccess)
+            throw new HubException(addMessageResult.ErrorMessage);
 
-        
+
         var groupName = GenerateGroupName();
-        if(groupName == null) return;
-        
+        if (groupName == null) return;
+
         addMessageResult.Value!.IsCurrUserSender = false;
         await Clients.OthersInGroup(groupName).ReceiveMessage(addMessageResult.Value!);
         addMessageResult.Value!.IsCurrUserSender = true;
@@ -47,28 +52,28 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
     public async Task NotifyTyping()
     {
         var groupName = GenerateGroupName();
-        if(groupName == null) return;
-        
+        if (groupName == null) return;
+
         await Clients.OthersInGroup(groupName).NotifyTyping();
     }
 
     public async Task NotifyStoppedTyping()
     {
         var groupName = GenerateGroupName();
-        if(groupName == null) return;
-        
+        if (groupName == null) return;
+
         await Clients.OthersInGroup(groupName).NotifyStoppedTyping();
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
     // helper methods
 
     private string? GenerateGroupName()
@@ -77,38 +82,38 @@ public class MessagesHub(IMessagesService messagesService) : Hub<IMessagesHub>
         if (userIdResult == null) return null;
 
         var otherUserId = GetOtherPersonId();
-        if(otherUserId is null) return null;
+        if (otherUserId is null) return null;
 
         if (string.Compare(userIdResult.Value.ToString(), otherUserId.Value.ToString(), StringComparison.Ordinal) > 0)
             return $"{userIdResult.Value}-{otherUserId.Value}";
-        
+
         return $"{otherUserId.Value}-{userIdResult.Value}";
     }
 
     private Guid? GetOtherPersonId()
     {
         var httpContext = Context.GetHttpContext();
-        if(httpContext == null)
+        if (httpContext == null)
             return null;
 
         if (!httpContext.Request.Query.TryGetValue("userId", out var idString))
             return null;
-        
-        if(!Guid.TryParse(idString, out var id))
+
+        if (!Guid.TryParse(idString, out var id) || id == Guid.Empty)
             return null;
-        
+
         return id;
     }
 
     private Guid? GetUserId()
     {
         var httpContext = Context.GetHttpContext();
-        if(httpContext == null)
+        if (httpContext == null)
             return null;
 
         var result = httpContext.User.GetUserId();
-        if(!result.IsSuccess) return null;
-        
+        if (!result.IsSuccess) return null;
+
         return result.Value;
     }
 }

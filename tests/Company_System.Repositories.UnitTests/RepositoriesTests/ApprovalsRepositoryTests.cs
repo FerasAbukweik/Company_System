@@ -1,10 +1,10 @@
 using System.Linq.Expressions;
 using AutoFixture;
 using FluentAssertions;
+using HR_System.Core.Abstraction.RepositoryContracts;
 using HR_System.Core.Domain.Entities;
 using HR_System.Core.DTO.LazyLoading;
 using HR_System.Core.Enums;
-using HR_System.Core.Interfaces.RepositoryContracts;
 using HR_System.Infrastructure;
 using HR_System.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -12,38 +12,30 @@ using Xunit.Abstractions;
 
 namespace TestProject1.RepositoriesTests;
 
-public class ApprovalRepositoryTests : IDisposable
+public class ApprovalRepositoryTests : RepositoryTestBase, IDisposable
 {
     private readonly IApprovalRepository _approvalRepository;
     private readonly ApplicationDbContext _dbContext;
-    private readonly ITestOutputHelper _output;
-    private readonly IFixture _fixture;
 
-    public ApprovalRepositoryTests(ITestOutputHelper output)
+    public ApprovalRepositoryTests(ITestOutputHelper output) : base(output)
     {
-        _output = output;
-
-        _fixture = new Fixture();
-        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-            .ForEach(b => _fixture.Behaviors.Remove(b));
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-        var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         _dbContext = new ApplicationDbContext(dbOptions);
         _approvalRepository = new ApprovalRepository(_dbContext);
     }
 
-    private Approval CreateApproval(
-        ApprovalStatusEnum? status = null,
-        Guid? taskId = null,
-        DateTime? createdOn = null)
+    private Approval CreateApproval(ApprovalStatusEnum? status = null, Guid? taskId = null, DateTime? createdOn = null)
     {
-        return _fixture.Build<Approval>()
+        return Fixture.Build<Approval>()
             .With(a => a.Status, status ?? ApprovalStatusEnum.Pending)
-            .With(a => a.TaskId, taskId)
-            .With(a => a.CreatedOn, createdOn ?? DateTime.UtcNow)
+            .With(
+                a => a.TaskId,
+                taskId
+            )
+            .With(
+            a => a.CreatedOn,
+            createdOn ?? DateTime.UtcNow
+        )
             .Without(a => a.Task)
             .Without(a => a.UserRequesting)
             .Without(a => a.Manager)
@@ -52,30 +44,31 @@ public class ApprovalRepositoryTests : IDisposable
 
     private AppTask CreateTask(Guid? id = null)
     {
-        var task = _fixture.Build<AppTask>()
+        var task = Fixture.Build<AppTask>()
             .Without(t => t.User)
             .Without(t => t.Manager)
             .Without(t => t.Approvals)
             .Create();
-
         if (id.HasValue)
             task.Id = id.Value;
-
         return task;
     }
 
     #region UpdateStatus
-
     [Fact]
     public async Task UpdateStatus_ShouldUpdateStatus_WhenApprovalExists()
     {
         // Arrange
+        LogArrange("Scenario", nameof(UpdateStatus_ShouldUpdateStatus_WhenApprovalExists));
+
         var approval = CreateApproval(status: ApprovalStatusEnum.Pending);
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
 
         // Act
-        var result = await _approvalRepository.UpdateStatus(approval.Id, ApprovalStatusEnum.Approved);
+        var result = await _approvalRepository.UpdateStatusAsync(approval.Id, ApprovalStatusEnum.Approved);
+        LogAct(result);
 
         // Assert
         result.Should().NotBeNull();
@@ -86,44 +79,57 @@ public class ApprovalRepositoryTests : IDisposable
     public async Task UpdateStatus_ShouldPersistUpdatedStatus_AfterSaveChanges()
     {
         // Arrange
+        LogArrange("Scenario", nameof(UpdateStatus_ShouldPersistUpdatedStatus_AfterSaveChanges));
+
         var approval = CreateApproval(status: ApprovalStatusEnum.Pending);
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
-
-        // Act
-        await _approvalRepository.UpdateStatus(approval.Id, ApprovalStatusEnum.Rejected);
-        await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
 
-        // Assert
+        // Act
+        await _approvalRepository.UpdateStatusAsync(approval.Id, ApprovalStatusEnum.Rejected);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
         var fromDb = await _dbContext.Approvals.SingleAsync(a => a.Id == approval.Id);
+        LogAct(fromDb);
+
+        // Assert
         fromDb.Status.Should().Be(ApprovalStatusEnum.Rejected);
     }
 
     [Fact]
     public async Task UpdateStatus_ShouldReturnNull_WhenApprovalDoesNotExist()
     {
+        // Arrange
+        LogArrange("Scenario", nameof(UpdateStatus_ShouldReturnNull_WhenApprovalDoesNotExist));
+
+        _dbContext.ChangeTracker.Clear();
+
         // Act
-        var result = await _approvalRepository.UpdateStatus(Guid.NewGuid(), ApprovalStatusEnum.Approved);
+        var result = await _approvalRepository.UpdateStatusAsync(Guid.NewGuid(), ApprovalStatusEnum.Approved);
+        LogAct(result);
 
         // Assert
         result.Should().BeNull();
     }
 
     [Fact]
-    public async Task UpdateStatus_ShouldLoadRelatedTask()
+    public async Task GetByIdAsync_ShouldLoadRelatedTask_WhenRequested()
     {
         // Arrange
+        LogArrange("Scenario", nameof(GetByIdAsync_ShouldLoadRelatedTask_WhenRequested));
+
         var task = CreateTask();
         _dbContext.Tasks.Add(task);
-
         var approval = CreateApproval(taskId: task.Id);
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
+        _dbContext.ChangeTracker.Clear();
 
         // Act
-        var result = await _approvalRepository.UpdateStatus(approval.Id, ApprovalStatusEnum.Approved);
+        var result = await _approvalRepository.GetByIdAsync(approval.Id, [record => record.Task!]);
+        LogAct(result);
 
         // Assert
         result.Should().NotBeNull();
@@ -132,17 +138,18 @@ public class ApprovalRepositoryTests : IDisposable
     }
 
     #endregion
-
     #region Add
-
     [Fact]
     public void Add_ShouldTrackEntityAsAdded()
     {
         // Arrange
+        LogArrange("Scenario", nameof(Add_ShouldTrackEntityAsAdded));
+
         var approval = CreateApproval();
 
         // Act
         _approvalRepository.Add(approval);
+        LogAct("Operation completed");
 
         // Assert
         _dbContext.Entry(approval).State.Should().Be(EntityState.Added);
@@ -153,31 +160,34 @@ public class ApprovalRepositoryTests : IDisposable
     public void Add_ShouldNotPersistToDatabase_BeforeSaveChangesIsCalled()
     {
         // Arrange
+        LogArrange("Scenario", nameof(Add_ShouldNotPersistToDatabase_BeforeSaveChangesIsCalled));
+
         var approval = CreateApproval();
 
         // Act
         _approvalRepository.Add(approval);
+        LogAct("Operation completed");
 
         // Assert
         _dbContext.Approvals.AsNoTracking().Any(a => a.Id == approval.Id).Should().BeFalse();
     }
 
     #endregion
-
     #region FilterAsync
-
     [Fact]
     public async Task FilterAsync_ShouldReturnOnlyApprovalsMatchingFilter()
     {
         // Arrange
+        LogArrange("Scenario", nameof(FilterAsync_ShouldReturnOnlyApprovalsMatchingFilter));
+
         var matching = CreateApproval(status: ApprovalStatusEnum.Approved);
         var nonMatching = CreateApproval(status: ApprovalStatusEnum.Pending);
-
         _dbContext.Approvals.AddRange(matching, nonMatching);
         await _dbContext.SaveChangesAsync();
 
         // Act
         var result = await _approvalRepository.FilterAsync(a => a.Status == ApprovalStatusEnum.Approved);
+        LogAct(result);
 
         // Assert
         result.Should().ContainSingle(a => a.Id == matching.Id);
@@ -188,11 +198,14 @@ public class ApprovalRepositoryTests : IDisposable
     public async Task FilterAsync_ShouldReturnEmptyList_WhenNoApprovalsMatchFilter()
     {
         // Arrange
+        LogArrange("Scenario", nameof(FilterAsync_ShouldReturnEmptyList_WhenNoApprovalsMatchFilter));
+
         _dbContext.Approvals.Add(CreateApproval(status: ApprovalStatusEnum.Pending));
         await _dbContext.SaveChangesAsync();
 
         // Act
         var result = await _approvalRepository.FilterAsync(a => a.Status == ApprovalStatusEnum.Rejected);
+        LogAct(result);
 
         // Assert
         result.Should().BeEmpty();
@@ -202,6 +215,8 @@ public class ApprovalRepositoryTests : IDisposable
     public async Task FilterAsync_ShouldReturnUntrackedEntities()
     {
         // Arrange
+        LogArrange("Scenario", nameof(FilterAsync_ShouldReturnUntrackedEntities));
+
         var approval = CreateApproval();
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
@@ -209,9 +224,10 @@ public class ApprovalRepositoryTests : IDisposable
 
         // Act
         var result = await _approvalRepository.FilterAsync(a => a.Id == approval.Id);
+        var fetched = result.Single();
+        LogAct(result);
 
         // Assert
-        var fetched = result.Single();
         _dbContext.Entry(fetched).State.Should().Be(EntityState.Detached);
     }
 
@@ -219,21 +235,21 @@ public class ApprovalRepositoryTests : IDisposable
     public async Task FilterAsync_ShouldLoadIncludedNavigationProperty_WhenIncludeProvided()
     {
         // Arrange
+        LogArrange("Scenario", nameof(FilterAsync_ShouldLoadIncludedNavigationProperty_WhenIncludeProvided));
+
         var task = CreateTask();
         _dbContext.Tasks.Add(task);
-
         var approval = CreateApproval(taskId: task.Id);
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
 
         // Act
-        var result = await _approvalRepository.FilterAsync(
-            filter: a => a.Id == approval.Id,
-            include: [a => a.Task!]);
+        var result = await _approvalRepository.FilterAsync(predicate: a => a.Id == approval.Id, include: [a => a.Task!]);
+        var fetched = result.Single();
+        LogAct(result);
 
         // Assert
-        var fetched = result.Single();
         fetched.Task.Should().NotBeNull();
         fetched.Task!.Id.Should().Be(task.Id);
     }
@@ -242,9 +258,10 @@ public class ApprovalRepositoryTests : IDisposable
     public async Task FilterAsync_ShouldNotLoadNavigationProperty_WhenIncludeNotProvided()
     {
         // Arrange
+        LogArrange("Scenario", nameof(FilterAsync_ShouldNotLoadNavigationProperty_WhenIncludeNotProvided));
+
         var task = CreateTask();
         _dbContext.Tasks.Add(task);
-
         var approval = CreateApproval(taskId: task.Id);
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
@@ -252,31 +269,39 @@ public class ApprovalRepositoryTests : IDisposable
 
         // Act
         var result = await _approvalRepository.FilterAsync(a => a.Id == approval.Id);
+        var fetched = result.Single();
+        LogAct(result);
 
         // Assert
-        var fetched = result.Single();
         fetched.Task.Should().BeNull();
     }
 
     #endregion
-
     #region LazyGetApprovals
-
     [Fact]
     public async Task LazyGetApprovals_ShouldReturnOnlyApprovalsMatchingFilter()
     {
         // Arrange
         var matching = CreateApproval(status: ApprovalStatusEnum.Approved);
         var nonMatching = CreateApproval(status: ApprovalStatusEnum.Pending);
-
         _dbContext.Approvals.AddRange(matching, nonMatching);
         await _dbContext.SaveChangesAsync();
-
-        var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+        var lazyData = new LazyDTO
+        {
+            Taken = 0,
+            SectionSize = 10
+        };
+        LogArrange(nameof(lazyData), lazyData);
 
         // Act
-        var result = await _approvalRepository.LazyGetApprovals(
-            lazyData, a => a.Status == ApprovalStatusEnum.Approved);
+        var result = await _approvalRepository.FilterAsync(
+            a => a.Status == ApprovalStatusEnum.Approved,
+            orderBy: approval => approval.CreatedOn,
+            orderByDesc: true,
+            skip: lazyData.Taken,
+            take: lazyData.SectionSize
+        );
+        LogAct(result);
 
         // Assert
         result.Should().ContainSingle(a => a.Id == matching.Id);
@@ -290,14 +315,24 @@ public class ApprovalRepositoryTests : IDisposable
         var oldest = CreateApproval(createdOn: DateTime.UtcNow.AddDays(-2));
         var middle = CreateApproval(createdOn: DateTime.UtcNow.AddDays(-1));
         var newest = CreateApproval(createdOn: DateTime.UtcNow);
-
         _dbContext.Approvals.AddRange(oldest, middle, newest);
         await _dbContext.SaveChangesAsync();
-
-        var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+        var lazyData = new LazyDTO
+        {
+            Taken = 0,
+            SectionSize = 10
+        };
+        LogArrange(nameof(lazyData), lazyData);
 
         // Act
-        var result = await _approvalRepository.LazyGetApprovals(lazyData, _ => true);
+        var result = await _approvalRepository.FilterAsync(
+            _ => true,
+            orderBy: approval => approval.CreatedOn,
+            orderByDesc: true,
+            skip: lazyData.Taken,
+            take: lazyData.SectionSize
+        );
+        LogAct(result);
 
         // Assert
         result.Select(a => a.Id).Should().ContainInOrder(newest.Id, middle.Id, oldest.Id);
@@ -307,19 +342,29 @@ public class ApprovalRepositoryTests : IDisposable
     public async Task LazyGetApprovals_ShouldRespectSkipAndTake()
     {
         // Arrange
-        var approvals = Enumerable.Range(0, 5)
-            .Select(i => CreateApproval(createdOn: DateTime.UtcNow.AddMinutes(-i)))
-            .ToList();
-
+        var approvals = Enumerable.Range(0, 5).Select(i => CreateApproval(createdOn: DateTime.UtcNow.AddMinutes(-i))).ToList();
         _dbContext.Approvals.AddRange(approvals);
         await _dbContext.SaveChangesAsync();
-
-        var lazyData = new LazyDTO { Taken = 1, SectionSize = 2 };
+        var lazyData = new LazyDTO
+        {
+            Taken = 1,
+            SectionSize = 2
+        };
+        LogArrange(nameof(lazyData), lazyData);
 
         // Act
-        var result = await _approvalRepository.LazyGetApprovals(lazyData, _ => true);
+        var result = await _approvalRepository.FilterAsync(
+            _ => true,
+            orderBy: approval => approval.CreatedOn,
+            orderByDesc: true,
+            skip: lazyData.Taken,
+            take: lazyData.SectionSize
+        );
+        LogAct(result);
 
         // Assert — sorted desc by CreatedOn: [0,1,2,3,4] -> skip 1, take 2 -> [1,2]
+
+        // Assert
         result.Should().HaveCount(2);
         result.Select(a => a.Id).Should().ContainInOrder(approvals[1].Id, approvals[2].Id);
     }
@@ -330,20 +375,30 @@ public class ApprovalRepositoryTests : IDisposable
         // Arrange
         var task = CreateTask();
         _dbContext.Tasks.Add(task);
-
         var approval = CreateApproval(taskId: task.Id);
         _dbContext.Approvals.Add(approval);
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
-
-        var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+        var lazyData = new LazyDTO
+        {
+            Taken = 0,
+            SectionSize = 10
+        };
+        LogArrange(nameof(lazyData), lazyData);
 
         // Act
-        var result = await _approvalRepository.LazyGetApprovals(
-            lazyData, a => a.Id == approval.Id, include: [a => a.Task!]);
+        var result = await _approvalRepository.FilterAsync(
+            a => a.Id == approval.Id,
+            orderBy: approval => approval.CreatedOn,
+            orderByDesc: true,
+            skip: lazyData.Taken,
+            take: lazyData.SectionSize,
+            include: [a => a.Task!]
+        );
+        var fetched = result.Single();
+        LogAct(result);
 
         // Assert
-        var fetched = result.Single();
         fetched.Task.Should().NotBeNull();
         fetched.Task!.Id.Should().Be(task.Id);
     }
@@ -354,29 +409,40 @@ public class ApprovalRepositoryTests : IDisposable
         // Arrange
         _dbContext.Approvals.Add(CreateApproval(status: ApprovalStatusEnum.Pending));
         await _dbContext.SaveChangesAsync();
-
-        var lazyData = new LazyDTO { Taken = 0, SectionSize = 10 };
+        var lazyData = new LazyDTO
+        {
+            Taken = 0,
+            SectionSize = 10
+        };
+        LogArrange(nameof(lazyData), lazyData);
 
         // Act
-        var result = await _approvalRepository.LazyGetApprovals(
-            lazyData, a => a.Status == ApprovalStatusEnum.Rejected);
+        var result = await _approvalRepository.FilterAsync(
+            a => a.Status == ApprovalStatusEnum.Rejected,
+            orderBy: approval => approval.CreatedOn,
+            orderByDesc: true,
+            skip: lazyData.Taken,
+            take: lazyData.SectionSize
+        );
+        LogAct(result);
 
         // Assert
         result.Should().BeEmpty();
     }
 
     #endregion
-
     #region SaveChangesAsync
-
     [Fact]
     public async Task SaveChangesAsync_ShouldReturnTrue_WhenThereArePendingChanges()
     {
         // Arrange
+        LogArrange("Scenario", nameof(SaveChangesAsync_ShouldReturnTrue_WhenThereArePendingChanges));
+
         _dbContext.Approvals.Add(CreateApproval());
 
         // Act
         var result = await _approvalRepository.SaveChangesAsync();
+        LogAct(result);
 
         // Assert
         result.Should().BeTrue();
@@ -386,14 +452,17 @@ public class ApprovalRepositoryTests : IDisposable
     [Fact]
     public async Task SaveChangesAsync_ShouldReturnFalse_WhenThereAreNoPendingChanges()
     {
+        // Arrange
+        LogArrange("Scenario", nameof(SaveChangesAsync_ShouldReturnFalse_WhenThereAreNoPendingChanges));
+
         // Act
         var result = await _approvalRepository.SaveChangesAsync();
+        LogAct(result);
 
         // Assert
         result.Should().BeFalse();
     }
 
     #endregion
-
     public void Dispose() => _dbContext.Dispose();
 }

@@ -1,0 +1,64 @@
+<app-drawer [open]="payment() !== null" labelledBy="payment-receipt-title" (closed)="closed.emit()">
+  <header class="flex items-center justify-between bg-surface-low p-6">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-text-secondary">Payment record</p>
+      <h2 id="payment-receipt-title" class="mt-1 text-xl font-bold text-corporate-blue">
+        Payment Details
+      </h2>
+    </div>
+    <button
+      type="button"
+      aria-label="Close payment details"
+      class="rounded-full p-2 hover:bg-surface-dim"
+      (click)="closed.emit()"
+    >
+      <app-icon class="size-5" [path]="HeroIcon.xMark" />
+    </button>
+  </header>
+  @if (payment(); as value) {
+    <div class="flex-1 overflow-y-auto p-6">
+      <div class="mb-6 flex items-center gap-3">
+        <app-avatar class="size-12" [name]="value.employeeName" />
+        <div>
+          <h3 class="font-semibold text-corporate-blue">{{ value.employeeName }}</h3>
+          <p class="text-xs text-text-secondary">{{ value.userId }}</p>
+        </div>
+      </div>
+      <div class="mb-6 rounded-xl bg-surface-low p-5">
+        <p class="text-xs text-text-secondary">Payment amount</p>
+        <p class="mt-1 text-3xl font-bold text-corporate-blue">
+          {{ value.paidAmount | currency: 'USD' }}
+        </p>
+      </div>
+      <dl class="space-y-4 text-sm">
+        <div class="flex justify-between gap-4">
+          <dt class="text-text-secondary">Payment ID</dt>
+          <dd class="font-mono text-corporate-blue">{{ value.id }}</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-text-secondary">Payroll month</dt>
+          <dd class="text-corporate-blue">{{ payrollDate() | date: 'MMMM yyyy' }}</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-text-secondary">Payment date</dt>
+          <dd class="text-corporate-blue">
+            {{ (value.paymentDate | date: 'MMM d, yyyy') ?? '—' }}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-text-secondary">State</dt>
+          <dd><app-payment-state-badge [state]="value.state" /></dd>
+        </div>
+      </dl>
+    </div>
+  }
+  <footer class="border-t border-outline-light p-4 text-right">
+    <button
+      type="button"
+      class="rounded-lg bg-corporate-blue px-4 py-2 text-sm text-surface-lowest hover:bg-corporate-blue/90"
+      (click)="closed.emit()"
+    >
+      Close
+    </button>
+  </footer>
+</app-drawer>

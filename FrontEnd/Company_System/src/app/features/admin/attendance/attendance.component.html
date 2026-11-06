@@ -1,0 +1,47 @@
+<header class="mb-6">
+  <h1 class="text-2xl font-bold text-corporate-blue">Daily Attendance</h1>
+  <p class="mt-1 text-sm text-text-secondary">
+    Select a day to record or update employee hours and attendance.
+  </p>
+</header>
+
+@if (error()) {
+  <div role="alert" class="mb-4 rounded-lg bg-error-bg p-3 text-error-text">
+    {{ error() }}
+    @if (!attendancePages()[page()] && !loading()) {
+      <button type="button" class="ml-2 underline" (click)="load()">Retry</button>
+    }
+  </div>
+}
+
+<div class="grid items-start gap-5 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
+  <app-attendance-calendar
+    [month]="month()"
+    [selectedDate]="selectedDate()"
+    [showAttendance]="false"
+    [disabled]="!!savingUserId()"
+    (monthChanged)="changeMonth($event)"
+    (dateSelected)="selectDate($event)"
+  />
+
+  @if (selectedDate(); as date) {
+    <app-attendance-day-table
+      [date]="date"
+      [employees]="attendancePages()[page()] ?? []"
+      [total]="totalCount()"
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [loading]="loading()"
+      [savingUserId]="savingUserId()"
+      (saved)="save($event)"
+      (pageChanged)="changePage($event)"
+      (pageSizeChanged)="changePageSize($event)"
+    />
+  } @else {
+    <p
+      class="rounded-xl border border-outline-light bg-surface-lowest p-5 text-sm text-text-secondary"
+    >
+      Select a calendar day to view employees and mark their attendance.
+    </p>
+  }
+</div>

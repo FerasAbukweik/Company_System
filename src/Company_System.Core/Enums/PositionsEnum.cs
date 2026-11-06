@@ -7,5 +7,4 @@ public enum PositionsEnum
     Manager,
     Programmer,
     Employee,
-    unknown
 }

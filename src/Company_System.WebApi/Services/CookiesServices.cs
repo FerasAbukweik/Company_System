@@ -1,17 +1,16 @@
 using System.ComponentModel;
 using System.Net;
-using HR_System.Core.common;
-using HR_System.Core.Constraints;
+using HR_System.Core.Abstraction.ServiceContracts;
 using HR_System.Core.DTO.Token;
-using HR_System.Core.Interfaces.ServiceContracts;
+using HR_System.Core.Options;
+using HR_System.Core.Result;
 using Microsoft.Extensions.Options;
 
 namespace HR_System.Services;
 
 public class CookiesServices(IHttpContextAccessor httpContextAccessor,
-    IConfiguration configuration,
-    ILogger<CookiesServices> logger,
-    IOptions<CookieKeys> cookieKeys) : ICookiesServices
+    IOptions<JWTOptions> jwtOptions,
+    IOptions<CookieKeysOptions> cookieKeys) : ICookiesServices
 {
     public Result Add(string key, string toAdd, int lifetimeInMinutes)
     {
@@ -35,7 +34,7 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
         var accessResult = Add(
             cookieKeys.Value.AccessToken,
             tokens.AccessToken,
-            configuration.GetValue<int>("Jwt:AccessTokenLifeTime")
+            jwtOptions.Value.AccessTokenLifeTime
         );
     
         if (!accessResult.IsSuccess)
@@ -44,7 +43,7 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
         return Add(
             cookieKeys.Value.RefreshToken,
             tokens.RefreshToken,
-            configuration.GetValue<int>("Jwt:RefreshTokenLifeTime")
+            jwtOptions.Value.RefreshTokenLifeTime
         );
     }
     public Result<T> GetValue<T>(string key)
@@ -54,7 +53,7 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
 
         if (!httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(key, out string? value) 
             || string.IsNullOrWhiteSpace(value))
-            return Result<T>.Failure("Cookie not found", HttpStatusCode.OK);
+            return Result<T>.Failure("Cookie not found", HttpStatusCode.Unauthorized);
 
         try
         {
@@ -68,7 +67,6 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
         }
         catch (Exception)
         {
-            logger.LogInformation($"Failed to parse {value} to type {typeof(T).Name}", HttpStatusCode.BadRequest);
             return Result<T>.Failure($"Cookie could not be converted to {typeof(T).Name}", HttpStatusCode.BadRequest);
         }
     }
@@ -88,10 +86,8 @@ public class CookiesServices(IHttpContextAccessor httpContextAccessor,
     public Result<string> RemoveTokens()
     {
         var removeAccessTokenResult = Remove(cookieKeys.Value.AccessToken);
-        if (!removeAccessTokenResult.IsSuccess) return removeAccessTokenResult;
-
         var removeRefreshTokenResult = Remove(cookieKeys.Value.RefreshToken);
 
-        return removeRefreshTokenResult;
+        return removeAccessTokenResult.IsSuccess ? removeRefreshTokenResult : removeAccessTokenResult;
     }
 }

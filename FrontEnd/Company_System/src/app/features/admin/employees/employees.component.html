@@ -1,0 +1,37 @@
+@if (employeesService.loading()) {
+  <p role="status" class="mb-4 text-text-secondary">Loading employees…</p>
+}
+@if (employeesService.error()) {
+  <div role="alert" class="mb-4 rounded-lg bg-error-bg p-4 text-error-text">
+    {{ employeesService.error() }}
+    <button type="button" class="underline" (click)="employeesService.reload()">Retry</button>
+  </div>
+}
+<app-employee-metrics [summary]="employeesService.summary()" />
+
+<section
+  class="bg-surface-lowest border border-outline-light rounded-xl shadow-sm overflow-hidden flex flex-col"
+>
+  <app-employee-toolbar [(search)]="search" (addEmployee)="openCreate()" />
+
+  <app-employee-table
+    [employees]="employeesService.employeePages()[page()] ?? []"
+    (edit)="openEdit($event)"
+    (rowAction)="onRowAction($event)"
+  />
+
+  <app-employee-pagination
+    [total]="employeesService.totalCount()"
+    [(page)]="page"
+    [(pageSize)]="pageSize"
+  />
+</section>
+
+<app-employee-drawer
+  [open]="isDrawerOpen()"
+  [employee]="editedEmployee()"
+  [isSaving]="isSaving()"
+  [serverError]="serverError()"
+  (closed)="closeDrawer()"
+  (saved)="onSave($event)"
+/>

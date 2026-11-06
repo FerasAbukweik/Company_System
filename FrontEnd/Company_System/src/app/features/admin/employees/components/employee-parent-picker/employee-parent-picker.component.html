@@ -1,0 +1,56 @@
+<input
+  appDebounce
+  type="search"
+  aria-label="Search manager by full name"
+  placeholder="Search employee full name"
+  maxlength="100"
+  class="mb-2 w-full rounded-lg border border-outline-light bg-surface-lowest p-2 text-sm text-text-primary"
+  (appDebounce)="search($event)"
+/>
+<div
+  class="w-full border-2 rounded-xl overflow-y-auto h-48 p-1.5 flex flex-col gap-1 bg-surface-lowest border-outline-light transition-colors"
+  [ngClass]="{ 'border-error!': invalid() }"
+>
+  @for (user of picker.employees(); track user.id) {
+    @if (user.id !== excludedUserId() && user.treeId) {
+      <button
+        type="button"
+        class="cursor-pointer flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-left border border-transparent hover:bg-surface-low hover:border-outline-light transition-colors"
+        [class.bg-surface-high]="selectedId() === user.treeId"
+        [attr.aria-pressed]="selectedId() === user.treeId"
+        (click)="parentSelected.emit(user.treeId)"
+      >
+        <span class="flex items-center gap-3">
+          <span
+            class="size-8 rounded-full flex items-center justify-center bg-surface-low text-corporate-blue"
+          >
+            @if (selectedId() === user.treeId) {
+              <app-icon class="size-5" [path]="HeroIcon.check" />
+            } @else {
+              <app-icon class="size-5" [path]="HeroIcon.person" />
+            }
+          </span>
+          <span class="font-medium text-text-primary">{{ user.fullName }}</span>
+        </span>
+      </button>
+    }
+  } @empty {
+    @if (!picker.loading()) {
+      <div class="text-xs font-medium text-text-secondary flex items-center justify-center py-6">
+        No active users found.
+      </div>
+    }
+  }
+
+  @if (picker.error()) {
+    <p role="alert" class="p-2 text-sm text-error-text">{{ picker.error() }}</p>
+    <button type="button" (click)="picker.error.set(''); loadMore()">Retry</button>
+  } @else {
+    <div appIsVisable [visibleRecheck]="picker.employees().length" (visible)="loadMore()"></div>
+  }
+  @if (picker.loading()) {
+    <div class="flex w-full justify-center items-center">
+      <app-loading [loadingName]="'Employees'" />
+    </div>
+  }
+</div>

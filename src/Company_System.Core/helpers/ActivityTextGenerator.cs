@@ -6,22 +6,28 @@ namespace HR_System.Core.helpers;
 public static class ActivityTextGenerator
 {
     public static string GetTaskTitle(AppTask task)
-        => $"Task: {task.Title}";
+    {
+        return $"Task: {task.Title}";
+    }
+
 
     public static string GetTaskDescription(AppTask task, string currUserName)
     {
         if (task.Status == TaskStatusEnum.Pending)
             return $"Priority: {task.Priority}\nAdded By {currUserName}";
-        
+
         return $"New Status: {task.Status}\nChanged by: {currUserName}";
     }
 
     public static string GetApprovalTitle(Approval approval)
-        => approval.Type == ApprovalTypeEnum.Task ? "Task Approval" : 
+    {
+        return approval.Type == ApprovalTypeEnum.Task ? "Task Approval" :
             approval.Type == ApprovalTypeEnum.Holiday ? "Holiday Approval" :
             "Unknown Approval";
+    }
 
-    public static string GetApprovalDescription(Approval approval)
+
+    public static string GetApprovalDescription(Approval approval, ApprovalStatusEnum? eventStatus = null)
     {
         var manager = approval.Manager?.UserName ?? "Unknown";
         var employee = approval.UserRequesting?.UserName ?? "Unknown";
@@ -37,6 +43,6 @@ public static class ActivityTextGenerator
             $"Manager: {manager}\n" +
             $"Employee: {employee}\n" +
             $"{request}\n" +
-            $"Approval Status: {approval.Status}";
+            $"Approval Status: {eventStatus ?? approval.Status}";
     }
 }

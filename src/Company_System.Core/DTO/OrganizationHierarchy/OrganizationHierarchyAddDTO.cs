@@ -7,13 +7,11 @@ public class OrganizationHierarchyAddDTO
 {
     [Required]
     public required Guid UserId { get; set; }
-    
-    [Required]
-    public required Guid ParentId { get; set; }
-    
-    
-    // override
 
+    public Guid? ParentId { get; set; }
+
+
+    // override
     override public string ToString()
     {
         return $"UserId: {UserId}\nParentId: {ParentId}\n";

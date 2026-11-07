@@ -22,7 +22,8 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
         {
             UserId = userId ?? Guid.NewGuid(),
             Date = new DateOnly(2026, 11, day),
-            MinutesWorked = 450,
+            ClockIn = new TimeOnly(8, 0),
+            ClockOut = new TimeOnly(15, 30),
             State = WorkDayStateEnum.Worked
         };
     }
@@ -47,7 +48,8 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
         (await repository.SaveChangesAsync()).Should().BeTrue();
         _dbContext.ChangeTracker.Clear();
         var saved = await repository.GetByIdAsync(record.Id);
-        saved!.MinutesWorked.Should().Be(450);
+        saved!.ClockIn.Should().Be(record.ClockIn);
+        saved.ClockOut.Should().Be(record.ClockOut);
         _dbContext.ChangeTracker.Entries().Should().BeEmpty();
     }
 
@@ -88,10 +90,10 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
     // ---------- Update ----------
     #region Update
     [Fact]
-    public async Task Update_ShouldOnlyStageMinutesAndStateChanges()
+    public async Task Update_ShouldOnlyStageClockTimesAndStateChanges()
     {
         // Arrange
-        LogArrange("Scenario", nameof(Update_ShouldOnlyStageMinutesAndStateChanges));
+        LogArrange("Scenario", nameof(Update_ShouldOnlyStageClockTimesAndStateChanges));
 
         var repository = new DailyWorkRecordsRepository(_dbContext);
         var record = CreateRecord();
@@ -100,14 +102,14 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
         _dbContext.ChangeTracker.Clear();
 
         // Act
-        var updated = await repository.UpdateAsync(record.Id, 0, WorkDayStateEnum.PaidLeave);
+        var updated = await repository.UpdateAsync(record.Id, null, null, WorkDayStateEnum.PaidLeave);
         LogAct(updated);
 
         // Assert
         updated.Should().NotBeNull();
         var modified = _dbContext.Entry(updated).Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name).ToArray();
-        modified.Order().ToArray().Should().Equal(new[] { "MinutesWorked", "State" });
-        (await repository.GetByIdAsync(record.Id))!.MinutesWorked.Should().Be(450);
+        modified.Order().ToArray().Should().Equal(new[] { "ClockIn", "ClockOut", "State" });
+        (await repository.GetByIdAsync(record.Id))!.ClockOut.Should().Be(record.ClockOut);
         await repository.SaveChangesAsync();
         (await repository.GetByIdAsync(record.Id))!.State.Should().Be(WorkDayStateEnum.PaidLeave);
     }
@@ -131,7 +133,8 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
         index.IsUnique.Should().BeTrue();
         index.Properties.Select(p => p.Name).Should().Equal(new[] { "UserId", "Date" });
         entity.GetForeignKeys().Should().ContainSingle().Which.DeleteBehavior.Should().Be(DeleteBehavior.Restrict);
-        entity.FindProperty(nameof(DailyWorkRecord.MinutesWorked))!.ClrType.Should().Be(typeof(int));
+        entity.FindProperty(nameof(DailyWorkRecord.ClockIn))!.IsNullable.Should().BeTrue();
+        entity.FindProperty(nameof(DailyWorkRecord.ClockOut))!.IsNullable.Should().BeTrue();
     }
 
     #endregion
@@ -152,8 +155,9 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
         var script = context.GetService<IMigrator>().GenerateScript("20261104090000_AddImageEntity");
         script.Should().Contain("CREATE TABLE [DailyWorkRecords]");
         script.Should().Contain("CREATE UNIQUE INDEX [IX_DailyWorkRecords_UserId_Date]");
-        script.Should().Contain("CHECK ([MinutesWorked] >= 0 AND [MinutesWorked] <= 1440)");
-        script.Should().NotContain("DROP COLUMN");
+        script.Should().Contain("ADD [ClockIn] time NULL");
+        script.Should().Contain("ADD [ClockOut] time NULL");
+        script.Should().Contain("DROP COLUMN [MinutesWorked]");
         script.Should().NotContain("CREATE TABLE [Images]");
     }
 

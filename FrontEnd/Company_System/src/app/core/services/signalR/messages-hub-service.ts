@@ -1,131 +1,111 @@
 import { Injectable, inject } from '@angular/core';
-import * as signalR from '@microsoft/signalr';
+import { HubConnectionState } from '@microsoft/signalr';
 import { defer, Subject } from 'rxjs';
 import { toastError } from '../../utils/toast-error';
-import { Urls } from '../../constants/urls';
 import { MessageDTO } from '../../dto/message/message-dto';
 import { ToastService } from '../api-services/toast-service';
+import { AuthService } from '../api-services/auth-service';
+import { SignalRService } from './signalr-service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class MessagesHubService {
-  // DI
-  private readonly toastService = inject(ToastService);
+  private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
+  private readonly signalR = inject(SignalRService);
+  private readonly connection = this.signalR.connection;
+  private currentUserId: string | null = null;
+  private groupOperations: Promise<void> = Promise.resolve();
 
-  // Hub connection
-  private connection: signalR.HubConnection | null = null;
-  private connectionVersion = 0;
-
-  // Observables
   readonly onTyping$ = new Subject<void>();
   readonly onStopTyping$ = new Subject<void>();
   readonly onMessageReceived$ = new Subject<MessageDTO>();
+  readonly onReconnected$ = new Subject<void>();
 
-  async startConnection(otherUserId: string): Promise<void> {
-    const version = ++this.connectionVersion;
-    const previous = this.connection;
-    this.connection = null;
-    if (previous) {
-      try {
-        await previous.stop();
-      } catch {
-        this.toastService.error('Failed disconnecting from messages hub');
-      }
-    }
-
-    if (version !== this.connectionVersion) return;
-
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${Urls.messagesHub}?userId=${otherUserId}`, {
-        withCredentials: true,
-      })
-      .withAutomaticReconnect()
-      .build();
-
-    const connection = this.connection;
-    this.registerHandlers();
-
-    try {
-      await connection.start();
-    } catch {
-      if (version === this.connectionVersion) {
-        this.toastService.error('Failed connecting to messages hub');
-      }
-    }
-
-    if (version !== this.connectionVersion) {
-      try {
-        await connection.stop();
-      } catch {
-        // A replaced connection must not affect the active conversation.
-      }
-    }
+  constructor() {
+    this.connection.on('ReceiveMessage', (message: MessageDTO) => {
+      this.onMessageReceived$.next({
+        ...message,
+        isCurrUserSender: message.senderId === this.auth.userData()?.userId,
+      });
+    });
+    this.connection.on('NotifyTyping', (userId: string) => {
+      if (userId === this.currentUserId) this.onTyping$.next();
+    });
+    this.connection.on('NotifyStoppedTyping', (userId: string) => {
+      if (userId === this.currentUserId) this.onStopTyping$.next();
+    });
+    this.signalR.onReconnected$.subscribe(() => {
+      this.groupOperations = this.groupOperations.then(async () => {
+        const userId = this.currentUserId;
+        if (userId) await this.addToGroup(userId);
+        this.onReconnected$.next();
+      });
+    });
   }
 
+  startConnection(otherUserId: string): Promise<void> {
+    this.currentUserId = otherUserId;
+    this.groupOperations = this.groupOperations.then(async () => {
+      await this.signalR.start();
+      if (this.currentUserId !== otherUserId) return;
+      await this.addToGroup(otherUserId);
+    });
+    return this.groupOperations;
+  }
+
+  // Leaving a conversation never stops the session's shared connection.
   async stopConnection(): Promise<void> {
-    ++this.connectionVersion;
-    const connection = this.connection;
-    this.connection = null;
-    if (!connection) return;
-
-    try {
-      await connection.stop();
-    } catch (err) {
-      this.toastService.error('failed disconnecting from messages hub');
-    }
-  }
-
-  private registerHandlers(): void {
-    if (!this.connection) {
-      return;
-    }
-
-    const connection = this.connection;
-    connection.on('NotifyTyping', () => {
-      if (this.connection !== connection) return;
-      this.onTyping$.next();
+    const previous = this.currentUserId;
+    this.currentUserId = null;
+    this.groupOperations = this.groupOperations.then(async () => {
+      if (!previous || this.connection.state !== HubConnectionState.Connected) return;
+      try {
+        await this.connection.invoke('RemoveFromGroup', previous);
+      } catch {
+        /* Reconnect clears groups. */
+      }
     });
-
-    connection.on('NotifyStoppedTyping', () => {
-      if (this.connection !== connection) return;
-      this.onStopTyping$.next();
-    });
-
-    connection.on('ReceiveMessage', (message: MessageDTO) => {
-      if (this.connection !== connection) return;
-      this.onMessageReceived$.next(message);
-    });
+    await this.groupOperations;
   }
 
   sendMessage(content: string) {
+    const recipient = this.currentUserId;
     return defer(async () => {
-      if (!this.isConnected()) throw new Error('Messages hub is not connected');
-      await this.connection!.invoke('SendMessage', content);
-    }).pipe(toastError(this.toastService, 'تعذر إرسال الرسالة'));
+      await this.groupOperations;
+      if (
+        !recipient ||
+        recipient !== this.currentUserId ||
+        this.connection.state !== HubConnectionState.Connected
+      )
+        throw new Error('Messages hub is not connected');
+      await this.connection.invoke('SendMessage', recipient, content);
+    }).pipe(toastError(this.toast, 'تعذر إرسال الرسالة'));
   }
 
   async notifyTyping(): Promise<void> {
-    if (!this.isConnected()) return;
-
+    if (!this.currentUserId || this.connection.state !== HubConnectionState.Connected) return;
     try {
-      await this.connection!.invoke('NotifyTyping');
+      await this.connection.send('NotifyTyping', this.currentUserId);
     } catch {
-      // Typing notifications are transient; a failed one must not reject into the UI.
+      /* Transient typing event. */
     }
   }
 
   async notifyStoppedTyping(): Promise<void> {
-    if (!this.isConnected()) return;
-
+    if (!this.currentUserId || this.connection.state !== HubConnectionState.Connected) return;
     try {
-      await this.connection!.invoke('NotifyStoppedTyping');
+      await this.connection.send('NotifyStoppedTyping', this.currentUserId);
     } catch {
-      // A disconnected client cannot notify the other user.
+      /* Transient typing event. */
     }
   }
 
-  private isConnected(): boolean {
-    return this.connection?.state === signalR.HubConnectionState.Connected;
+  private async addToGroup(userId: string) {
+    if (this.connection.state !== HubConnectionState.Connected) return;
+    try {
+      await this.connection.invoke('AddToGroup', userId);
+    } catch {
+      this.toast.error('Unable to join the conversation');
+    }
   }
 }

@@ -23,7 +23,14 @@ describe('AttendanceCalendarComponent', () => {
     const fixture = TestBed.createComponent(AttendanceCalendarComponent);
     fixture.componentRef.setInput('month', new Date(2026, 10, 1));
     fixture.componentRef.setInput('records', [
-      { id: 'day', userId: 'user', date: '2026-11-05', minutesWorked: 450, state: 0 },
+      {
+        id: 'day',
+        userId: 'user',
+        date: '2026-11-05',
+        clockIn: '08:00:00',
+        clockOut: '15:30:00',
+        state: 0,
+      },
     ]);
     await fixture.whenStable();
     expect(

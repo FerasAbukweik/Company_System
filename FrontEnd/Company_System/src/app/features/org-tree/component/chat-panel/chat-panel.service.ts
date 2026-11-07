@@ -31,6 +31,9 @@ export class ChatPanelService {
   open(node: OrgNodeDTO) {
     this._isVisable.set(true);
     this._node.set(node);
-    this._messageHubService.startConnection(node.userId);
+    void this._messageHubService.stopConnection().then(() => {
+      if (this._node()?.userId === node.userId)
+        void this._messageHubService.startConnection(node.userId);
+    });
   }
 }

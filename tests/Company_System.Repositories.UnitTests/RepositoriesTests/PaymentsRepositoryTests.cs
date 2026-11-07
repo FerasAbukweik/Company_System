@@ -141,7 +141,7 @@ public class PaymentsRepositoryTests : RepositoryTestBase, IDisposable
 
         // Assert
         context.Database.HasPendingModelChanges().Should().BeFalse();
-        var script = context.GetService<IMigrator>().GenerateScript("20261105144635_AddDailyWorkRecords");
+        var script = context.GetService<IMigrator>().GenerateScript("20261105144635_AddDailyWorkRecords", "20261105195622_MakePaymentDateApprovalOnly");
         script.Should().Contain("CREATE TABLE [Payments]");
         script.Should().Contain("[PaidAmount] decimal(18,2) NOT NULL");
         script.Should().Contain("CREATE UNIQUE INDEX [IX_Payments_UserId_Year_Month]");

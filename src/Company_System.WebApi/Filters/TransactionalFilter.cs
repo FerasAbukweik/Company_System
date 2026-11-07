@@ -1,3 +1,4 @@
+using HR_System.Core.Abstraction.ServiceContracts;
 using HR_System.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -13,10 +14,14 @@ public class TransactionalAttribute : ActionFilterAttribute
         // DI database
         var dbContext = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
 
+        var publisher = context.HttpContext.RequestServices.GetService<INotificationPublisher>();
+        var committed = false;
+
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
         {
+            publisher?.Clear();
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
             try
             {
@@ -26,7 +31,10 @@ public class TransactionalAttribute : ActionFilterAttribute
                     await transaction.RollbackAsync();
                 
                 else
+                {
                     await transaction.CommitAsync();
+                    committed = true;
+                }
             }
             catch (Exception)
             {
@@ -34,6 +42,9 @@ public class TransactionalAttribute : ActionFilterAttribute
                 throw;
             }
         });
+
+        if (committed && publisher is not null) await publisher.FlushAsync();
+        else publisher?.Clear();
     }
     
     

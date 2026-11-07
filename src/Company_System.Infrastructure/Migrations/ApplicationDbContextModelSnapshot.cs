@@ -142,11 +142,14 @@ namespace HR_System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<TimeOnly?>("ClockIn")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly?>("ClockOut")
+                        .HasColumnType("time");
+
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
-
-                    b.Property<int>("MinutesWorked")
-                        .HasColumnType("int");
 
                     b.Property<int>("State")
                         .HasColumnType("int");
@@ -161,8 +164,6 @@ namespace HR_System.Infrastructure.Migrations
 
                     b.ToTable("DailyWorkRecords", null, t =>
                         {
-                            t.HasCheckConstraint("CK_DailyWorkRecords_MinutesWorked", "[MinutesWorked] >= 0 AND [MinutesWorked] <= 1440");
-
                             t.HasCheckConstraint("CK_DailyWorkRecords_State", "[State] IN (0, 1, 2, 3)");
                         });
                 });
@@ -222,6 +223,54 @@ namespace HR_System.Infrastructure.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SourceKey")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("TargetPath")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "SourceKey")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
@@ -657,6 +706,17 @@ namespace HR_System.Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("HR_System.Core.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("HR_System.Core.Domain.Identity.ApplicationUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HR_System.Core.Domain.Entities.OrganizationHierarchy", b =>
                 {
                     b.HasOne("HR_System.Core.Domain.Entities.OrganizationHierarchy", "Parent")
@@ -768,6 +828,8 @@ namespace HR_System.Infrastructure.Migrations
                     b.Navigation("DailyWorkRecords");
 
                     b.Navigation("Image");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("OrganizationHierarchy")
                         .IsRequired();

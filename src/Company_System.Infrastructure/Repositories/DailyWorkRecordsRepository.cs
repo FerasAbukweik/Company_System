@@ -35,7 +35,8 @@ public class DailyWorkRecordsRepository(
                         Id = record.Id,
                         UserId = record.UserId,
                         Date = record.Date,
-                        MinutesWorked = record.MinutesWorked,
+                        ClockIn = record.ClockIn,
+                        ClockOut = record.ClockOut,
                         State = record.State
                     })
                     .FirstOrDefault()
@@ -86,22 +87,31 @@ public class DailyWorkRecordsRepository(
         return await Filter(predicate, include, orderBy, orderByDesc, skip, take).ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyDictionary<Guid, long>> GetWorkedMinutesAsync(
+    public async Task<IReadOnlyDictionary<Guid, decimal>> GetWorkedHoursAsync(
         DateOnly from,
         DateOnly toExclusive,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.DailyWorkRecords
+        var records = await dbContext.DailyWorkRecords
             .AsNoTracking()
-            .Where(record => record.Date >= from && record.Date < toExclusive)
+            .Where(record => record.Date >= from && record.Date < toExclusive &&
+                record.ClockIn.HasValue && record.ClockOut.HasValue)
+            .Select(record => new { record.UserId, record.ClockIn, record.ClockOut })
+            .ToListAsync(cancellationToken);
+
+        // TimeOnly subtraction includes overnight shifts. Convert only after summing to avoid per-day rounding.
+        return records
             .GroupBy(record => record.UserId)
-            .Select(group => new { UserId = group.Key, Minutes = group.Sum(record => (long)record.MinutesWorked) })
-            .ToDictionaryAsync(record => record.UserId, record => record.Minutes, cancellationToken);
+            .ToDictionary(
+                group => group.Key,
+                group => group.Sum(record => (record.ClockOut!.Value - record.ClockIn!.Value).Ticks) /
+                    (decimal)TimeSpan.TicksPerHour);
     }
 
     public async Task<DailyWorkRecord?> UpdateAsync(
         Guid recordId,
-        int minutesWorked,
+        TimeOnly? clockIn,
+        TimeOnly? clockOut,
         WorkDayStateEnum state,
         CancellationToken cancellationToken = default)
     {
@@ -109,10 +119,12 @@ public class DailyWorkRecordsRepository(
         if (record is null) return null;
 
         dbContext.DailyWorkRecords.Attach(record);
-        record.MinutesWorked = minutesWorked;
+        record.ClockIn = clockIn;
+        record.ClockOut = clockOut;
         record.State = state;
 
-        dbContext.Entry(record).Property(r => r.MinutesWorked).IsModified = true;
+        dbContext.Entry(record).Property(r => r.ClockIn).IsModified = true;
+        dbContext.Entry(record).Property(r => r.ClockOut).IsModified = true;
         dbContext.Entry(record).Property(r => r.State).IsModified = true;
 
         // Nothing is written until the service calls SaveChangesAsync.

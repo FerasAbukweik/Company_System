@@ -91,6 +91,7 @@ public static class WebApiServiceCollectionExtensions
 
         services.AddScoped<ICookiesServices, CookiesServices>();
         services.AddScoped<IClaimsService, ClaimsService>();
+        services.AddScoped<INotificationPublisher, NotificationPublisher>();
 
         return services;
     }

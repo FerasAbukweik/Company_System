@@ -33,15 +33,16 @@ public interface IDailyWorkRecordsRepository
         int? take = null,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyDictionary<Guid, long>> GetWorkedMinutesAsync(
+    Task<IReadOnlyDictionary<Guid, decimal>> GetWorkedHoursAsync(
         DateOnly from,
         DateOnly toExclusive,
         CancellationToken cancellationToken = default);
 
-    // Employee and date remain fixed; only minutes and state are modified.
+    // Employee and date remain fixed; only clock times and state are modified.
     Task<DailyWorkRecord?> UpdateAsync(
         Guid recordId,
-        int minutesWorked,
+        TimeOnly? clockIn,
+        TimeOnly? clockOut,
         WorkDayStateEnum state,
         CancellationToken cancellationToken = default);
 

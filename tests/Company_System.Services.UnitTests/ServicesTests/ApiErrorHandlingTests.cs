@@ -1,7 +1,7 @@
 using System.Reflection;
 using HR_System.Controllers;
 using HR_System.MiddleWares;
-using HR_System.SignalR.Messages;
+using HR_System.SignalR.App;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -14,20 +14,20 @@ public class ApiErrorHandlingTests : ServiceTestBase
     {
     }
 
-    // ---------- MessagesHub ----------
-    #region MessagesHub
+    // ---------- AppHub ----------
+    #region AppHub
     [Fact]
-    public void MessagesHub_RequiresAuthentication()
+    public void AppHub_RequiresAuthentication()
     {
         // Arrange
-        LogArrange("Scenario", nameof(MessagesHub_RequiresAuthentication));
+        LogArrange("Scenario", nameof(AppHub_RequiresAuthentication));
 
         LogAct("Operation completed");
 
         // Act
 
         // Assert
-        typeof(MessagesHub).GetCustomAttribute<AuthorizeAttribute>().Should().NotBeNull();
+        typeof(AppHub).GetCustomAttribute<AuthorizeAttribute>().Should().NotBeNull();
     }
 
     #endregion

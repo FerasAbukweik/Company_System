@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { currentTime, toTimeInput, toTimeValue } from '../../../../../core/utils/attendance-time';
 import { AttendanceEmployee } from '../../../../../core/dto/attendance/attendance-employee-dto';
 import { AttendanceDaySave } from '../../attendance.model';
 
@@ -19,33 +21,52 @@ export class AttendanceEmployeeRowComponent {
 
   protected readonly states = ['Worked', 'Paid Leave', 'Holiday', 'Weekend'];
   protected readonly form = new FormGroup({
-    hours: new FormControl(8, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(0), Validators.max(24)],
-    }),
+    clockIn: new FormControl('', { nonNullable: true }),
+    clockOut: new FormControl({ value: '', disabled: true }, { nonNullable: true }),
     state: new FormControl(0, { nonNullable: true, validators: [Validators.required] }),
   });
 
   constructor() {
+    this.form.controls.clockIn.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.updateClockOut());
+
     effect(() => {
       this.date();
       const record = this.employee().record;
       this.form.reset({
-        hours: record ? Number((record.minutesWorked / 60).toFixed(4)) : 8,
+        clockIn: toTimeInput(record?.clockIn ?? null),
+        clockOut: toTimeInput(record?.clockOut ?? null),
         state: record?.state ?? 0,
       });
+      this.updateClockOut();
     });
+  }
+
+  protected defaultTime(field: 'clockIn' | 'clockOut') {
+    const control = this.form.controls[field];
+    if (!control.disabled && !control.value) control.setValue(currentTime());
+  }
+
+  private updateClockOut() {
+    const clockOut = this.form.controls.clockOut;
+    if (this.form.controls.clockIn.value) clockOut.enable({ emitEvent: false });
+    else {
+      clockOut.reset('', { emitEvent: false });
+      clockOut.disable({ emitEvent: false });
+    }
   }
 
   protected save() {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.disabled() || this.saving()) return;
 
-    const { hours, state } = this.form.getRawValue();
+    const { clockIn, clockOut, state } = this.form.getRawValue();
     this.saved.emit({
       userId: this.employee().userId,
       recordId: this.employee().record?.id,
-      minutesWorked: Math.round(hours * 60),
+      clockIn: toTimeValue(clockIn),
+      clockOut: toTimeValue(clockOut),
       state,
     });
   }

@@ -26,7 +26,8 @@ export class DailyWorkRecordsApiService {
   saveAttendance(data: Omit<AttendanceRecord, 'id'>, id?: string) {
     return id
       ? this.http.put<AttendanceRecord>(this.base + '/Update/' + id, {
-          minutesWorked: data.minutesWorked,
+          clockIn: data.clockIn,
+          clockOut: data.clockOut,
           state: data.state,
         })
       : this.http.post<AttendanceRecord>(this.base + '/Add', data);

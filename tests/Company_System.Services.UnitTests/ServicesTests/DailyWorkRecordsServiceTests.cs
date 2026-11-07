@@ -34,7 +34,8 @@ public class DailyWorkRecordsServiceTests : ServiceTestBase
     {
         UserId = Guid.NewGuid(),
         Date = new DateOnly(2026, 11, 5),
-        MinutesWorked = 480,
+        ClockIn = new TimeOnly(8, 0),
+        ClockOut = new TimeOnly(16, 0),
         State = WorkDayStateEnum.Worked
     };
     private void SetupRecords(params DailyWorkRecord[] records)
@@ -54,14 +55,12 @@ public class DailyWorkRecordsServiceTests : ServiceTestBase
     // ---------- Add ----------
     #region Add
     [Theory]
-    [InlineData(-1, WorkDayStateEnum.Worked)]
-    [InlineData(1441, WorkDayStateEnum.Worked)]
     [InlineData(480, (WorkDayStateEnum)99)]
-    public async Task Add_ShouldRejectInvalidMinutesAndStatesBeforeWriting(int minutes, WorkDayStateEnum state)
+    public async Task Add_ShouldRejectInvalidStateBeforeWriting(int minutes, WorkDayStateEnum state)
     {
         // Arrange
         var data = CreateData();
-        data.MinutesWorked = minutes;
+        data.ClockOut = data.ClockIn!.Value.AddMinutes(minutes);
         data.State = state;
         LogArrange(nameof(data), data);
 
@@ -97,7 +96,7 @@ public class DailyWorkRecordsServiceTests : ServiceTestBase
         var data = CreateData();
         _usersRepositoryMock.Setup(u => u.GetByIdAsync(data.UserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ApplicationUser { FullName = "Employee", Position = default });
-        SetupRecords(new DailyWorkRecord { UserId = data.UserId, Date = data.Date, MinutesWorked = 480, State = WorkDayStateEnum.Worked });
+        SetupRecords(new DailyWorkRecord { UserId = data.UserId, Date = data.Date, ClockIn = data.ClockIn, ClockOut = data.ClockOut, State = WorkDayStateEnum.Worked });
         LogArrange(nameof(data), data);
 
         // Act
@@ -119,7 +118,8 @@ public class DailyWorkRecordsServiceTests : ServiceTestBase
         // Arrange
         var data = CreateData();
         data.State = state;
-        data.MinutesWorked = minutes;
+        data.ClockIn = minutes > 0 ? data.ClockIn : null;
+        data.ClockOut = minutes > 0 ? data.ClockOut : null;
         _usersRepositoryMock.Setup(u => u.GetByIdAsync(data.UserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ApplicationUser { FullName = "Employee", Position = default });
         SetupRecords();
@@ -134,7 +134,8 @@ public class DailyWorkRecordsServiceTests : ServiceTestBase
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.Created);
         result.Value!.State.Should().Be(state);
-        result.Value.MinutesWorked.Should().Be(minutes);
+        result.Value.ClockIn.Should().Be(data.ClockIn);
+        result.Value.ClockOut.Should().Be(data.ClockOut);
         _recordsRepositoryMock.Verify(
             r => r.Add(
                 It.Is<DailyWorkRecord>(record => record.UserId == data.UserId && record.Date == data.Date),
@@ -154,12 +155,54 @@ public class DailyWorkRecordsServiceTests : ServiceTestBase
         LogArrange("Scenario", nameof(Update_ShouldReturnNotFoundWithoutSavingMissingRecord));
 
         // Act
-        var result = await _dailyWorkRecordsService.UpdateAsync(Guid.NewGuid(), 480, WorkDayStateEnum.Worked);
+        var result = await _dailyWorkRecordsService.UpdateAsync(Guid.NewGuid(), null, null, WorkDayStateEnum.Worked);
         LogAct(result);
 
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.NotFound);
         _recordsRepositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task Update_ShouldAllowNullableClockTimes(bool hasClockIn, bool hasClockOut)
+    {
+        // Arrange
+        var data = CreateData();
+        var clockIn = hasClockIn ? data.ClockIn : null;
+        var clockOut = hasClockOut ? data.ClockOut : null;
+        var record = new DailyWorkRecord { UserId = data.UserId, Date = data.Date, ClockIn = clockIn, ClockOut = clockOut, State = data.State };
+        _recordsRepositoryMock.Setup(repository => repository.UpdateAsync(record.Id, clockIn, clockOut, data.State, It.IsAny<CancellationToken>())).ReturnsAsync(record);
+        _recordsRepositoryMock.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        LogArrange(nameof(record), record);
+
+        // Act
+        var result = await _dailyWorkRecordsService.UpdateAsync(record.Id, clockIn, clockOut, data.State);
+        LogAct(result);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.ClockIn.Should().Be(clockIn);
+        result.Value.ClockOut.Should().Be(clockOut);
+    }
+
+    [Fact]
+    public async Task Update_ShouldRejectInvalidStateWithoutWriting()
+    {
+        // Arrange
+        var data = CreateData();
+        LogArrange(nameof(data), data);
+
+        // Act
+        var result = await _dailyWorkRecordsService.UpdateAsync(Guid.NewGuid(), data.ClockOut, data.ClockIn, (WorkDayStateEnum)99);
+        LogAct(result);
+
+        // Assert
+        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        _recordsRepositoryMock.VerifyNoOtherCalls();
     }
 
     #endregion

@@ -85,7 +85,7 @@ describe('Shared controller caches', () => {
     attendance.attendance('2026-01-01', '2026-12-31').subscribe();
     http.expectNone(() => true);
     attendance
-      .saveAttendance({ userId: 'a', date: '2026-11-06', minutesWorked: 480, state: 0 })
+      .saveAttendance({ userId: 'a', date: '2026-11-06', clockIn: '08:00:00', clockOut: '16:00:00', state: 0 })
       .subscribe();
     http.expectOne(() => true).flush({ id: 'record' });
     attendance.attendanceDayRecords('2026-11-06', query).subscribe();

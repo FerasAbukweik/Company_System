@@ -41,11 +41,12 @@ public class LoggingDailyWorkRecordsService(
 
     public async Task<Result<DailyWorkRecordDTO>> UpdateAsync(
         Guid recordId,
-        int minutesWorked,
+        TimeOnly? clockIn,
+        TimeOnly? clockOut,
         WorkDayStateEnum state,
         CancellationToken cancellationToken = default)
     {
-        var result = await inner.UpdateAsync(recordId, minutesWorked, state, cancellationToken);
+        var result = await inner.UpdateAsync(recordId, clockIn, clockOut, state, cancellationToken);
 
         logger.LogResult(result, ServiceName, nameof(UpdateAsync),
             $"RecordId: {recordId}, State: {state}");

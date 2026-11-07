@@ -65,11 +65,24 @@ export class ChatPanelComponent implements OnInit, OnDestroy {
           this.messageContent = '';
           this.isTyping.set(false);
           if (!node) return EMPTY;
+          this.messagesService.resetConversation(node.userId);
           return this.messagesService.loadMoreMessages(node.userId).pipe(catchError(() => EMPTY));
         }),
         takeUntilDestroyed(this._destroyRef),
       )
       .subscribe();
+
+    this.messageHubService.onReconnected$
+      ?.pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(() => {
+        this.messagesService.reset();
+        const node = this.chatPanelService.node();
+        if (node)
+          this.messagesService
+            .loadMoreMessages(node.userId)
+            .pipe(takeUntilDestroyed(this._destroyRef))
+            .subscribe({ error: () => {} });
+      });
 
     // manage page scroll
     let firstCheck = true;

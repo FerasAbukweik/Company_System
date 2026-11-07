@@ -32,7 +32,7 @@ public class DailyWorkRecordsService(
         DailyWorkRecordSaveDTO data,
         CancellationToken cancellationToken = default)
     {
-        if (data.UserId == Guid.Empty || data.Date == default || !IsValid(data.MinutesWorked, data.State))
+        if (data.UserId == Guid.Empty || data.Date == default || !Enum.IsDefined(data.State))
             return Result<DailyWorkRecordDTO>.Failure("Invalid daily work record", HttpStatusCode.BadRequest);
 
         var user = await usersRepository.GetByIdAsync(data.UserId, cancellationToken);
@@ -51,7 +51,8 @@ public class DailyWorkRecordsService(
         {
             UserId = data.UserId,
             Date = data.Date,
-            MinutesWorked = data.MinutesWorked,
+            ClockIn = data.ClockIn,
+            ClockOut = data.ClockOut,
             State = data.State
         };
 
@@ -73,14 +74,15 @@ public class DailyWorkRecordsService(
 
     public async Task<Result<DailyWorkRecordDTO>> UpdateAsync(
         Guid recordId,
-        int minutesWorked,
+        TimeOnly? clockIn,
+        TimeOnly? clockOut,
         WorkDayStateEnum state,
         CancellationToken cancellationToken = default)
     {
-        if (!IsValid(minutesWorked, state))
-            return Result<DailyWorkRecordDTO>.Failure("Invalid minutes or day state", HttpStatusCode.BadRequest);
+        if (!Enum.IsDefined(state))
+            return Result<DailyWorkRecordDTO>.Failure("Invalid clock-in, clock-out or day state", HttpStatusCode.BadRequest);
 
-        var record = await recordsRepository.UpdateAsync(recordId, minutesWorked, state, cancellationToken);
+        var record = await recordsRepository.UpdateAsync(recordId, clockIn, clockOut, state, cancellationToken);
         if (record is null)
             return Result<DailyWorkRecordDTO>.Failure("Daily work record not found", HttpStatusCode.NotFound);
 
@@ -112,10 +114,4 @@ public class DailyWorkRecordsService(
         return Result<IReadOnlyList<DailyWorkRecordDTO>>.Success(records.Select(r => r.ToDTO()).ToList());
     }
 
-
-    private static bool IsValid(int minutesWorked, WorkDayStateEnum state)
-    {
-        return minutesWorked is >= 0 and <= 1440 &&
-               Enum.IsDefined(state);
-    }
 }

@@ -49,18 +49,18 @@ public class MonthlyPayrollTests : ServiceTestBase, IDisposable
     // ---------- Generation ----------
     #region Generation
     [Fact]
-    public async Task Generation_ShouldUseRecordedMinutesAndOnlyActiveConfiguredEmployees()
+    public async Task Generation_ShouldUseClockTimesAndOnlyActiveConfiguredEmployees()
     {
         // Arrange
-        LogArrange("Scenario", nameof(Generation_ShouldUseRecordedMinutesAndOnlyActiveConfiguredEmployees));
+        LogArrange("Scenario", nameof(Generation_ShouldUseClockTimesAndOnlyActiveConfiguredEmployees));
 
         var employee = Employee(200.10m);
         Employee(null);
         Employee(0);
         Employee(12000, active: false);
         Employee(0.01m);
-        _context.Add(new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 5), MinutesWorked = 450, State = WorkDayStateEnum.Worked });
-        _context.Add(new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 12, 1), MinutesWorked = 480, State = WorkDayStateEnum.Worked });
+        _context.Add(new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 5), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(450), State = WorkDayStateEnum.Worked });
+        _context.Add(new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 12, 1), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(480), State = WorkDayStateEnum.Worked });
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
 
@@ -81,16 +81,16 @@ public class MonthlyPayrollTests : ServiceTestBase, IDisposable
     }
 
     [Fact]
-    public async Task Generation_ShouldRoundOnceAfterSummingMinutesAndIgnoreOtherMonths()
+    public async Task Generation_ShouldRoundOnceAfterSummingDurationsAndIgnoreOtherMonths()
     {
         // Arrange
-        LogArrange("Scenario", nameof(Generation_ShouldRoundOnceAfterSummingMinutesAndIgnoreOtherMonths));
+        LogArrange("Scenario", nameof(Generation_ShouldRoundOnceAfterSummingDurationsAndIgnoreOtherMonths));
 
         var employee = Employee(0.30m);
         _context.AddRange(
-            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 10, 31), MinutesWorked = 480, State = WorkDayStateEnum.Worked },
-            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 1), MinutesWorked = 1, State = WorkDayStateEnum.Worked },
-            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 2), MinutesWorked = 1, State = WorkDayStateEnum.Worked }
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 10, 31), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(480), State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 1), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(1), State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 2), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(1), State = WorkDayStateEnum.Worked }
         );
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
@@ -104,6 +104,36 @@ public class MonthlyPayrollTests : ServiceTestBase, IDisposable
         (await _context.Payments.SingleAsync()).PaidAmount.Should().Be(0.01m);
     }
 
+    [Fact]
+    public async Task Generation_ShouldIgnoreIncompleteRecordsAndUseElapsedTimeAcrossMidnight()
+    {
+        // Arrange
+        var employee = Employee(20);
+        var incomplete = Employee(20);
+        var clockIn = new TimeOnly(22, 0);
+        _context.AddRange(
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 30), ClockIn = clockIn, ClockOut = clockIn.AddHours(8), State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 11, 29), ClockIn = clockIn, ClockOut = null, State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = incomplete.Id, Date = new DateOnly(2026, 11, 28), ClockIn = null, ClockOut = clockIn, State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = incomplete.Id, Date = new DateOnly(2026, 11, 29), ClockIn = clockIn, ClockOut = null, State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = incomplete.Id, Date = new DateOnly(2026, 11, 30), State = WorkDayStateEnum.Holiday }
+        );
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
+        LogArrange(nameof(clockIn), clockIn);
+
+        // Act
+        var result = await CreateService().GenerateMonthlyPaymentsAsync(new DateOnly(2026, 11, 1));
+        LogAct(result);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().Be(1);
+        var payment = await _context.Payments.SingleAsync();
+        payment.UserId.Should().Be(employee.Id);
+        payment.PaidAmount.Should().Be(160);
+    }
+
     #endregion
     // ---------- Restart ----------
     #region Restart
@@ -115,7 +145,7 @@ public class MonthlyPayrollTests : ServiceTestBase, IDisposable
 
         var existing = Employee(12000);
         var missing = Employee(20);
-        _context.Add(new DailyWorkRecord { UserId = missing.Id, Date = new DateOnly(2026, 11, 5), MinutesWorked = 450, State = WorkDayStateEnum.Worked });
+        _context.Add(new DailyWorkRecord { UserId = missing.Id, Date = new DateOnly(2026, 11, 5), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(450), State = WorkDayStateEnum.Worked });
         _context.Add(new Payment { UserId = existing.Id, Year = 2026, Month = 11, PaidAmount = 750, PaymentDate = new DateOnly(2026, 11, 1), State = PaymentStateEnum.Rejected });
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
@@ -147,8 +177,8 @@ public class MonthlyPayrollTests : ServiceTestBase, IDisposable
 
         var employee = Employee(20);
         _context.AddRange(
-            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 12, 31), MinutesWorked = 480, State = WorkDayStateEnum.Worked },
-            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2027, 1, 1), MinutesWorked = 480, State = WorkDayStateEnum.Worked }
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2026, 12, 31), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(480), State = WorkDayStateEnum.Worked },
+            new DailyWorkRecord { UserId = employee.Id, Date = new DateOnly(2027, 1, 1), ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(480), State = WorkDayStateEnum.Worked }
         );
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();

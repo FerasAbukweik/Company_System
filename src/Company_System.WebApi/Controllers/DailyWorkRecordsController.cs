@@ -74,7 +74,7 @@ public class DailyWorkRecordsController(
         [FromBody] DailyWorkRecordUpdateDTO data,
         CancellationToken cancellationToken = default)
     {
-        var result = await recordsService.UpdateAsync(recordId, data.MinutesWorked, data.State, cancellationToken);
+        var result = await recordsService.UpdateAsync(recordId, data.ClockIn, data.ClockOut, data.State, cancellationToken);
 
         return result.ToActionResult();
     }

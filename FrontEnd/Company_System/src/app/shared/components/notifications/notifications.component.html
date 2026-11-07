@@ -1,0 +1,76 @@
+<button
+  type="button"
+  aria-label="Notifications"
+  [attr.aria-expanded]="isOpen()"
+  (click)="toggle()"
+  class="relative rounded-full p-2 hover:bg-surface-low"
+>
+  <app-icon class="size-6 text-corporate-blue" [path]="HeroIcon.bell" />
+  @if (service.unreadCount()) {
+    <span
+      class="absolute -right-1 -top-1 min-w-5 rounded-full bg-error px-1 text-xs text-surface-lowest"
+      >{{ service.unreadCount() }}</span
+    >
+  }
+</button>
+
+@if (isOpen()) {
+  <button
+    type="button"
+    aria-label="Close notifications"
+    class="fixed inset-0 z-40 cursor-default"
+    (click)="isOpen.set(false)"
+  ></button>
+  <section
+    appIsVisible
+    (visible)="listVisible.set(true)"
+    aria-label="Your notifications"
+    class="absolute right-0 top-12 z-50 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-outline-light bg-surface-lowest shadow-lg"
+  >
+    <header class="flex items-center justify-between border-b border-outline-light p-4">
+      <h2 class="font-semibold text-corporate-blue">Notifications</h2>
+    </header>
+    @if (service.connectionState() === 'failed') {
+      <div class="flex items-center justify-between bg-error-bg p-3 text-sm text-error-text">
+        <span>Live updates disconnected</span
+        ><button type="button" (click)="service.retry()">Retry</button>
+      </div>
+    }
+    <div class="max-h-96 overflow-y-auto">
+      @for (notification of service.notifications(); track notification.id) {
+        <button
+          type="button"
+          (click)="open(notification)"
+          [class.bg-surface-low]="!notification.isRead"
+          class="block w-full border-b border-surface-high p-4 text-left hover:bg-surface-high"
+        >
+          <span class="block font-medium text-corporate-blue">{{ notification.title }}</span>
+          <span class="mt-1 block whitespace-pre-line text-sm text-text-secondary">{{
+            notification.content
+          }}</span>
+          <span class="mt-2 block text-xs text-outline-strong">{{
+            notification.createdAt | date: 'short'
+          }}</span>
+        </button>
+      } @empty {
+        @if (!service.loading()) {
+          <p class="p-6 text-sm text-text-secondary">No notifications yet.</p>
+        }
+      }
+
+      @if (service.loading()) {
+        <p role="status" class="p-4 text-sm text-text-secondary">Loading notifications…</p>
+      } @else if (service.loadFailed()) {
+        <button
+          type="button"
+          (click)="service.loadMore()"
+          class="w-full p-4 text-sm text-secondary-blue"
+        >
+          Retry loading notifications
+        </button>
+      } @else if (service.isMoreAvaiable()) {
+        <div appIsVisible (visible)="service.loadMore()" class="h-1" aria-hidden="true"></div>
+      }
+    </div>
+  </section>
+}

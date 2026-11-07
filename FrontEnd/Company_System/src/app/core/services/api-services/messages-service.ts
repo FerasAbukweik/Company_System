@@ -71,6 +71,20 @@ export class MessagesService {
     this._usersWithNoMoreMessages = new Set();
   }
 
+  resetConversation(otherUserId: string) {
+    this.cancelRequests$.next();
+    const userId = this._authService.userData()?.userId;
+    if (!userId) return;
+
+    const groupId = this.generateGroupId(userId, otherUserId);
+    this._messages.update((current) => {
+      const conversations = { ...current };
+      delete conversations[groupId];
+      return conversations;
+    });
+    this._usersWithNoMoreMessages.delete(otherUserId);
+  }
+
   private mergeMessages(current: MessageDTO[], incoming: MessageDTO[]) {
     const messages = new Map([...current, ...incoming].map((message) => [message.id, message]));
     return [...messages.values()].sort(

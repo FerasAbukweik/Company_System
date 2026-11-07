@@ -54,4 +54,17 @@ describe('Message history', () => {
     expect(service.messages()).toEqual([]);
     expect(service.isLoading()).toBe(false);
   });
+  it('fetches fresh history when a conversation with exhausted history is reopened', () => {
+    api.lazyGetMessages.mockReturnValue(of([]));
+    service.loadMoreMessages('a').subscribe();
+    service.loadMoreMessages('a').subscribe();
+    expect(api.lazyGetMessages).toHaveBeenCalledOnce();
+
+    service.resetConversation('a');
+    const message = { id: 'new', groupName: 'b-a', createdAt: new Date() } as MessageDTO;
+    api.lazyGetMessages.mockReturnValue(of([message]));
+    service.loadMoreMessages('a').subscribe();
+    expect(api.lazyGetMessages).toHaveBeenLastCalledWith({ taken: 0, sectionSize: 10 }, 'a');
+    expect(service.messages()).toEqual([message]);
+  });
 });

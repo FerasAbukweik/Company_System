@@ -2,7 +2,7 @@ using HR_System;
 using HR_System.Core;
 using HR_System.Infrastructure;
 using HR_System.MiddleWares;
-using HR_System.SignalR.Messages;
+using HR_System.SignalR.App;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -46,6 +46,6 @@ app.UseCors("Angular");   // after UseRouting and before auth, so preflight requ
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<MessagesHub>("/hubs/messages");
+app.MapHub<AppHub>("/hubs/app");
 
 app.Run();

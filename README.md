@@ -164,3 +164,24 @@ Shared testing infrastructure includes:
 ## 📄 License
 
 This project is available for portfolio and educational purposes.
+
+
+## Attendance, payroll, and notifications
+
+Daily work records store a `DateOnly` day and nullable `TimeOnly` clock-in and clock-out values. The attendance form enables clock-out only after clock-in is set. Selecting an empty time field defaults it to the current local time. Clearing clock-in also clears and disables clock-out.
+
+Payroll derives elapsed hours from complete clock pairs, sums them for the recorded month, and rounds only the final payment amount. Missing clock-in or clock-out contributes no hours. An earlier clock-out is treated as an overnight shift; the whole shift belongs to its recorded attendance day.
+
+The `AddAttendanceClockTimesAndNotifications` migration removes `MinutesWorked`, adds the two nullable clock columns, and creates notifications. Old durations cannot establish actual clock times, so existing attendance rows receive null clock values; previously saved payments are unchanged. Apply the migration before running the updated application:
+
+```sh
+dotnet ef database update --project src/Company_System.Infrastructure --startup-project src/Company_System.WebApi
+```
+
+Notifications are created for task assignments, approval requests and decisions, payment decisions, and new chat messages. The notification bell supports newest-first infinite scrolling, an unread count, and automatic mark-all-read when visible. The API always scopes these operations to the authenticated user:
+
+- `GET /api/Notifications?taken=0&sectionSize=10`
+- `GET /api/Notifications/GetUnreadCount`
+- `PUT /api/Notifications/MarkAllRead`
+
+Chat and notifications share one authenticated SignalR connection at `/hubs/app`. The connection starts with the signed-in layout and stops when that session ends. Opening or closing a chat only joins or leaves its private conversation group. Reconnection rejoins the active chat and reloads missed notifications and message history. Persistent notifications are pushed only after the surrounding database transaction commits.

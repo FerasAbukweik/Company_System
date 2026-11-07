@@ -63,6 +63,9 @@ public class ApplicationUser : IdentityUser<Guid>
     public List<Payment> Payments { get; set; } = [];
 
     [JsonIgnore]
+    public List<Notification> Notifications { get; set; } = [];
+
+    [JsonIgnore]
     public List<AppTask> CreatedTasks { get; set; } = [];
 
     [JsonIgnore]

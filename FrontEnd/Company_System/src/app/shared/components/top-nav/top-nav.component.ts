@@ -1,3 +1,4 @@
+import { NotificationsComponent } from '../notifications/notifications.component';
 import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/api-services/auth-service';
 import { IconComponent } from '../icon/icon.component';
@@ -5,7 +6,7 @@ import { HeroIcon } from '../../../core/constants/hero-icon-d';
 
 @Component({
   selector: 'nav[app-top-nav]',
-  imports: [IconComponent],
+  imports: [IconComponent, NotificationsComponent],
   templateUrl: './top-nav.component.html',
   host: {
     class:

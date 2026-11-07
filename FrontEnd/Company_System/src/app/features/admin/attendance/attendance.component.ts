@@ -70,7 +70,8 @@ export class AttendanceComponent {
         {
           date,
           userId: value.userId,
-          minutesWorked: value.minutesWorked,
+          clockIn: value.clockIn,
+          clockOut: value.clockOut,
           state: value.state,
         },
         value.recordId,

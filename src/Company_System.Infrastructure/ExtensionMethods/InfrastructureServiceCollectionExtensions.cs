@@ -1,3 +1,4 @@
+using HR_System.Infrastructure.Decorators;
 using HR_System.Core.Abstraction.RepositoryContracts;
 using HR_System.Core.Abstraction.ServiceContracts;
 using HR_System.Core.Domain.Identity;
@@ -85,6 +86,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IUsersService, UsersService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IMessagesService, MessagesService>();
+        services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<ITasksApprovalsService, TasksApprovalsService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IOrganizationHierarchyService, OrganizationHierarchyService>();
@@ -103,6 +105,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IPaymentsRepository, PaymentsRepository>();
         services.AddScoped<IOrganizationHierarchyRepository, OrganizationHierarchyRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<INotificationsRepository, NotificationsRepository>();
         services.AddScoped<IImagesRepository, ImagesRepository>();
 
         return services;
@@ -123,13 +126,16 @@ public static class InfrastructureServiceCollectionExtensions
         services.Decorate<IRefreshTokenService, LoggingRefreshTokenService>();
         services.Decorate<ITasksService, LoggingTasksService>();
         services.Decorate<IDailyWorkRecordsService, LoggingDailyWorkRecordsService>();
+        services.Decorate<IPaymentsService, NotifyingPaymentsService>();
         services.Decorate<IPaymentsService, LoggingPaymentsService>();
         services.Decorate<IApprovalService, LoggingApprovalService>();
+        services.Decorate<IActivitiesService, NotifyingActivitiesService>();
         services.Decorate<IActivitiesService, LoggingActivitiesService>();
         services.Decorate<IUsersService, InvalidatingUsersService>();
         services.Decorate<IUsersService, LoggingUsersService>();
         services.Decorate<IAuthService, LoggingAuthService>();
         services.Decorate<IMessagesService, LoggingMessagesService>();
+        services.Decorate<INotificationsService, LoggingNotificationsService>();
         services.Decorate<ITasksApprovalsService, LoggingTasksApprovalsService>();
         services.Decorate<IImageService, LoggingImageService>();
 

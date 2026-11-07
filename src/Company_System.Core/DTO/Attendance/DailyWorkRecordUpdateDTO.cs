@@ -5,9 +5,9 @@ namespace HR_System.Core.DTO.Attendance;
 
 public class DailyWorkRecordUpdateDTO
 {
-    [Required]
-    [Range(0, 1440)]
-    public required int MinutesWorked { get; set; }
+    public TimeOnly? ClockIn { get; set; }
+
+    public TimeOnly? ClockOut { get; set; }
 
     [Required]
     [EnumDataType(typeof(WorkDayStateEnum))]

@@ -1,3 +1,5 @@
+import { NotificationsService } from '../../core/services/api-services/notifications-service';
+import { SignalRService } from '../../core/services/signalR/signalr-service';
 import { MessagesService } from '../../core/services/api-services/messages-service';
 import { OrgTreeService } from '../../core/services/api-services/org-tree-service';
 import { ApprovalService } from '../../core/services/api-services/approval-service';
@@ -34,7 +36,16 @@ export class MainLayoutComponent implements OnDestroy {
 
   private readonly messagesService = inject(MessagesService);
 
+  private readonly notifications = inject(NotificationsService);
+  private readonly signalR = inject(SignalRService);
+
+  constructor() {
+    this.notifications.start();
+  }
+
   ngOnDestroy() {
+    this.notifications.reset();
+    void this.signalR.stop();
     this.tasksService.reset();
     this.activitiesService.reset();
     this.approvalService.resetToApprova();

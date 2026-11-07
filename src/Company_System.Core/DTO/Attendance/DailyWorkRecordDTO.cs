@@ -10,7 +10,9 @@ public class DailyWorkRecordDTO
 
     public required DateOnly Date { get; set; }
 
-    public required int MinutesWorked { get; set; }
+    public TimeOnly? ClockIn { get; set; }
+
+    public TimeOnly? ClockOut { get; set; }
 
     public required WorkDayStateEnum State { get; set; }
 }

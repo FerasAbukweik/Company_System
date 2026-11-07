@@ -1,3 +1,4 @@
+import { workedHours } from '../../../core/utils/attendance-time';
 import { AttendanceRecord } from '../../../core/dto/attendance/attendance-record-dto';
 import {
   ChangeDetectionStrategy,
@@ -46,6 +47,7 @@ export class AttendanceCalendarComponent implements OnInit {
       const current = date.getMonth() === month.getMonth();
       const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(number).padStart(2, '0')}`;
       const record = current ? this.records().find((record) => record.date === dateKey) : undefined;
+      const hours = record ? workedHours(record.clockIn, record.clockOut) : null;
       const labels = ['Worked', 'Paid Leave', 'Holiday', 'Weekend'];
       const colors = [
         'bg-turquoise-tint text-turquoise-text',
@@ -64,7 +66,7 @@ export class AttendanceCalendarComponent implements OnInit {
           : !this.showAttendance()
             ? 'Select attendance date'
             : record
-              ? `${labels[record.state]} · ${(record.minutesWorked / 60).toLocaleString('en-US', { maximumFractionDigits: 2 })} hours`
+              ? `${labels[record.state]} · ${hours === null ? 'Clock times incomplete' : `${hours.toLocaleString('en-US', { maximumFractionDigits: 2 })} hours`}`
               : 'No attendance data',
         classes: !current
           ? 'text-outline-strong/40'

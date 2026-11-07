@@ -2,6 +2,7 @@ export interface AttendanceRecord {
   id: string;
   userId: string;
   date: string;
-  minutesWorked: number;
+  clockIn: string | null;
+  clockOut: string | null;
   state: number;
 }

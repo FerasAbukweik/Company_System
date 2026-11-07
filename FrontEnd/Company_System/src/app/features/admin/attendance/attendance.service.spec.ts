@@ -5,7 +5,14 @@ import { AttendanceService } from './attendance.service';
 
 const date = '2026-11-05';
 const employee = { userId: 'employee', fullName: 'Employee', record: null };
-const record = { id: 'day', userId: 'employee', date, state: 0, minutesWorked: 480 };
+const record = {
+  id: 'day',
+  userId: 'employee',
+  date,
+  state: 0,
+  clockIn: '08:00:00',
+  clockOut: '16:00:00',
+};
 const response = { items: [employee], totalCount: 6 };
 const isRecords = (request: { url: string }) => request.url.includes('/GetDayRecords');
 

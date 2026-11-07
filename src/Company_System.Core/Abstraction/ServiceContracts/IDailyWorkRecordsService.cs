@@ -18,7 +18,8 @@ public interface IDailyWorkRecordsService
 
     Task<Result<DailyWorkRecordDTO>> UpdateAsync(
         Guid recordId,
-        int minutesWorked,
+        TimeOnly? clockIn,
+        TimeOnly? clockOut,
         WorkDayStateEnum state,
         CancellationToken cancellationToken = default);
 

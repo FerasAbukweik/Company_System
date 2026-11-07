@@ -34,8 +34,9 @@ public class Message
         return new MessageDTO()
         {
             Id = Id,
+            SenderId = SenderId,
             Content = Content,
-            CreatedAt = CreatedAt,
+            CreatedAt = DateTime.SpecifyKind(CreatedAt, DateTimeKind.Utc),
             IsCurrUserSender = SenderId == currUserId,
             GroupName = GenerateGroupName()
         };

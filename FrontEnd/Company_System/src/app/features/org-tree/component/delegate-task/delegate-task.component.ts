@@ -1,4 +1,6 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskPrioritiesEnum } from '../../../../core/enum/priorities-enum';
 import { DelegateTaskService } from './delegate-task.service';
@@ -19,15 +21,17 @@ export class DelegateTaskComponent {
   // DI
   protected readonly delegateTaskService = inject(DelegateTaskService);
   protected readonly tasksService = inject(TasksService);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly saving = signal(false);
 
   // fields
-  public readonly todayStr = new Date().toISOString().substring(0, 10);
+  public readonly todayStr = this.today();
 
   // Form
   public readonly form = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    deadline: new FormControl(new Date().toISOString().substring(0, 10), {
+    deadline: new FormControl(this.today(), {
       nonNullable: true,
       validators: [Validators.required],
     }),
@@ -52,16 +56,23 @@ export class DelegateTaskComponent {
     return control.invalid && control.touched && control.dirty;
   }
 
+  private today(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }
+
   private resetComponentState(): void {
     this.form.reset({
       title: '',
       description: '',
-      deadline: new Date().toISOString().substring(0, 10),
+      deadline: this.today(),
     });
     this.selectedPriority.set(TaskPrioritiesEnum.Low);
   }
 
   public onSubmit(): void {
+    if (this.saving()) return;
+
     this.form.markAllAsTouched();
     this.form.markAllAsDirty();
     const currentNode = this.delegateTaskService.node();
@@ -74,14 +85,23 @@ export class DelegateTaskComponent {
 
     const taskData: TaskAddDTO = {
       userId: currentNode.userId,
-      deadline: new Date(formValues.deadline),
+      deadline: new Date(`${formValues.deadline}T23:59:59.999`),
       description: formValues.description,
       priority: this.selectedPriority(),
       title: formValues.title,
     };
 
-    this.tasksService.addTask(taskData);
-
-    this.delegateTaskService.close();
+    this.saving.set(true);
+    this.tasksService
+      .addTask(taskData)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.saving.set(false)),
+      )
+      .subscribe({
+        next: () => this.delegateTaskService.close(),
+        // TasksService displays the error; leave the form open so the user can retry.
+        error: () => {},
+      });
   }
 }

@@ -11,9 +11,9 @@ public class DailyWorkRecordSaveDTO
     [Required]
     public required DateOnly Date { get; set; }
 
-    [Required]
-    [Range(0, 1440)]
-    public required int MinutesWorked { get; set; }
+    public TimeOnly? ClockIn { get; set; }
+
+    public TimeOnly? ClockOut { get; set; }
 
     [Required]
     [EnumDataType(typeof(WorkDayStateEnum))]

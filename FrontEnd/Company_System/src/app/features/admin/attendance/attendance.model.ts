@@ -1,6 +1,7 @@
 export interface AttendanceDaySave {
   userId: string;
-  minutesWorked: number;
+  clockIn: string | null;
+  clockOut: string | null;
   state: number;
   recordId?: string;
 }

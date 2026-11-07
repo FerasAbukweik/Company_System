@@ -24,7 +24,7 @@ public class PaymentsService(
             user => user.OrganizationHierarchy != null && user.OrganizationHierarchy.IsActive && user.HourlyRate > 0,
             cancellationToken: cancellationToken);
 
-        var workedMinutes = await dailyWorkRecordsRepository.GetWorkedMinutesAsync(
+        var workedHours = await dailyWorkRecordsRepository.GetWorkedHoursAsync(
             month, month.AddMonths(1), cancellationToken);
 
         var existing = await paymentsRepository.FilterAsync(
@@ -37,8 +37,8 @@ public class PaymentsService(
         {
             if (paidEmployees.Contains(employee.Id)) continue;
 
-            var minutes = workedMinutes.GetValueOrDefault(employee.Id);
-            var amount = decimal.Round(minutes / 60m * employee.HourlyRate!.Value, 2, MidpointRounding.AwayFromZero);
+            var hours = workedHours.GetValueOrDefault(employee.Id);
+            var amount = decimal.Round(hours * employee.HourlyRate!.Value, 2, MidpointRounding.AwayFromZero);
             if (amount <= 0) continue;
 
             paymentsRepository.Add(new Payment()

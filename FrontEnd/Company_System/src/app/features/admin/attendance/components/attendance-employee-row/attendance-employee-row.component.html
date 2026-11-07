@@ -6,17 +6,21 @@
 </td>
 <td class="p-4" [formGroup]="form">
   <input
-    type="number"
-    formControlName="hours"
-    min="0"
-    max="24"
-    step="any"
-    [attr.aria-label]="'Worked hours for ' + employee().fullName"
-    class="w-28 rounded-lg border border-outline-light bg-surface-lowest p-2"
+    type="time"
+    formControlName="clockIn"
+    (focus)="defaultTime('clockIn')"
+    [attr.aria-label]="'Clock-in for ' + employee().fullName"
+    class="rounded-lg border border-outline-light bg-surface-lowest p-2"
   />
-  @if (form.controls.hours.invalid && form.controls.hours.touched) {
-    <p role="alert" class="mt-1 text-xs text-error-text">Enter hours from 0 to 24.</p>
-  }
+</td>
+<td class="p-4" [formGroup]="form">
+  <input
+    type="time"
+    formControlName="clockOut"
+    (focus)="defaultTime('clockOut')"
+    [attr.aria-label]="'Clock-out for ' + employee().fullName"
+    class="rounded-lg border border-outline-light bg-surface-lowest p-2"
+  />
 </td>
 <td class="p-4" [formGroup]="form">
   <select

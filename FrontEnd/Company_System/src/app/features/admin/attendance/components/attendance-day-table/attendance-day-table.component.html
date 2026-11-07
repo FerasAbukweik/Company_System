@@ -4,7 +4,8 @@
       {{ date() | date: 'EEEE, MMM d, yyyy' }}
     </h2>
     <p class="mt-1 text-sm text-text-secondary">
-      Unrecorded days default to 8 hours and Worked. Save each row to record it.
+      Set clock-in first, then clock-out. Empty fields default to the current time when selected.
+      Payroll only counts complete records; an earlier clock-out means an overnight shift.
     </p>
   </header>
 
@@ -17,7 +18,10 @@
         <table class="w-full text-left text-sm">
           <thead class="bg-surface-low">
             <tr>
-              @for (heading of ['Employee', 'Worked hours', 'State', 'Action']; track heading) {
+              @for (
+                heading of ['Employee', 'Clock-in', 'Clock-out', 'State', 'Action'];
+                track heading
+              ) {
                 <th scope="col" class="p-4">{{ heading }}</th>
               }
             </tr>
@@ -34,7 +38,7 @@
               ></tr>
             } @empty {
               <tr>
-                <td colspan="4" class="p-8 text-center text-text-secondary">No employees found.</td>
+                <td colspan="5" class="p-8 text-center text-text-secondary">No employees found.</td>
               </tr>
             }
           </tbody>

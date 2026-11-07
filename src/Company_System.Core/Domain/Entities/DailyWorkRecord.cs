@@ -12,8 +12,9 @@ public class DailyWorkRecord
     [Required]
     public required DateOnly Date { get; set; }
 
-    [Required]
-    public required int MinutesWorked { get; set; }
+    public TimeOnly? ClockIn { get; set; }
+
+    public TimeOnly? ClockOut { get; set; }
 
     [Required]
     public required WorkDayStateEnum State { get; set; }
@@ -36,7 +37,8 @@ public class DailyWorkRecord
             Id = Id,
             UserId = UserId,
             Date = Date,
-            MinutesWorked = MinutesWorked,
+            ClockIn = ClockIn,
+            ClockOut = ClockOut,
             State = State
         };
     }

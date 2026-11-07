@@ -42,9 +42,9 @@ public class AttendanceDayPageTests : ServiceTestBase, IDisposable
         var unrecorded = new ApplicationUser { FullName = "Unrecorded Employee", Position = PositionsEnum.Employee };
         _context.AddRange(first, second, unrecorded);
         _context.AddRange(
-            new DailyWorkRecord { UserId = first.Id, Date = date, State = WorkDayStateEnum.PaidLeave, MinutesWorked = 0 },
-            new DailyWorkRecord { UserId = first.Id, Date = date.AddDays(-1), State = WorkDayStateEnum.Worked, MinutesWorked = 480 },
-            new DailyWorkRecord { UserId = second.Id, Date = date, State = WorkDayStateEnum.Worked, MinutesWorked = 480 }
+            new DailyWorkRecord { UserId = first.Id, Date = date, State = WorkDayStateEnum.PaidLeave, ClockIn = null, ClockOut = null },
+            new DailyWorkRecord { UserId = first.Id, Date = date.AddDays(-1), State = WorkDayStateEnum.Worked, ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(480) },
+            new DailyWorkRecord { UserId = second.Id, Date = date, State = WorkDayStateEnum.Worked, ClockIn = new TimeOnly(8, 0), ClockOut = new TimeOnly(8, 0).AddMinutes(480) }
         );
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
@@ -65,7 +65,8 @@ public class AttendanceDayPageTests : ServiceTestBase, IDisposable
         result.Value.Items.Single(employee => employee.UserId == unrecorded.Id).Record.Should().BeNull();
         var record = result.Value.Items.Single(employee => employee.UserId == first.Id).Record!;
         record.Date.Should().Be(date);
-        record.MinutesWorked.Should().Be(0);
+        record.ClockIn.Should().BeNull();
+        record.ClockOut.Should().BeNull();
         record.State.Should().Be(WorkDayStateEnum.PaidLeave);
         users.VerifyNoOtherCalls();
         _context.ChangeTracker.Entries().Should().BeEmpty();

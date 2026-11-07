@@ -9,6 +9,8 @@ namespace HR_System.Infrastructure;
 
 public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options)
 {
+    public DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -110,6 +112,15 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
         });
 
 
+        builder.Entity<Notification>(notification =>
+        {
+            notification.HasIndex(item => new { item.UserId, item.SourceKey }).IsUnique();
+            notification.HasIndex(item => new { item.UserId, item.IsRead, item.CreatedAt });
+            notification.HasOne(item => item.User).WithMany(user => user.Notifications)
+                .HasForeignKey(item => item.UserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+
         // Daily work records ------------------------------------------------------------
         builder.Entity<DailyWorkRecord>(r =>
         {
@@ -117,7 +128,6 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
 
             r.ToTable("DailyWorkRecords", table =>
             {
-                table.HasCheckConstraint("CK_DailyWorkRecords_MinutesWorked", "[MinutesWorked] >= 0 AND [MinutesWorked] <= 1440");
                 table.HasCheckConstraint("CK_DailyWorkRecords_State", "[State] IN (0, 1, 2, 3)");
             });
 

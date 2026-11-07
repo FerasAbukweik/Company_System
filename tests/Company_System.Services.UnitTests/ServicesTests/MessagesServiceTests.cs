@@ -41,6 +41,30 @@ public class MessagesServiceTests : ServiceTestBase
         return Fixture.Create<LazyDTO>();
     }
 
+    [Fact]
+    public void ToDTO_ShouldSerializeStoredMessageTimeAsUtc()
+    {
+        // Arrange
+        var timestamp = new DateTime(2026, 11, 7, 8, 30, 0, DateTimeKind.Unspecified);
+        var message = new Message
+        {
+            Content = "Stored message",
+            SenderId = Guid.NewGuid(),
+            ReceiverId = Guid.NewGuid(),
+            CreatedAt = timestamp
+        };
+        LogArrange(nameof(timestamp), timestamp);
+
+        // Act
+        var dto = message.ToDTO(message.SenderId);
+        LogAct(dto);
+
+        // Assert
+        dto.CreatedAt.Kind.Should().Be(DateTimeKind.Utc);
+        dto.CreatedAt.Ticks.Should().Be(timestamp.Ticks);
+        System.Text.Json.JsonSerializer.Serialize(dto).Should().Contain("2026-11-07T08:30:00Z");
+    }
+
     #region AddAsync
     [Fact]
     public async Task AddAsync_ShouldReturnFailure_WhenSaveChangesFails()

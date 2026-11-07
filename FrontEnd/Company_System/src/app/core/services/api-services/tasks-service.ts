@@ -100,6 +100,9 @@ export class TasksService {
   addTask(taskData: TaskAddDTO) {
     return this._tasksApiService
       .addTask(taskData)
-      .pipe(toastError(this._toastService, 'تعذر إضافة المهمة'));
+      .pipe(
+        toastError(this._toastService, 'تعذر إضافة المهمة'),
+        tap(() => this._toastService.success('Task added successfully.')),
+      );
   }
 }

@@ -34,6 +34,7 @@ describe('Chat message submission', () => {
         {
           provide: MessagesService,
           useValue: {
+            resetConversation: vi.fn(),
             receiveMessages: () => new Subject(),
             loadMoreMessages: () => of([]),
             isLoading: signal(false),

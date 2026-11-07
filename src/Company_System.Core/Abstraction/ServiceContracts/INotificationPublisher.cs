@@ -6,7 +6,7 @@ public interface INotificationPublisher
 {
     Task PublishAsync(NotificationDTO notification, CancellationToken cancellationToken = default);
 
-    Task FlushAsync();
+    Task PublishPendingAsync();
 
-    void Clear();
+    void DiscardPending();
 }

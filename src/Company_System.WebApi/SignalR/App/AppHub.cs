@@ -18,12 +18,6 @@ public class AppHub(
     INotificationPublisher publisher,
     ApplicationDbContext dbContext) : Hub<IAppClient>
 {
-    public override async Task OnConnectedAsync()
-    {
-        await Groups.AddToGroupAsync(Context.ConnectionId, UserGroup(CurrentUserId()), Context.ConnectionAborted);
-        await base.OnConnectedAsync();
-    }
-
     public async Task AddToGroup(Guid otherUserId)
     {
         await EnsureRecipientAsync(otherUserId);
@@ -44,27 +38,40 @@ public class AppHub(
         var currentUserId = CurrentUserId();
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(Context.ConnectionAborted);
-        var result = await messagesService.AddAsync(new MessageAddDTO
-        {
-            ReceiverId = otherUserId,
-            Content = content
-        }, currentUserId, Context.ConnectionAborted);
-        if (!result.IsSuccess) throw new HubException(result.ErrorMessage);
+        MessageDTO message;
 
-        var notification = await notificationsService.AddAsync(new NotificationAddDTO
+        try
         {
-            UserId = otherUserId,
-            Title = "New chat message",
-            Content = content,
-            TargetPath = "/org-tree",
-            SourceKey = $"message:{result.Value!.Id}",
-            Type = NotificationTypeEnum.Message
-        }, Context.ConnectionAborted);
-        if (!notification.IsSuccess) throw new HubException(notification.ErrorMessage);
+            var result = await messagesService.AddAsync(new MessageAddDTO
+            {
+                ReceiverId = otherUserId,
+                Content = content
+            }, currentUserId, Context.ConnectionAborted);
+            if (!result.IsSuccess) throw new HubException(result.ErrorMessage);
 
-        await transaction.CommitAsync(Context.ConnectionAborted);
-        await publisher.FlushAsync();
-        await Clients.Group(ConversationGroup(otherUserId)).ReceiveMessage(result.Value!);
+            var notification = await notificationsService.AddAsync(new NotificationAddDTO
+            {
+                UserId = otherUserId,
+                Title = "New chat message",
+                Content = content,
+                TargetPath = "/org-tree",
+                SourceKey = $"message:{result.Value!.Id}",
+                Type = NotificationTypeEnum.Message
+            }, Context.ConnectionAborted);
+            if (!notification.IsSuccess) throw new HubException(notification.ErrorMessage);
+
+            await transaction.CommitAsync(Context.ConnectionAborted);
+            message = result.Value!;
+        }
+        catch
+        {
+            publisher.DiscardPending();
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+
+        await publisher.PublishPendingAsync();
+        await Clients.Group(ConversationGroup(otherUserId)).ReceiveMessage(message);
     }
 
     public Task NotifyTyping(Guid otherUserId)
@@ -119,6 +126,4 @@ public class AppHub(
         Array.Sort(ids, StringComparer.Ordinal);
         return $"{ids[1]}-{ids[0]}";
     }
-
-    public static string UserGroup(Guid userId) => $"user:{userId:D}";
 }

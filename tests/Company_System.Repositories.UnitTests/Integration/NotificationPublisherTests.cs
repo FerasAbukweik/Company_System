@@ -24,7 +24,7 @@ public class NotificationPublisherTests : RepositoryTestBase
         await context.Database.OpenConnectionAsync();
         var client = new Mock<IAppClient>();
         var clients = new Mock<IHubClients<IAppClient>>();
-        clients.Setup(hub => hub.Group(It.IsAny<string>())).Returns(client.Object);
+        clients.Setup(hub => hub.User(It.IsAny<string>())).Returns(client.Object);
         var hub = new Mock<IHubContext<AppHub, IAppClient>>();
         hub.SetupGet(value => value.Clients).Returns(clients.Object);
         var publisher = new NotificationPublisher(hub.Object, context, NullLogger<NotificationPublisher>.Instance);
@@ -43,13 +43,41 @@ public class NotificationPublisherTests : RepositoryTestBase
         else
         {
             await transaction.RollbackAsync();
-            publisher.Clear();
+            publisher.DiscardPending();
         }
-        await publisher.FlushAsync();
+        await publisher.PublishPendingAsync();
         LogAct("Pending notifications flushed");
 
         // Assert
         client.Verify(value => value.ReceiveNotification(notification), commit ? Times.Once : Times.Never);
-        if (commit) clients.Verify(value => value.Group(AppHub.UserGroup(notification.UserId)), Times.Once);
+        if (commit) clients.Verify(value => value.User(notification.UserId.ToString()), Times.Once);
     }
+    [Fact]
+    public async Task Publish_ShouldSendImmediatelyWithoutATransaction()
+    {
+        // Arrange
+        await using var context = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite("Data Source=:memory:").Options);
+        var client = new Mock<IAppClient>();
+        var clients = new Mock<IHubClients<IAppClient>>();
+        clients.Setup(value => value.User(It.IsAny<string>())).Returns(client.Object);
+        var hub = new Mock<IHubContext<AppHub, IAppClient>>();
+        hub.SetupGet(value => value.Clients).Returns(clients.Object);
+        var publisher = new NotificationPublisher(hub.Object, context, NullLogger<NotificationPublisher>.Instance);
+        var notification = new NotificationDTO
+        {
+            Id = Guid.NewGuid(), UserId = Guid.NewGuid(), Title = "New task", Content = "Assigned", TargetPath = "/dashboard",
+            CreatedAt = DateTime.UtcNow, IsRead = false, Type = NotificationTypeEnum.TaskAssigned
+        };
+        LogArrange(nameof(notification), notification);
+
+        // Act
+        await publisher.PublishAsync(notification);
+        await publisher.PublishPendingAsync();
+        LogAct("Published outside a transaction");
+
+        // Assert
+        client.Verify(value => value.ReceiveNotification(notification), Times.Once);
+    }
+
 }

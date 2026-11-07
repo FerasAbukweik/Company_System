@@ -13,30 +13,30 @@ public class NotificationPublisher(
 {
     private readonly List<NotificationDTO> pending = [];
 
-    public async Task PublishAsync(NotificationDTO notification, CancellationToken cancellationToken = default)
+    public Task PublishAsync(NotificationDTO notification, CancellationToken cancellationToken = default)
     {
         if (dbContext.Database.CurrentTransaction is not null)
         {
             pending.Add(notification);
-            return;
+            return Task.CompletedTask;
         }
 
-        await SendAsync(notification);
+        return SendAsync(notification);
     }
 
-    public async Task FlushAsync()
+    public async Task PublishPendingAsync()
     {
         foreach (var notification in pending) await SendAsync(notification);
         pending.Clear();
     }
 
-    public void Clear() => pending.Clear();
+    public void DiscardPending() => pending.Clear();
 
     private async Task SendAsync(NotificationDTO notification)
     {
         try
         {
-            await hub.Clients.Group(AppHub.UserGroup(notification.UserId)).ReceiveNotification(notification);
+            await hub.Clients.User(notification.UserId.ToString()).ReceiveNotification(notification);
         }
         catch (Exception exception)
         {

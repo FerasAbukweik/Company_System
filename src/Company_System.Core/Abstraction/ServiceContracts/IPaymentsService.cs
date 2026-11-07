@@ -6,6 +6,10 @@ namespace HR_System.Core.Abstraction.ServiceContracts;
 
 public interface IPaymentsService
 {
+    Task<Result<AdminPaymentSummaryDTO>> GetAdminSummaryAsync(CancellationToken cancellationToken = default);
+
+    Task<Result<UserPaymentOverviewDTO>> GetUserOverviewAsync(Guid userId, CancellationToken cancellationToken = default);
+
     /// <summary>Creates missing pending payments for the supplied month from active employees' hourly rates.</summary>
     Task<Result<int>> GenerateMonthlyPaymentsAsync(DateOnly month, CancellationToken cancellationToken = default);
 

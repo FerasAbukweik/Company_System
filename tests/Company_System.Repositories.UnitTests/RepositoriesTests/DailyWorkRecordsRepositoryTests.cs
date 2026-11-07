@@ -31,6 +31,30 @@ public class DailyWorkRecordsRepositoryTests : RepositoryTestBase, IDisposable
     // ---------- Add ----------
     #region Add
     [Fact]
+    public async Task CountPaidLeaveDays_ShouldOnlyCountTheEmployeesPaidLeaveWithinTheRange()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var from = new DateOnly(2025, 1, 1);
+        var to = new DateOnly(2025, 12, 31);
+        _dbContext.DailyWorkRecords.AddRange(
+            new DailyWorkRecord { UserId = userId, Date = from, State = WorkDayStateEnum.PaidLeave },
+            new DailyWorkRecord { UserId = userId, Date = to, State = WorkDayStateEnum.PaidLeave },
+            new DailyWorkRecord { UserId = userId, Date = from.AddDays(1), State = WorkDayStateEnum.Holiday },
+            new DailyWorkRecord { UserId = userId, Date = from.AddDays(-1), State = WorkDayStateEnum.PaidLeave },
+            new DailyWorkRecord { UserId = Guid.NewGuid(), Date = from, State = WorkDayStateEnum.PaidLeave });
+        await _dbContext.SaveChangesAsync();
+        LogArrange(nameof(userId), userId);
+
+        // Act
+        var count = await new DailyWorkRecordsRepository(_dbContext).CountPaidLeaveDaysAsync(userId, from, to);
+        LogAct(count);
+
+        // Assert
+        count.Should().Be(2);
+    }
+
+    [Fact]
     public async Task Add_ShouldNotPersistUntilSaveChanges()
     {
         // Arrange

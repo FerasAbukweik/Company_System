@@ -29,6 +29,13 @@ public class UsersController(
 
     [HttpGet("[action]")]
     [Authorize(Roles = nameof(RolesEnum.Admin))]
+    public async Task<ActionResult<EmployeeSummaryDTO>> GetEmployeesSummary(CancellationToken cancellationToken = default)
+    {
+        return (await usersService.GetEmployeeSummaryAsync(cancellationToken)).ToActionResult();
+    }
+
+    [HttpGet("[action]")]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
     public async Task<ActionResult<EmployeePageDTO>> GetEmployees(
         [FromQuery] EmployeeQueryDTO lazyData,
         CancellationToken cancellationToken = default)

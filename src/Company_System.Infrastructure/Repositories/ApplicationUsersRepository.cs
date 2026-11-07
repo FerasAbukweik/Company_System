@@ -105,9 +105,14 @@ public class ApplicationUsersRepository(
         return query;
     }
 
-    public async Task<EmployeeSummaryDTO> GetSummaryAsync(Expression<Func<ApplicationUser, bool>> predicate, CancellationToken cancellationToken = default)
+    public Task<int> CountAsync(Expression<Func<ApplicationUser, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Users.AsNoTracking().Where(predicate)
+        return dbContext.Users.CountAsync(predicate, cancellationToken);
+    }
+
+    public async Task<EmployeeSummaryDTO> GetSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Users.AsNoTracking()
             .GroupBy(user => 1)
             .Select(group => new EmployeeSummaryDTO
             {

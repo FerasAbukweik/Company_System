@@ -112,26 +112,26 @@ public class PaymentsRepository(
         return query;
     }
 
-    public async Task<UserPaymentSummaryDTO> GetUserSummaryAsync(Guid userId, int year, PaymentStateEnum? state, CancellationToken cancellationToken = default)
+    public Task<int> CountAsync(Expression<Func<Payment, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return dbContext.Payments.CountAsync(predicate, cancellationToken);
+    }
+
+    public async Task<UserPaymentSummaryDTO> GetUserSummaryAsync(Guid userId, int year, CancellationToken cancellationToken = default)
     {
         return await dbContext.Payments.AsNoTracking().Where(payment => payment.UserId == userId && payment.Year == year)
             .GroupBy(payment => 1)
             .Select(group => new UserPaymentSummaryDTO
             {
-                TotalCount = group.Count(payment => !state.HasValue || payment.State == state.Value),
                 ApprovedAmount = group.Sum(payment => payment.State == PaymentStateEnum.Approved ? payment.PaidAmount : 0),
                 PendingAmount = group.Sum(payment => payment.State == PaymentStateEnum.Pending ? payment.PaidAmount : 0)
             })
             .SingleOrDefaultAsync(cancellationToken) ?? new UserPaymentSummaryDTO();
     }
 
-    public async Task<AdminPaymentSummaryDTO> GetAdminSummaryAsync(PaymentQueryDTO query, CancellationToken cancellationToken = default)
+    public async Task<AdminPaymentSummaryDTO> GetAdminSummaryAsync(CancellationToken cancellationToken = default)
     {
-        var name = query.FullName?.Trim().ToUpperInvariant();
-        return await dbContext.Payments.AsNoTracking().Where(payment => payment.Year == query.Year &&
-                (!query.Month.HasValue || payment.Month == query.Month) &&
-                (!query.UserId.HasValue || payment.UserId == query.UserId) &&
-                (string.IsNullOrEmpty(name) || (payment.User != null && payment.User.FullName.ToUpper().Contains(name))))
+        return await dbContext.Payments.AsNoTracking()
             .GroupBy(payment => 1)
             .Select(group => new AdminPaymentSummaryDTO
             {

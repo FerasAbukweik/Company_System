@@ -69,4 +69,20 @@ public class LoggingPaymentsService(
             $"UserId: {userId}, Year: {query.Year}, State: {query.State}, Taken: {query.Taken}, SectionSize: {query.SectionSize}", logSuccess: false);
         return result;
     }
+    public async Task<Result<UserPaymentOverviewDTO>> GetUserOverviewAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var result = await inner.GetUserOverviewAsync(userId, cancellationToken);
+        logger.LogResult(result, ServiceName, nameof(GetUserOverviewAsync), $"UserId: {userId}", logSuccess: false);
+
+        return result;
+    }
+
+    public async Task<Result<AdminPaymentSummaryDTO>> GetAdminSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await inner.GetAdminSummaryAsync(cancellationToken);
+        logger.LogResult(result, ServiceName, nameof(GetAdminSummaryAsync), logSuccess: false);
+
+        return result;
+    }
+
 }

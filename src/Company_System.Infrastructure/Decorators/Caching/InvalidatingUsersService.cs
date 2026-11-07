@@ -13,6 +13,9 @@ public class InvalidatingUsersService(IUsersService inner, IRedisService redis) 
     public Task<Result<ApplicationUser>> AddEmployeeAsync(AddEmployeeDTO data, CancellationToken cancellationToken = default)
         => inner.AddEmployeeAsync(data, cancellationToken);
 
+    public Task<Result<EmployeeSummaryDTO>> GetEmployeeSummaryAsync(CancellationToken cancellationToken = default)
+        => inner.GetEmployeeSummaryAsync(cancellationToken);
+
     public Task<Result<EmployeePageDTO>> LazyGetEmployeesAsync(EmployeeQueryDTO data, CancellationToken cancellationToken = default)
         => inner.LazyGetEmployeesAsync(data, cancellationToken);
 

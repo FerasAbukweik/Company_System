@@ -8,6 +8,8 @@ namespace HR_System.Core.Abstraction.RepositoryContracts;
 
 public interface IDailyWorkRecordsRepository
 {
+    Task<int> CountPaidLeaveDaysAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
+
     Task<AttendanceDayPageDTO> GetDayRecordsAsync(
         DateOnly date,
         LazyDTO lazyData,

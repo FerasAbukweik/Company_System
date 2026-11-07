@@ -52,7 +52,7 @@ public class PortalPaymentPaginationTests : ServiceTestBase, IDisposable
     // ---------- Pages ----------
     #region Pages
     [Fact]
-    public async Task Pages_ShouldHaveGlobalYearlyTotalsAndNotExposeOtherEmployees()
+    public async Task Pages_ShouldReturnOnlyTheFilteredUsersRowsAndCount()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -75,11 +75,71 @@ public class PortalPaymentPaginationTests : ServiceTestBase, IDisposable
         second.Value!.Items.Count.Should().Be(5);
         all.Value!.Items.Count.Should().Be(12);
         first.Value.Items.Select(payment => payment.Id).Intersect(second.Value.Items.Select(payment => payment.Id)).Should().BeEmpty();
-        first.Value.Summary.TotalCount.Should().Be(12);
-        second.Value.Summary.ApprovedAmount.Should().Be(600);
-        second.Value.Summary.PendingAmount.Should().Be(600);
-        first.Value.LatestApproved!.Month.Should().Be(12);
+        first.Value.TotalCount.Should().Be(12);
+        second.Value.TotalCount.Should().Be(12);
         all.Value.Items.Should().AllSatisfy(payment => payment.UserId.Should().Be(userId));
+    }
+
+    [Fact]
+    public async Task Overview_ShouldScopeCurrentYearTotalsAndHolidaysToTheUserAndReturnLatestApproved()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var otherUser = Guid.NewGuid();
+        _context.Payments.AddRange(
+            new Payment { UserId = userId, Year = today.Year, Month = 1, PaidAmount = 100, State = PaymentStateEnum.Approved, PaymentDate = today.AddDays(-2) },
+            new Payment { UserId = userId, Year = today.Year, Month = 2, PaidAmount = 200, State = PaymentStateEnum.Pending },
+            new Payment { UserId = userId, Year = today.Year - 1, Month = 12, PaidAmount = 300, State = PaymentStateEnum.Approved, PaymentDate = today },
+            new Payment { UserId = otherUser, Year = today.Year, Month = 1, PaidAmount = 9999, State = PaymentStateEnum.Approved, PaymentDate = today });
+        _context.DailyWorkRecords.AddRange(
+            new DailyWorkRecord { UserId = userId, Date = today, State = WorkDayStateEnum.PaidLeave },
+            new DailyWorkRecord { UserId = userId, Date = today.AddDays(1), State = WorkDayStateEnum.PaidLeave },
+            new DailyWorkRecord { UserId = otherUser, Date = today, State = WorkDayStateEnum.PaidLeave });
+        await _context.SaveChangesAsync();
+        var service = new PaymentsService(new PaymentsRepository(_context), Mock.Of<IApplicationUsersRepository>(), new DailyWorkRecordsRepository(_context));
+        LogArrange(nameof(userId), userId);
+
+        // Act
+        var result = await service.GetUserOverviewAsync(userId);
+        LogAct(result);
+
+        // Assert
+        result.Value!.ApprovedAmount.Should().Be(100);
+        result.Value.PendingAmount.Should().Be(200);
+        result.Value.PaidLeaveDays.Should().Be(1);
+        result.Value.LatestApproved!.PaidAmount.Should().Be(300);
+        result.Value.LatestApproved.UserId.Should().Be(userId);
+    }
+
+    [Fact]
+    public async Task AdminSummary_ShouldReturnOverallTotalsIndependentlyFromTheFilteredPage()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _context.Users.Add(new ApplicationUser { Id = userId, FullName = "Employee", Position = PositionsEnum.Employee });
+        _context.Payments.AddRange(
+            new Payment { UserId = userId, Year = 2025, Month = 1, PaidAmount = 100, State = PaymentStateEnum.Approved },
+            new Payment { UserId = userId, Year = 2026, Month = 1, PaidAmount = 200, State = PaymentStateEnum.Approved },
+            new Payment { UserId = userId, Year = 2026, Month = 2, PaidAmount = 300, State = PaymentStateEnum.Pending },
+            new Payment { UserId = userId, Year = 2026, Month = 3, PaidAmount = 400, State = PaymentStateEnum.Rejected });
+        await _context.SaveChangesAsync();
+        var service = new PaymentsService(new PaymentsRepository(_context), Mock.Of<IApplicationUsersRepository>(), Mock.Of<IDailyWorkRecordsRepository>());
+        LogArrange(nameof(userId), userId);
+
+        // Act
+        var page = await service.GetPaymentsAsync(new PaymentQueryDTO { Year = 2026, State = PaymentStateEnum.Pending, Taken = 0, SectionSize = 5 });
+        var summary = await service.GetAdminSummaryAsync();
+        LogAct(summary);
+
+        // Assert
+        page.Value!.TotalCount.Should().Be(1);
+        page.Value.Items.Should().ContainSingle().Which.State.Should().Be(PaymentStateEnum.Pending);
+        summary.Value!.TotalCount.Should().Be(4);
+        summary.Value.ApprovedCount.Should().Be(2);
+        summary.Value.PendingCount.Should().Be(1);
+        summary.Value.RejectedCount.Should().Be(1);
+        summary.Value.ApprovedAmount.Should().Be(300);
     }
 
     #endregion

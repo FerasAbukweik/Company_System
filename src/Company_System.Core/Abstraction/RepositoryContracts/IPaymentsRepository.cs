@@ -35,9 +35,11 @@ public interface IPaymentsRepository
 
     void SetState(Payment payment, PaymentStateEnum state);
 
-    Task<UserPaymentSummaryDTO> GetUserSummaryAsync(Guid userId, int year, PaymentStateEnum? state, CancellationToken cancellationToken = default);
+    Task<UserPaymentSummaryDTO> GetUserSummaryAsync(Guid userId, int year, CancellationToken cancellationToken = default);
 
-    Task<AdminPaymentSummaryDTO> GetAdminSummaryAsync(PaymentQueryDTO query, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(Expression<Func<Payment, bool>> predicate, CancellationToken cancellationToken = default);
+
+    Task<AdminPaymentSummaryDTO> GetAdminSummaryAsync(CancellationToken cancellationToken = default);
 
     Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

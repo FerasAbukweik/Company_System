@@ -1,3 +1,4 @@
+import { PaymentsService } from './payments-service';
 import { LazyDTO } from '../../dto/lazy-loading/lazy-dto';
 import { AttendanceDayPage } from '../../dto/attendance/attendance-day-page-dto';
 import { inject, Injectable } from '@angular/core';
@@ -8,6 +9,7 @@ import { AttendanceRecord } from '../../dto/attendance/attendance-record-dto';
 @Injectable({ providedIn: 'root' })
 export class DailyWorkRecordsService {
   private readonly api = inject(DailyWorkRecordsApiService);
+  private readonly paymentsService = inject(PaymentsService);
   private dayRecords: Record<string, AttendanceDayPage> | null = null;
   private periodRecords: Record<string, AttendanceRecord[]> | null = null;
   private version = 0;
@@ -47,12 +49,21 @@ export class DailyWorkRecordsService {
   }
 
   saveAttendance(data: Omit<AttendanceRecord, 'id'>, id?: string) {
-    return this.api.saveAttendance(data, id).pipe(tap(() => this.reset()));
+    const request = id
+      ? this.api.updateAttendance(id, {
+          clockIn: data.clockIn,
+          clockOut: data.clockOut,
+          state: data.state,
+        })
+      : this.api.addAttendance(data);
+
+    return request.pipe(tap(() => this.reset()));
   }
 
   reset() {
     this.version++;
     this.dayRecords = null;
     this.periodRecords = null;
+    this.paymentsService.resetOverview();
   }
 }

@@ -70,10 +70,11 @@ export class PaymentsComponent {
   ];
 
   protected readonly counts = computed(() => ({
-    pending: this.paymentsService.summary().pendingCount,
+    pending: this.paymentsService.summary()?.pendingCount ?? 0,
     history:
-      this.paymentsService.summary().approvedCount + this.paymentsService.summary().rejectedCount,
-    all: this.paymentsService.summary().totalCount,
+      (this.paymentsService.summary()?.approvedCount ?? 0) +
+      (this.paymentsService.summary()?.rejectedCount ?? 0),
+    all: this.paymentsService.summary()?.totalCount ?? 0,
   }));
 
   // Each view remembers its page; changing search or period starts a new result set.

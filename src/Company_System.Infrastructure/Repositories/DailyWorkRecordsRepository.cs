@@ -12,6 +12,13 @@ public class DailyWorkRecordsRepository(
     ApplicationDbContext dbContext
     ) : IDailyWorkRecordsRepository
 {
+    public Task<int> CountPaidLeaveDaysAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        return dbContext.DailyWorkRecords.CountAsync(record => record.UserId == userId &&
+            record.State == WorkDayStateEnum.PaidLeave && record.Date >= from && record.Date <= to,
+            cancellationToken);
+    }
+
     public async Task<AttendanceDayPageDTO> GetDayRecordsAsync(
         DateOnly date,
         LazyDTO lazyData,

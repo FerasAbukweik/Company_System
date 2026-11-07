@@ -25,6 +25,16 @@ public class PaymentsController(
         return (await paymentsService.GetUserPaymentPageAsync(userId.Value, query, cancellationToken)).ToActionResult();
     }
 
+    [HttpGet("[action]")]
+    [Authorize]
+    public async Task<ActionResult<UserPaymentOverviewDTO>> GetMyOverview(CancellationToken cancellationToken = default)
+    {
+        var userId = User.GetUserId();
+        if (!userId.IsSuccess) return ((Result)userId).ToActionResult();
+
+        return (await paymentsService.GetUserOverviewAsync(userId.Value, cancellationToken)).ToActionResult();
+    }
+
     [HttpGet("[action]/{userId:guid}")]
     [Authorize(Roles = nameof(RolesEnum.Admin))]
     public async Task<ActionResult<IReadOnlyList<PaymentDTO>>> GetUserPayments(
@@ -50,6 +60,13 @@ public class PaymentsController(
 
         return result.ToActionResult();
     }
+    [HttpGet("[action]")]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
+    public async Task<ActionResult<AdminPaymentSummaryDTO>> GetSummary(CancellationToken cancellationToken = default)
+    {
+        return (await paymentsService.GetAdminSummaryAsync(cancellationToken)).ToActionResult();
+    }
+
     [HttpGet("GetPayments")]
     [Authorize(Roles = nameof(RolesEnum.Admin))]
     public async Task<ActionResult<AdminPaymentPageDTO>> GetPayments([FromQuery] PaymentQueryDTO query, CancellationToken cancellationToken = default)

@@ -5,7 +5,6 @@ import { UsersService } from '../../../core/services/api-services/users-service'
 import { EmployeeDTO } from '../../../core/dto/users/employee-dto';
 import { EmployeePage } from '../../../core/dto/users/employee-page-dto';
 import { EmployeeQuery } from '../../../core/dto/users/employee-query-dto';
-import { EmployeesSummary } from '../../../core/dto/users/employees-summary-dto';
 import { EmployeeFormValue } from './employees.model';
 
 @Injectable()
@@ -20,15 +19,24 @@ export class EmployeesAdminService {
   readonly totalCount = signal(0);
   readonly loading = signal(false);
   readonly error = signal('');
-  readonly summary = signal<EmployeesSummary>({
-    headcount: 0,
-    active: 0,
-    totalHourlyRates: 0,
-    configuredHourlyRates: 0,
-  });
+  readonly summary = this.usersService.employeeSummary;
+  readonly summaryError = signal('');
+  private summaryRequest?: Subscription;
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.request?.unsubscribe());
+    this.loadSummary();
+    this.destroyRef.onDestroy(() => {
+      this.request?.unsubscribe();
+      this.summaryRequest?.unsubscribe();
+    });
+  }
+
+  loadSummary() {
+    this.summaryRequest?.unsubscribe();
+    this.summaryError.set('');
+    this.summaryRequest = this.usersService.getEmployeeSummary().subscribe({
+      error: (error) => this.summaryError.set(apiError(error)),
+    });
   }
 
   private fetchPage(query: EmployeeQuery) {
@@ -40,7 +48,7 @@ export class EmployeesAdminService {
       }
       const page = Math.floor(query.taken / query.sectionSize) + 1;
       const cached = this.employeePages()[page];
-      if (cached?.length) return of(cached);
+      if (cached !== undefined) return of(cached);
 
       return this.usersService.employeePage(query).pipe(
         tap((result) => {
@@ -54,7 +62,6 @@ export class EmployeesAdminService {
   private publishPage(page: number, result: EmployeePage) {
     this.employeePages.update((pages) => ({ ...pages, [page]: result.items }));
     this.totalCount.set(result.totalCount);
-    this.summary.set(result.summary);
   }
 
   load(query: EmployeeQuery) {
@@ -71,11 +78,13 @@ export class EmployeesAdminService {
 
   reload() {
     this.usersService.reset();
+    this.loadSummary();
     this.employeePages.set({});
     this.load(this.query);
   }
 
   private refresh() {
+    this.loadSummary();
     this.employeePages.set({});
     return this.fetchPage(this.query);
   }

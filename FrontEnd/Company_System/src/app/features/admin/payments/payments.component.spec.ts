@@ -31,7 +31,6 @@ const summary = {
 const response = (items: AdminPayment[], totalCount = items.length) => ({
   items,
   totalCount,
-  summary,
 });
 
 describe('Payments backend integration', () => {
@@ -63,6 +62,9 @@ describe('Payments backend integration', () => {
     const fixture = TestBed.createComponent(PaymentsComponent);
     await fixture.whenStable();
     const http = TestBed.inject(HttpTestingController);
+    const aggregate = http.expectOne((request) => request.url.endsWith('/Payments/GetSummary'));
+    expect(aggregate.request.params.keys()).toEqual([]);
+    aggregate.flush(summary);
     http
       .expectOne((request) => request.url.endsWith('/Payments/GetPayments'))
       .flush(response(records.filter((payment) => payment.state === PaymentState.Pending)));
@@ -117,6 +119,7 @@ describe('Payments backend integration', () => {
     expect(request.request.body).toEqual(['payment-0']);
     expect(request.request.params.get('state')).toBe('1');
     request.flush([{ ...records[0], state: PaymentState.Approved }]);
+    http.expectOne((request) => request.url.endsWith('/Payments/GetSummary')).flush(summary);
     http
       .expectOne((request) => request.url.endsWith('/Payments/GetPayments'))
       .flush(response([records[1]]));

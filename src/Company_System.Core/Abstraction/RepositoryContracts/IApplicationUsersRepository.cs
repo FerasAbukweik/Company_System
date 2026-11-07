@@ -64,7 +64,9 @@ public interface IApplicationUsersRepository
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>True when at least one row was written, otherwise false.</returns>
-    Task<EmployeeSummaryDTO> GetSummaryAsync(Expression<Func<ApplicationUser, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(Expression<Func<ApplicationUser, bool>> predicate, CancellationToken cancellationToken = default);
+
+    Task<EmployeeSummaryDTO> GetSummaryAsync(CancellationToken cancellationToken = default);
 
     Task ReplaceImageAsync(Guid userId, Image image, CancellationToken cancellationToken = default);
 

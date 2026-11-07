@@ -64,6 +64,11 @@ public class UsersService(UserManager<ApplicationUser> userManager,
     }
 
 
+    public async Task<Result<EmployeeSummaryDTO>> GetEmployeeSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        return Result<EmployeeSummaryDTO>.Success(await usersRepository.GetSummaryAsync(cancellationToken));
+    }
+
     public async Task<Result<EmployeePageDTO>> LazyGetEmployeesAsync(EmployeeQueryDTO query, CancellationToken cancellationToken = default)
     {
         if (query.Taken < 0 || query.SectionSize < 1 || query.Search?.Length > 100)
@@ -85,7 +90,7 @@ public class UsersService(UserManager<ApplicationUser> userManager,
             (employeeId.HasValue && user.Id == employeeId.Value) ||
             (isActive.HasValue && (user.OrganizationHierarchy != null && user.OrganizationHierarchy.IsActive) == isActive.Value));
 
-        var summary = await usersRepository.GetSummaryAsync(predicate, cancellationToken);
+        var total = await usersRepository.CountAsync(predicate, cancellationToken);
         var employees = await usersRepository.FilterAsync(predicate,
             include: [user => user.Image, user => user.OrganizationHierarchy],
             orderBy: user => user.CreatedAt,
@@ -97,8 +102,7 @@ public class UsersService(UserManager<ApplicationUser> userManager,
         return Result<EmployeePageDTO>.Success(new EmployeePageDTO
         {
             Items = employees.Select(ToEmployeeDTO).ToList(),
-            TotalCount = summary.Headcount,
-            Summary = summary
+            TotalCount = total
         });
     }
 

@@ -8,6 +8,8 @@ namespace HR_System.Core.Abstraction.ServiceContracts;
 
 public interface IUsersService
 {
+    Task<Result<EmployeeSummaryDTO>> GetEmployeeSummaryAsync(CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Uploads the profile image, creates the account (with its image row) and adds the user to the organization hierarchy.
     /// The uploaded file is removed again if a later step fails.

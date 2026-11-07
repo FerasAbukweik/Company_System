@@ -24,6 +24,14 @@ public class LoggingUsersService(
         return result;
     }
 
+    public async Task<Result<EmployeeSummaryDTO>> GetEmployeeSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await inner.GetEmployeeSummaryAsync(cancellationToken);
+        logger.LogResult(result, ServiceName, nameof(GetEmployeeSummaryAsync), logSuccess: false);
+
+        return result;
+    }
+
     public async Task<Result<EmployeePageDTO>> LazyGetEmployeesAsync(
         EmployeeQueryDTO lazyData,
         CancellationToken cancellationToken = default)

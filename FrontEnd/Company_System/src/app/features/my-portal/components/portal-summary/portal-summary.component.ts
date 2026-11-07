@@ -1,4 +1,3 @@
-import { AttendanceRecord } from '../../../../core/dto/attendance/attendance-record-dto';
 import { Component, computed, input } from '@angular/core';
 import { StatusCardsComponent } from '../../../../shared/components/status-cards/status-cards.component';
 import { StatusData } from '../../../../shared/components/status-cards/status-cards.model';
@@ -13,17 +12,11 @@ export class PortalSummaryComponent {
   readonly profile = input<UserDTO | null>(null);
   readonly approvedAmount = input(0);
   readonly pendingAmount = input(0);
-  readonly attendance = input<readonly AttendanceRecord[]>([]);
-  protected readonly taken = computed(
-    () =>
-      this.attendance().filter(
-        (day) => day.state === 1 && day.date <= new Date().toLocaleDateString('en-CA'),
-      ).length,
-  );
+  readonly paidLeaveDays = input(0);
   protected readonly remaining = computed(() =>
     this.profile()?.annualHolidayAllowance == null
       ? null
-      : Math.max(0, this.profile()!.annualHolidayAllowance! - this.taken()),
+      : Math.max(0, this.profile()!.annualHolidayAllowance! - this.paidLeaveDays()),
   );
 
   protected readonly statuses = computed<StatusData[]>(() => {
@@ -38,10 +31,10 @@ export class PortalSummaryComponent {
       { label: 'Pending Payments', value: this.pendingAmount(), format: 'currency' },
       {
         label: 'Holidays',
-        value: `${this.taken()} days taken`,
+        value: `${this.paidLeaveDays()} days taken`,
         description:
           remaining === null ? 'Allowance not configured' : `${remaining} days remaining`,
-        detail: 'Based on recorded paid leave in the selected year.',
+        detail: 'Based on recorded paid leave this year.',
       },
       { label: 'Approved Payments This Year', value: this.approvedAmount(), format: 'currency' },
     ];

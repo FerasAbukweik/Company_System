@@ -1,8 +1,9 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { defer, of, tap, Observable, finalize, shareReplay } from 'rxjs';
 import { ToastService } from './toast-service';
 import { toastError } from '../../utils/toast-error';
 import { UsersApiService } from '../api/users-api-service';
+import { EmployeesSummary } from '../../dto/users/employees-summary-dto';
 import { EmployeePage } from '../../dto/users/employee-page-dto';
 import { EmployeeQuery } from '../../dto/users/employee-query-dto';
 import { UserDTO } from '../../dto/auth/user-dto';
@@ -17,6 +18,21 @@ export class UsersService {
   private profile: UserDTO | null = null;
   private profileRequest: Observable<UserDTO> | null = null;
   private version = 0;
+  private readonly _employeeSummary = signal<EmployeesSummary | null>(null);
+  public readonly employeeSummary = this._employeeSummary.asReadonly();
+
+  getEmployeeSummary() {
+    return defer(() => {
+      const cached = this._employeeSummary();
+      if (cached !== null) return of(cached);
+      const version = this.version;
+      return this.api.employeeSummary().pipe(
+        tap((summary) => {
+          if (version === this.version) this._employeeSummary.set(summary);
+        }),
+      );
+    });
+  }
 
   employeePage(query: EmployeeQuery) {
     return defer(() => {
@@ -85,6 +101,7 @@ export class UsersService {
   reset() {
     this.version++;
     this.employeePages = null;
+    this._employeeSummary.set(null);
     this.profile = null;
     this.profileRequest = null;
   }

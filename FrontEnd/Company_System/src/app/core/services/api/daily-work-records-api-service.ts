@@ -23,13 +23,11 @@ export class DailyWorkRecordsApiService {
     );
   }
 
-  saveAttendance(data: Omit<AttendanceRecord, 'id'>, id?: string) {
-    return id
-      ? this.http.put<AttendanceRecord>(this.base + '/Update/' + id, {
-          clockIn: data.clockIn,
-          clockOut: data.clockOut,
-          state: data.state,
-        })
-      : this.http.post<AttendanceRecord>(this.base + '/Add', data);
+  addAttendance(data: Omit<AttendanceRecord, 'id'>) {
+    return this.http.post<AttendanceRecord>(this.base + '/Add', data);
+  }
+
+  updateAttendance(id: string, data: Pick<AttendanceRecord, 'clockIn' | 'clockOut' | 'state'>) {
+    return this.http.put<AttendanceRecord>(this.base + '/Update/' + id, data);
   }
 }

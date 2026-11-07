@@ -23,8 +23,8 @@
     <button
       type="button"
       class="rounded-lg bg-corporate-blue px-4 py-2 text-sm text-surface-lowest disabled:opacity-50"
-      [disabled]="!portal.latestApproved()"
-      (click)="selectedPayslip.set(portal.latestApproved())"
+      [disabled]="!portal.overview()?.latestApproved"
+      (click)="selectedPayslip.set(portal.overview()?.latestApproved ?? null)"
     >
       Latest Approved Payment
     </button>
@@ -36,17 +36,51 @@
 @if (portal.error()) {
   <div role="alert" class="mb-4 rounded-lg bg-error-bg p-4 text-error-text">
     {{ portal.error() }}
-    <button type="button" class="underline" (click)="portal.loadDetails(year())">Retry</button>
+    <button type="button" class="underline" (click)="portal.loadDetails(calendarMonth())">
+      Retry
+    </button>
+  </div>
+}
+@if (portal.overviewLoading()) {
+  <p role="status" class="mb-4 text-text-secondary">Loading your overview…</p>
+}
+@if (portal.overviewError()) {
+  <div role="alert" class="mb-4 rounded-lg bg-error-bg p-4 text-error-text">
+    {{ portal.overviewError() }}
+    <button type="button" class="underline" (click)="portal.loadOverview()">Retry overview</button>
   </div>
 }
 <app-portal-summary
   [profile]="portal.profile()"
-  [approvedAmount]="portal.paymentSummary().approvedAmount"
-  [pendingAmount]="portal.paymentSummary().pendingAmount"
-  [attendance]="portal.attendance()"
+  [approvedAmount]="portal.overview()?.approvedAmount ?? 0"
+  [pendingAmount]="portal.overview()?.pendingAmount ?? 0"
+  [paidLeaveDays]="portal.overview()?.paidLeaveDays ?? 0"
 />
 <div class="grid grid-cols-12 gap-6">
   <div class="col-span-12 min-w-0 lg:col-span-8">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h2 class="font-semibold text-corporate-blue">Payment History</h2>
+      <label class="flex items-center gap-2 text-sm text-text-secondary">
+        Payment status
+        <select
+          aria-label="Payment status"
+          class="rounded-lg border border-outline-light bg-surface-lowest p-2 text-text-primary"
+          [value]="paymentState() ?? ''"
+          (change)="changePaymentState($any($event.target).value)"
+        >
+          <option value="" [selected]="paymentState() === null">All payments</option>
+          <option [value]="State.Pending" [selected]="paymentState() === State.Pending">
+            Pending
+          </option>
+          <option [value]="State.Approved" [selected]="paymentState() === State.Approved">
+            Approved
+          </option>
+          <option [value]="State.Rejected" [selected]="paymentState() === State.Rejected">
+            Rejected
+          </option>
+        </select>
+      </label>
+    </div>
     @if (portal.paymentsLoading()) {
       <p role="status" class="mb-3 text-sm text-text-secondary">Loading payments…</p>
     }
@@ -56,7 +90,7 @@
         <button
           type="button"
           class="underline"
-          (click)="portal.loadPayments(year(), page(), pageSize())"
+          (click)="portal.loadPayments(year(), page(), pageSize(), paymentState())"
         >
           Retry
         </button>
@@ -68,7 +102,7 @@
     />
     <app-employee-pagination
       label="payments"
-      [total]="portal.paymentSummary().totalCount"
+      [total]="portal.paymentTotalCount()"
       [(page)]="page"
       [(pageSize)]="pageSize"
     />
@@ -77,7 +111,14 @@
     <app-attendance-calendar
       [records]="portal.attendance()"
       [month]="calendarMonth()"
+      [(selectedDate)]="selectedDate"
       (monthChanged)="changeMonth($event)"
+    />
+    <app-selected-attendance-day
+      [date]="selectedDate()"
+      [record]="selectedAttendance()"
+      [loading]="portal.loading()"
+      [error]="portal.error()"
     />
   </div>
 </div>

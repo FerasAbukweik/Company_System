@@ -1,7 +1,9 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { defer, of, tap } from 'rxjs';
 import { PaymentsApiService } from '../api/payments-api-service';
+import { PaymentSummary } from '../../dto/payments/payment-summary-dto';
 import { PaymentPage } from '../../dto/payments/payment-page-dto';
+import { UserPaymentOverview } from '../../dto/payments/user-payment-overview-dto';
 import { UserPaymentPage } from '../../dto/payments/user-payment-page-dto';
 import { AdminPaymentQuery } from '../../dto/payments/admin-payment-query-dto';
 import { PaymentState } from '../../enum/payment-state';
@@ -12,6 +14,23 @@ export class PaymentsService {
   private paymentPages: Record<string, PaymentPage> | null = null;
   private userPaymentPages: Record<string, UserPaymentPage> | null = null;
   private version = 0;
+  private readonly _summary = signal<PaymentSummary | null>(null);
+  public readonly summary = this._summary.asReadonly();
+  private readonly _overview = signal<UserPaymentOverview | null>(null);
+  public readonly overview = this._overview.asReadonly();
+
+  getSummary() {
+    return defer(() => {
+      const cached = this._summary();
+      if (cached !== null) return of(cached);
+      const version = this.version;
+      return this.api.summary().pipe(
+        tap((summary) => {
+          if (version === this.version) this._summary.set(summary);
+        }),
+      );
+    });
+  }
 
   payments(query: AdminPaymentQuery) {
     return defer(() => {
@@ -55,13 +74,33 @@ export class PaymentsService {
     });
   }
 
+  myOverview() {
+    return defer(() => {
+      const cached = this._overview();
+      if (cached !== null) return of(cached);
+      const version = this.version;
+
+      return this.api.myOverview().pipe(
+        tap((overview) => {
+          if (version === this.version) this._overview.set(overview);
+        }),
+      );
+    });
+  }
+
+  resetOverview() {
+    this.version++;
+    this._overview.set(null);
+  }
+
   decide(ids: string[], state: PaymentState) {
     return this.api.decide(ids, state).pipe(tap(() => this.reset()));
   }
 
   reset() {
-    this.version++;
     this.paymentPages = null;
+    this._summary.set(null);
     this.userPaymentPages = null;
+    this.resetOverview();
   }
 }

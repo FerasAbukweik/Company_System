@@ -7,7 +7,18 @@
     <button type="button" class="underline" (click)="employeesService.reload()">Retry</button>
   </div>
 }
-<app-employee-metrics [summary]="employeesService.summary()" />
+@if (employeesService.summary(); as summary) {
+  <p class="mb-2 text-xs text-text-secondary">Overall employee totals</p>
+  <app-employee-metrics [summary]="summary" />
+}
+@if (employeesService.summaryError()) {
+  <div role="alert" class="mb-4 rounded-lg bg-error-bg p-4 text-error-text">
+    {{ employeesService.summaryError() }}
+    <button type="button" class="underline" (click)="employeesService.loadSummary()">
+      Retry summary
+    </button>
+  </div>
+}
 
 <section
   class="bg-surface-lowest border border-outline-light rounded-xl shadow-sm overflow-hidden flex flex-col"

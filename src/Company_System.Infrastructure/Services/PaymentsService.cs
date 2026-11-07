@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using HR_System.Core.Enums;
 using System.Net;
 using HR_System.Core.Abstraction.RepositoryContracts;
@@ -124,7 +125,8 @@ public class PaymentsService(
             (query.State.HasValue && !Enum.IsDefined(query.State.Value)))
             return Result<UserPaymentPageDTO>.Failure("Invalid payment filters or page size", HttpStatusCode.BadRequest);
 
-        var summary = await paymentsRepository.GetUserSummaryAsync(userId, query.Year, query.State, cancellationToken);
+        var total = await paymentsRepository.CountAsync(payment => payment.UserId == userId && payment.Year == query.Year &&
+            (!query.State.HasValue || payment.State == query.State.Value), cancellationToken);
         var payments = await paymentsRepository.FilterAsync(
             payment => payment.UserId == userId && payment.Year == query.Year && (!query.State.HasValue || payment.State == query.State.Value),
             orderBy: payment => payment.Year * 12 + payment.Month,
@@ -132,19 +134,40 @@ public class PaymentsService(
             skip: query.Taken,
             take: query.SectionSize,
             cancellationToken: cancellationToken);
+        return Result<UserPaymentPageDTO>.Success(new UserPaymentPageDTO
+        {
+            Items = payments.Select(payment => payment.ToDTO()).ToList(),
+            TotalCount = total
+        });
+    }
+
+    public async Task<Result<UserPaymentOverviewDTO>> GetUserOverviewAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        if (userId == Guid.Empty)
+            return Result<UserPaymentOverviewDTO>.Failure("Invalid employee", HttpStatusCode.BadRequest);
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var summary = await paymentsRepository.GetUserSummaryAsync(userId, today.Year, cancellationToken);
+        var paidLeaveDays = await dailyWorkRecordsRepository.CountPaidLeaveDaysAsync(userId, new DateOnly(today.Year, 1, 1), today, cancellationToken);
         var latest = await paymentsRepository.FilterAsync(
-            payment => payment.UserId == userId && payment.Year == query.Year && payment.State == PaymentStateEnum.Approved,
+            payment => payment.UserId == userId && payment.State == PaymentStateEnum.Approved,
             orderBy: payment => payment.PaymentDate,
             orderByDesc: true,
             take: 1,
             cancellationToken: cancellationToken);
 
-        return Result<UserPaymentPageDTO>.Success(new UserPaymentPageDTO
+        return Result<UserPaymentOverviewDTO>.Success(new UserPaymentOverviewDTO
         {
-            Items = payments.Select(payment => payment.ToDTO()).ToList(),
-            Summary = summary,
+            ApprovedAmount = summary.ApprovedAmount,
+            PendingAmount = summary.PendingAmount,
+            PaidLeaveDays = paidLeaveDays,
             LatestApproved = latest.FirstOrDefault()?.ToDTO()
         });
+    }
+
+    public async Task<Result<AdminPaymentSummaryDTO>> GetAdminSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        return Result<AdminPaymentSummaryDTO>.Success(await paymentsRepository.GetAdminSummaryAsync(cancellationToken));
     }
 
     public async Task<Result<AdminPaymentPageDTO>> GetPaymentsAsync(PaymentQueryDTO query, CancellationToken cancellationToken = default)
@@ -154,31 +177,22 @@ public class PaymentsService(
             return Result<AdminPaymentPageDTO>.Failure("Invalid payment filters", HttpStatusCode.BadRequest);
 
         var name = query.FullName?.Trim().ToUpperInvariant();
-        var summary = await paymentsRepository.GetAdminSummaryAsync(query, cancellationToken);
-        var payments = await paymentsRepository.FilterAsync(
-            payment => payment.Year == query.Year && (!query.Month.HasValue || payment.Month == query.Month) &&
-                (!query.State.HasValue || payment.State == query.State) && (!query.UserId.HasValue || payment.UserId == query.UserId) &&
-                (!query.HistoryOnly || payment.State != PaymentStateEnum.Pending) &&
-                (string.IsNullOrEmpty(name) || (payment.User != null && payment.User.FullName.ToUpper().Contains(name))),
+        Expression<Func<Payment, bool>> predicate = payment => payment.Year == query.Year && (!query.Month.HasValue || payment.Month == query.Month) &&
+            (!query.State.HasValue || payment.State == query.State) && (!query.UserId.HasValue || payment.UserId == query.UserId) &&
+            (!query.HistoryOnly || payment.State != PaymentStateEnum.Pending) &&
+            (string.IsNullOrEmpty(name) || (payment.User != null && payment.User.FullName.ToUpper().Contains(name)));
+        var count = await paymentsRepository.CountAsync(predicate, cancellationToken);
+        var payments = await paymentsRepository.FilterAsync(predicate,
             include: [payment => payment.User!, payment => payment.User!.Image],
             orderBy: payment => payment.Year * 12 + payment.Month,
             orderByDesc: true,
             skip: query.Taken,
             take: query.SectionSize,
             cancellationToken: cancellationToken);
-        var count = query.State switch
-        {
-            PaymentStateEnum.Pending => query.HistoryOnly ? 0 : summary.PendingCount,
-            PaymentStateEnum.Approved => summary.ApprovedCount,
-            PaymentStateEnum.Rejected => summary.RejectedCount,
-            _ => query.HistoryOnly ? summary.ApprovedCount + summary.RejectedCount : summary.TotalCount
-        };
-
         return Result<AdminPaymentPageDTO>.Success(new AdminPaymentPageDTO
         {
             Items = payments.Select(payment => payment.ToDTO()).ToList(),
-            TotalCount = count,
-            Summary = summary
+            TotalCount = count
         });
     }
 

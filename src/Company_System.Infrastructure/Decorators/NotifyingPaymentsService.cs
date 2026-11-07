@@ -64,4 +64,14 @@ public class NotifyingPaymentsService(IPaymentsService inner, INotificationsServ
         return inner.GetUserPaymentPageAsync(userId, query, cancellationToken);
     }
 
+    public Task<Result<UserPaymentOverviewDTO>> GetUserOverviewAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return inner.GetUserOverviewAsync(userId, cancellationToken);
+    }
+
+    public Task<Result<AdminPaymentSummaryDTO>> GetAdminSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        return inner.GetAdminSummaryAsync(cancellationToken);
+    }
+
 }

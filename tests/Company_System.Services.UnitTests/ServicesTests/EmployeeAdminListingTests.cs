@@ -105,9 +105,6 @@ public class EmployeeAdminListingTests : ServiceTestBase, IDisposable
         last.Value!.Items.Count.Should().Be(3);
         first.Value.Items.Select(employee => employee.Id).Intersect(next.Value.Items.Select(employee => employee.Id)).Should().BeEmpty();
         first.Value.TotalCount.Should().Be(13);
-        first.Value.Summary.Active.Should().Be(7);
-        first.Value.Summary.TotalHourlyRates.Should().Be(156000);
-        first.Value.Summary.ConfiguredHourlyRates.Should().Be(13);
         _context.ChangeTracker.Entries().Should().BeEmpty();
     }
 
@@ -126,7 +123,11 @@ public class EmployeeAdminListingTests : ServiceTestBase, IDisposable
         // Assert
         result.Value!.Items.Should().ContainSingle();
         result.Value.TotalCount.Should().Be(4);
-        result.Value.Summary.TotalHourlyRates.Should().Be(48000);
+        var summary = await Service().GetEmployeeSummaryAsync();
+        summary.Value!.Headcount.Should().Be(13);
+        summary.Value.Active.Should().Be(7);
+        summary.Value.TotalHourlyRates.Should().Be(156000);
+        summary.Value.ConfiguredHourlyRates.Should().Be(13);
     }
 
     [Theory]

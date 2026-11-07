@@ -4,7 +4,6 @@ import { defer, finalize, of, tap, Subscription } from 'rxjs';
 import { PaymentsService as PaymentsDataService } from '../../../core/services/api-services/payments-service';
 import { AdminPayment } from '../../../core/dto/payments/admin-payment-dto';
 import { AdminPaymentQuery } from '../../../core/dto/payments/admin-payment-query-dto';
-import { PaymentSummary } from '../../../core/dto/payments/payment-summary-dto';
 import { PaymentPage } from '../../../core/dto/payments/payment-page-dto';
 import { PaymentDecision } from './payments.model';
 
@@ -18,15 +17,9 @@ export class PaymentsService {
 
   readonly paymentPages = signal<Readonly<Record<number, AdminPayment[]>>>({});
   readonly totalCount = signal(0);
-  readonly summary = signal<PaymentSummary>({
-    totalCount: 0,
-    pendingCount: 0,
-    approvedCount: 0,
-    rejectedCount: 0,
-    pendingAmount: 0,
-    approvedAmount: 0,
-    rejectedAmount: 0,
-  });
+  readonly summary = this.paymentDataService.summary;
+  readonly summaryError = signal('');
+  private summaryRequest?: Subscription;
   readonly loading = signal(false);
   readonly error = signal('');
   readonly years = signal(
@@ -34,7 +27,19 @@ export class PaymentsService {
   );
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.request?.unsubscribe());
+    this.loadSummary();
+    this.destroyRef.onDestroy(() => {
+      this.request?.unsubscribe();
+      this.summaryRequest?.unsubscribe();
+    });
+  }
+
+  loadSummary() {
+    this.summaryRequest?.unsubscribe();
+    this.summaryError.set('');
+    this.summaryRequest = this.paymentDataService.getSummary().subscribe({
+      error: (error) => this.summaryError.set(apiError(error)),
+    });
   }
 
   private fetchPage(query: AdminPaymentQuery) {
@@ -53,7 +58,7 @@ export class PaymentsService {
       }
       const page = Math.floor(query.taken / query.sectionSize) + 1;
       const cached = this.paymentPages()[page];
-      if (cached?.length) return of(cached);
+      if (cached !== undefined) return of(cached);
 
       return this.paymentDataService.payments(query).pipe(
         tap((result) => {
@@ -67,7 +72,6 @@ export class PaymentsService {
   private publishPage(page: number, result: PaymentPage) {
     this.paymentPages.update((pages) => ({ ...pages, [page]: result.items }));
     this.totalCount.set(result.totalCount);
-    this.summary.set(result.summary);
   }
 
   load(query: AdminPaymentQuery) {
@@ -84,6 +88,7 @@ export class PaymentsService {
 
   reload() {
     this.paymentDataService.reset();
+    this.loadSummary();
     this.paymentPages.set({});
     if (this.query) this.load(this.query);
   }

@@ -55,21 +55,24 @@ describe.each(cases)('$name page signal cache', ({ create }) => {
   it('stores pages only after responses and returns to a cached page without changing the signal', () => {
     const { pages, load } = create();
     const http = TestBed.inject(HttpTestingController);
+    http
+      .match(
+        (request) =>
+          request.url.endsWith('/GetEmployeesSummary') ||
+          request.url.endsWith('/Payments/GetSummary'),
+      )
+      .forEach((request) => request.flush({}));
     const first = [{ id: 'first' }];
     const second = [{ id: 'second' }];
     load(1);
     expect(pages()[1]).toBeUndefined();
-    http
-      .expectOne(() => true)
-      .flush({ items: first, totalCount: 10, summary: { totalCount: 10 }, latestApproved: null });
+    http.expectOne(() => true).flush({ items: first, totalCount: 10 });
     expect(pages()[1]).toEqual(first);
 
     load(2);
     expect(pages()[2]).toBeUndefined();
     expect(pages()[1]).toEqual(first);
-    http
-      .expectOne(() => true)
-      .flush({ items: second, totalCount: 10, summary: { totalCount: 10 }, latestApproved: null });
+    http.expectOne(() => true).flush({ items: second, totalCount: 10 });
     const cachedPages = pages();
     load(1);
     http.expectNone(() => true);

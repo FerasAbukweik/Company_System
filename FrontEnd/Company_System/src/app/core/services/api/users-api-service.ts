@@ -5,6 +5,7 @@ import { inject, Injectable } from '@angular/core';
 import { Urls } from '../../constants/urls';
 import { map } from 'rxjs';
 import { EmployeeDTO } from '../../dto/users/employee-dto';
+import { EmployeesSummary } from '../../dto/users/employees-summary-dto';
 import { EmployeePage } from '../../dto/users/employee-page-dto';
 import { EmployeeQuery } from '../../dto/users/employee-query-dto';
 import { AddEmployeeDTO } from '../../dto/users/add-employee-dto';
@@ -14,6 +15,10 @@ import { EmployeeFormValue } from '../../../features/admin/employees/employees.m
 export class UsersApiService {
   private readonly http = inject(HttpClient);
   private readonly base = Urls.api + '/Users';
+
+  employeeSummary() {
+    return this.http.get<EmployeesSummary>(this.base + '/GetEmployeesSummary');
+  }
 
   employeePage(query: EmployeeQuery) {
     return this.http.get<EmployeePage>(this.base + '/GetEmployees', {

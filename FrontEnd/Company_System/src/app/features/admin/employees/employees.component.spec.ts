@@ -19,7 +19,6 @@ const page = (start: number, count: number) => ({
     isActive: true,
   })),
   totalCount: 12,
-  summary,
 });
 
 describe('Employee server pagination', () => {
@@ -33,6 +32,9 @@ describe('Employee server pagination', () => {
   it('fetches five employees initially and only fetches the next page after navigation', async () => {
     const fixture = TestBed.createComponent(EmployeesComponent);
     const http = TestBed.inject(HttpTestingController);
+    const aggregate = http.expectOne((request) => request.url.endsWith('/GetEmployeesSummary'));
+    expect(aggregate.request.params.keys()).toEqual([]);
+    aggregate.flush(summary);
     await fixture.whenStable();
     const first = http.expectOne((request) => request.url.endsWith('/Users/GetEmployees'));
     expect(first.request.params.get('taken')).toBe('0');
@@ -62,6 +64,9 @@ describe('Employee server pagination', () => {
   it('sends the selected page size and filters to the server, resetting to page one', async () => {
     const fixture = TestBed.createComponent(EmployeesComponent);
     const http = TestBed.inject(HttpTestingController);
+    const aggregate = http.expectOne((request) => request.url.endsWith('/GetEmployeesSummary'));
+    expect(aggregate.request.params.keys()).toEqual([]);
+    aggregate.flush(summary);
     await fixture.whenStable();
     http.expectOne((request) => request.url.endsWith('/Users/GetEmployees')).flush(page(0, 5));
     await fixture.whenStable();

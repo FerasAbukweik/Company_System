@@ -21,7 +21,18 @@
   </div>
 }
 
-<app-payment-metrics [summary]="paymentsService.summary()" />
+@if (paymentsService.summary(); as summary) {
+  <p class="mb-2 text-xs text-text-secondary">Overall payment totals</p>
+  <app-payment-metrics [summary]="summary" />
+}
+@if (paymentsService.summaryError()) {
+  <div role="alert" class="mb-4 rounded-lg bg-error-bg p-4 text-error-text">
+    {{ paymentsService.summaryError() }}
+    <button type="button" class="underline" (click)="paymentsService.loadSummary()">
+      Retry summary
+    </button>
+  </div>
+}
 
 <section
   aria-label="Payment transactions"

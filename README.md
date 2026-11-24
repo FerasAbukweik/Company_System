@@ -4,19 +4,13 @@ Manage reporting lines, task approvals, attendance and monthly payroll in one wo
 
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/) [![Angular 22](https://img.shields.io/badge/Angular-22-DD0031)](https://angular.dev/) [![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED)](compose.yaml)
 
-## Demo and screenshots
+## Screenshots
 
-<!-- TODO: add public live demo URL -->
-Hosted demo pending.
+![Company System organization tree](docs/screenshots/organization-tree.jpg)
 
-Capture these views using demo data:
+![Task delegation panel alongside the organization tree](docs/screenshots/task-delegation.jpg)
 
-- the organization tree with an expanded reporting branch
-  <!-- TODO: add screenshot of the organization tree with an expanded reporting branch -->
-- a manager reviewing a task or leave request
-  <!-- TODO: add screenshot of a manager reviewing a task or leave request -->
-- the attendance calendar and monthly payroll review
-  <!-- TODO: add screenshot of the attendance calendar and monthly payroll review -->
+![Employee portal with payment history and attendance calendar](docs/screenshots/employee-portal.jpg)
 
 ## Key features
 
@@ -195,15 +189,6 @@ Use [Scalar](https://localhost:8081/scalar/v1) in Development to explore the
 API. Controller groups cover authentication and users, hierarchy, tasks,
 approvals and activities, work records and payments, messages and notifications.
 SignalR is served at `/hubs/app`.
-
-## Known limitations and roadmap
-
-- Database migrations run separately from Compose startup.
-- Fresh databases need a documented first-admin provisioning workflow.
-- Local TLS uses mounted certificate files. Provide deployment-specific TLS
-  material and externalize the Compose certificate password for shared environments.
-- SQL Server-specific hierarchy queries need SQL Server for end-to-end testing.
-- <!-- TODO: measure and add --> Measure cold versus cached hierarchy reads.
 
 ## Author
 
